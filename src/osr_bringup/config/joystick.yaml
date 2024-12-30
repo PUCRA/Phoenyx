@@ -1,0 +1,29 @@
+joy_node:
+    ros__parameters:
+        device_id: 0
+        #deadzone: 0.05
+        autorepeat_rate: 5.0 
+
+teleop_twist_joy_node:
+    ros__parameters:
+        axis_linear:
+            x: 1 # joystick right. ros2 run joy_tester test_joy 
+        scale_linear:
+            x: 0.1 # [m/s] vel is goin to move when we push the axis to the limit 
+        scale_linear_turbo.x: 1.0 # [m/s] max vel when we press turbo
+
+        axis_angular:
+            yaw: 3 # joystick right. ros2 run joy_tester test_joy 
+        scale_angular:
+            yaw: 0.4 # [rad/s] vel is goin to move when we push the axis to the limit 
+        scale_angular_turbo:
+            yaw: 1.0 # [rad/s] max vel when we press turbo
+
+        # In place rotation
+        # axis_angular.yaw: 2
+        # scale_angular.yaw: -1.25
+        
+        # By default this buttons employ a dead man switch, so if you go of the buttons it is going to send a zero speed reference until it stop
+        enable_button: 5
+        enable_turbo_button: 3
+        require_enable_button: true
