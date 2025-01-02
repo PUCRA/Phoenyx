@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = 
 
-C_INCLUDES = -I/home/orioldcr/YDLidar-SDK/. -I/home/orioldcr/YDLidar-SDK/core -I/home/orioldcr/YDLidar-SDK/src -I/home/orioldcr/YDLidar-SDK -I/home/orioldcr/YDLidar-SDK/cmake
+C_INCLUDES = -I/home/icehot03/Phoenyx/YDLidar-SDK/. -I/home/icehot03/Phoenyx/YDLidar-SDK/core -I/home/icehot03/Phoenyx/YDLidar-SDK/src -I/home/icehot03/Phoenyx/YDLidar-SDK -I/home/icehot03/Phoenyx/YDLidar-SDK/cmake
 
 C_FLAGS = -fPIC
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/orioldcr/YDLidar-SDK/. -I/home/orioldcr/YDLidar-SDK/core -I/home/orioldcr/YDLidar-SDK/src -I/home/orioldcr/YDLidar-SDK -I/home/orioldcr/YDLidar-SDK/cmake
+CXX_INCLUDES = -I/home/icehot03/Phoenyx/YDLidar-SDK/. -I/home/icehot03/Phoenyx/YDLidar-SDK/core -I/home/icehot03/Phoenyx/YDLidar-SDK/src -I/home/icehot03/Phoenyx/YDLidar-SDK -I/home/icehot03/Phoenyx/YDLidar-SDK/cmake
 
 CXX_FLAGS =  -std=c++11 -fPIC
 

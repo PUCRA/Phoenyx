@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = -I/home/orioldcr/YDLidar-SDK/. -I/home/orioldcr/YDLidar-SDK/core -I/home/orioldcr/YDLidar-SDK/src -I/home/orioldcr/YDLidar-SDK -I/home/orioldcr/YDLidar-SDK/.. -I/home/orioldcr/YDLidar-SDK/cmake/examples -I/home/orioldcr/YDLidar-SDK/cmake
+C_INCLUDES = -I/home/icehot03/Phoenyx/YDLidar-SDK/. -I/home/icehot03/Phoenyx/YDLidar-SDK/core -I/home/icehot03/Phoenyx/YDLidar-SDK/src -I/home/icehot03/Phoenyx/YDLidar-SDK -I/home/icehot03/Phoenyx/YDLidar-SDK/.. -I/home/icehot03/Phoenyx/YDLidar-SDK/cmake/examples -I/home/icehot03/Phoenyx/YDLidar-SDK/cmake
 
 C_FLAGS = -fPIC -std=c++11
 

@@ -1,4 +1,4 @@
-# Install script for directory: /home/orioldcr/YDLidar-SDK/core/common
+# Install script for directory: /home/icehot03/Phoenyx/YDLidar-SDK/core/common
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

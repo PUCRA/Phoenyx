@@ -1,4 +1,4 @@
-# Install script for directory: /home/orioldcr/YDLidar-SDK/core/serial/impl
+# Install script for directory: /home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/orioldcr/YDLidar-SDK/cmake/core/serial/impl/unix/cmake_install.cmake")
+  include("/home/icehot03/Phoenyx/YDLidar-SDK/cmake/core/serial/impl/unix/cmake_install.cmake")
 
 endif()
 

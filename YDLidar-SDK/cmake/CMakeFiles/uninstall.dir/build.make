@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/orioldcr/YDLidar-SDK
+CMAKE_SOURCE_DIR = /home/icehot03/Phoenyx/YDLidar-SDK
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/orioldcr/YDLidar-SDK/cmake
+CMAKE_BINARY_DIR = /home/icehot03/Phoenyx/YDLidar-SDK/cmake
 
 # Utility rule file for uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/uninstall.dir/compiler_depend.make
 include CMakeFiles/uninstall.dir/progress.make
 
 CMakeFiles/uninstall:
-	/usr/bin/cmake -P /home/orioldcr/YDLidar-SDK/cmake/cmake_uninstall.cmake
+	/usr/bin/cmake -P /home/icehot03/Phoenyx/YDLidar-SDK/cmake/cmake_uninstall.cmake
 
 uninstall: CMakeFiles/uninstall
 uninstall: CMakeFiles/uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/uninstall.dir/clean:
 .PHONY : CMakeFiles/uninstall.dir/clean
 
 CMakeFiles/uninstall.dir/depend:
-	cd /home/orioldcr/YDLidar-SDK/cmake && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/orioldcr/YDLidar-SDK /home/orioldcr/YDLidar-SDK /home/orioldcr/YDLidar-SDK/cmake /home/orioldcr/YDLidar-SDK/cmake /home/orioldcr/YDLidar-SDK/cmake/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/icehot03/Phoenyx/YDLidar-SDK/cmake && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/icehot03/Phoenyx/YDLidar-SDK /home/icehot03/Phoenyx/YDLidar-SDK /home/icehot03/Phoenyx/YDLidar-SDK/cmake /home/icehot03/Phoenyx/YDLidar-SDK/cmake /home/icehot03/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/uninstall.dir/depend
 

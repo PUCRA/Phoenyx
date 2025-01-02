@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/orioldcr/YDLidar-SDK
+CMAKE_SOURCE_DIR = /home/icehot03/Phoenyx/YDLidar-SDK
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/orioldcr/YDLidar-SDK/cmake
+CMAKE_BINARY_DIR = /home/icehot03/Phoenyx/YDLidar-SDK/cmake
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ package/fast: package
 # Special rule for the target package_source
 package_source:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Run CPack packaging tool for source..."
-	/usr/bin/cpack --config ./CPackSourceConfig.cmake /home/orioldcr/YDLidar-SDK/cmake/CPackSourceConfig.cmake
+	/usr/bin/cpack --config ./CPackSourceConfig.cmake /home/icehot03/Phoenyx/YDLidar-SDK/cmake/CPackSourceConfig.cmake
 .PHONY : package_source
 
 # Special rule for the target package_source
@@ -162,9 +162,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orioldcr/YDLidar-SDK/cmake/CMakeFiles /home/orioldcr/YDLidar-SDK/cmake//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/icehot03/Phoenyx/YDLidar-SDK/cmake/CMakeFiles /home/icehot03/Phoenyx/YDLidar-SDK/cmake//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orioldcr/YDLidar-SDK/cmake/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/icehot03/Phoenyx/YDLidar-SDK/cmake/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
