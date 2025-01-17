@@ -1,33 +1,52 @@
-
-# Consider dependencies only in project.
-set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
-
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "C"
+  "CXX"
   )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_C
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/json/cJSON.c" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/json/cJSON.c.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/lock.c" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/lock.c.o"
+  )
+set(CMAKE_C_COMPILER_ID "GNU")
 
-# The set of dependency files which are needed:
-set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/json/cJSON.c" "CMakeFiles/ydlidar_sdk.dir/core/json/cJSON.c.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/json/cJSON.c.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/lock.c" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/lock.c.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/lock.c.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/timer.cpp" "CMakeFiles/ydlidar_sdk.dir/core/base/timer.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/base/timer.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ydlidar_def.cpp" "CMakeFiles/ydlidar_sdk.dir/core/common/ydlidar_def.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/common/ydlidar_def.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/ActiveSocket.cpp" "CMakeFiles/ydlidar_sdk.dir/core/network/ActiveSocket.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/network/ActiveSocket.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/PassiveSocket.cpp" "CMakeFiles/ydlidar_sdk.dir/core/network/PassiveSocket.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/network/PassiveSocket.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/SimpleSocket.cpp" "CMakeFiles/ydlidar_sdk.dir/core/network/SimpleSocket.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/network/SimpleSocket.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/list_ports_linux.cpp" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/list_ports_linux.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/list_ports_linux.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix_serial.cpp" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/unix_serial.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/unix_serial.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/serial.cpp" "CMakeFiles/ydlidar_sdk.dir/core/serial/serial.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/core/serial/serial.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/CYdLidar.cpp" "CMakeFiles/ydlidar_sdk.dir/src/CYdLidar.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/CYdLidar.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/DTSLidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/DTSLidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/DTSLidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/ETLidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/ETLidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/ETLidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/GSLidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/GSLidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/GSLidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/SDMLidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/SDMLidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/SDMLidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/TiaLidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/TiaLidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/TiaLidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/YDlidarDriver.cpp" "CMakeFiles/ydlidar_sdk.dir/src/YDlidarDriver.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/YDlidarDriver.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/filters/NoiseFilter.cpp" "CMakeFiles/ydlidar_sdk.dir/src/filters/NoiseFilter.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/filters/NoiseFilter.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/filters/StrongLightFilter.cpp" "CMakeFiles/ydlidar_sdk.dir/src/filters/StrongLightFilter.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/filters/StrongLightFilter.cpp.o.d"
-  "/home/icehot03/Phoenyx/YDLidar-SDK/src/ydlidar_sdk.cpp" "CMakeFiles/ydlidar_sdk.dir/src/ydlidar_sdk.cpp.o" "gcc" "CMakeFiles/ydlidar_sdk.dir/src/ydlidar_sdk.cpp.o.d"
+# The include file search paths:
+set(CMAKE_C_TARGET_INCLUDE_PATH
+  "../."
+  "../core"
+  "../src"
+  "../"
+  "."
+  )
+set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/base/timer.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/base/timer.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ydlidar_def.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/common/ydlidar_def.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/network/ActiveSocket.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/network/ActiveSocket.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/network/PassiveSocket.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/network/PassiveSocket.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/network/SimpleSocket.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/network/SimpleSocket.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/list_ports_linux.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/list_ports_linux.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix_serial.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/serial/impl/unix/unix_serial.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/serial.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/core/serial/serial.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/CYdLidar.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/CYdLidar.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/DTSLidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/DTSLidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/ETLidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/ETLidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/GSLidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/GSLidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/SDMLidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/SDMLidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/TiaLidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/TiaLidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/YDlidarDriver.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/YDlidarDriver.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/filters/NoiseFilter.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/filters/NoiseFilter.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/filters/StrongLightFilter.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/filters/StrongLightFilter.cpp.o"
+  "/home/pucra/Phoenyx/YDLidar-SDK/src/ydlidar_sdk.cpp" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/src/ydlidar_sdk.cpp.o"
+  )
+set(CMAKE_CXX_COMPILER_ID "GNU")
+
+# The include file search paths:
+set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "../."
+  "../core"
+  "../src"
+  "../"
+  "."
   )
 
 # Targets to which this target links.

@@ -1,4 +1,4 @@
-# Install script for directory: /home/icehot03/Phoenyx/YDLidar-SDK
+# Install script for directory: /home/pucra/Phoenyx/YDLidar-SDK
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,11 +37,6 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set default install directory permissions.
-if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/usr/bin/objdump")
-endif()
-
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/usr/local/include/core/base/datatype.h")
@@ -51,7 +46,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/datatype.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/datatype.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -63,7 +58,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/locker.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/locker.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -75,7 +70,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/thread.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/thread.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -87,7 +82,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/timer.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/timer.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -99,7 +94,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/typedef.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/typedef.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -111,7 +106,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/utils.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/utils.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -123,7 +118,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/v8stdint.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/v8stdint.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -135,7 +130,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/base/ydlidar.h")
+file(INSTALL DESTINATION "/usr/local/include/core/base" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/base/ydlidar.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -147,7 +142,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ChannelDevice.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ChannelDevice.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -159,7 +154,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/DriverInterface.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/DriverInterface.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -171,7 +166,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ydlidar_datatype.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ydlidar_datatype.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -183,7 +178,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ydlidar_def.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ydlidar_def.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -195,7 +190,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ydlidar_help.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ydlidar_help.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -207,7 +202,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/common/ydlidar_protocol.h")
+file(INSTALL DESTINATION "/usr/local/include/core/common" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/common/ydlidar_protocol.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -219,7 +214,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/json" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/json/cJSON.h")
+file(INSTALL DESTINATION "/usr/local/include/core/json" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/json/cJSON.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -231,7 +226,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/math" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/math/angles.h")
+file(INSTALL DESTINATION "/usr/local/include/core/math" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/math/angles.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -243,7 +238,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/ActiveSocket.h")
+file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/network/ActiveSocket.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -255,7 +250,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/PassiveSocket.h")
+file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/network/PassiveSocket.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -267,7 +262,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/SimpleSocket.h")
+file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/network/SimpleSocket.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -279,7 +274,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/network/StatTimer.h")
+file(INSTALL DESTINATION "/usr/local/include/core/network" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/network/StatTimer.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -291,7 +286,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/serial" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/common.h")
+file(INSTALL DESTINATION "/usr/local/include/core/serial" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/common.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -303,7 +298,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/serial" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/serial.h")
+file(INSTALL DESTINATION "/usr/local/include/core/serial" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/serial.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -315,7 +310,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/lock.h")
+file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/lock.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -327,7 +322,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix.h")
+file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -339,7 +334,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix_serial.h")
+file(INSTALL DESTINATION "/usr/local/include/core/serial/impl/unix" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/core/serial/impl/unix/unix_serial.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -351,7 +346,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/CYdLidar.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/CYdLidar.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -363,7 +358,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/DTSLidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/DTSLidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -375,7 +370,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/ETLidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/ETLidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -387,7 +382,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/GSLidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/GSLidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -399,7 +394,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/SDMLidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/SDMLidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -411,7 +406,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/TiaLidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/TiaLidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -423,7 +418,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/YDlidarDriver.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/YDlidarDriver.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -435,7 +430,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/ydlidar_sdk.h")
+file(INSTALL DESTINATION "/usr/local/include/src" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/ydlidar_sdk.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -447,7 +442,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/filters/FilterInterface.h")
+file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/filters/FilterInterface.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -459,7 +454,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/filters/NoiseFilter.h")
+file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/filters/NoiseFilter.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -471,7 +466,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/src/filters/StrongLightFilter.h")
+file(INSTALL DESTINATION "/usr/local/include/src/filters" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/src/filters/StrongLightFilter.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -483,7 +478,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/ydlidar_config.h")
+file(INSTALL DESTINATION "/usr/local/include" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/cmake/ydlidar_config.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -495,7 +490,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/lib" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/libydlidar_sdk.a")
+file(INSTALL DESTINATION "/usr/local/lib" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/cmake/libydlidar_sdk.a")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -507,14 +502,14 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/lib/pkgconfig" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/YDLIDAR_SDK.pc")
+file(INSTALL DESTINATION "/usr/local/lib/pkgconfig" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/cmake/YDLIDAR_SDK.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ydlidar_sdk" TYPE FILE FILES
-    "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkConfig.cmake"
-    "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkTargets.cmake"
-    "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkConfigVersion.cmake"
+    "/home/pucra/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkConfig.cmake"
+    "/home/pucra/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkTargets.cmake"
+    "/home/pucra/Phoenyx/YDLidar-SDK/cmake/ydlidar_sdkConfigVersion.cmake"
     )
 endif()
 
@@ -527,7 +522,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE FILE FILES "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/FindYDLIDAR_SDK.cmake")
+file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE FILE FILES "/home/pucra/Phoenyx/YDLidar-SDK/cmake/FindYDLIDAR_SDK.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -539,7 +534,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE DIRECTORY FILES "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/")
+file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE DIRECTORY FILES "/home/pucra/Phoenyx/YDLidar-SDK/cmake/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -551,9 +546,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE FILE FILES
-    "/home/icehot03/Phoenyx/YDLidar-SDK/LICENSE.txt"
-    "/home/icehot03/Phoenyx/YDLidar-SDK/README.md"
+file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE FILE FILES
+    "/home/pucra/Phoenyx/YDLidar-SDK/LICENSE.txt"
+    "/home/pucra/Phoenyx/YDLidar-SDK/README.md"
     )
 endif()
 
@@ -566,18 +561,18 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE DIRECTORY FILES "/home/icehot03/Phoenyx/YDLidar-SDK/doc")
+file(INSTALL DESTINATION "/usr/local/share/YDLIDAR_SDK" TYPE DIRECTORY FILES "/home/pucra/Phoenyx/YDLidar-SDK/doc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/startup" TYPE PROGRAM FILES "/home/icehot03/Phoenyx/YDLidar-SDK/startup/initenv.sh")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/startup" TYPE PROGRAM FILES "/home/pucra/Phoenyx/YDLidar-SDK/startup/initenv.sh")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/icehot03/Phoenyx/YDLidar-SDK/cmake/core/cmake_install.cmake")
-  include("/home/icehot03/Phoenyx/YDLidar-SDK/cmake/src/cmake_install.cmake")
-  include("/home/icehot03/Phoenyx/YDLidar-SDK/cmake/examples/cmake_install.cmake")
+  include("/home/pucra/Phoenyx/YDLidar-SDK/cmake/core/cmake_install.cmake")
+  include("/home/pucra/Phoenyx/YDLidar-SDK/cmake/src/cmake_install.cmake")
+  include("/home/pucra/Phoenyx/YDLidar-SDK/cmake/examples/cmake_install.cmake")
 
 endif()
 
@@ -589,5 +584,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/pucra/Phoenyx/YDLidar-SDK/cmake/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

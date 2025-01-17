@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../lidar_c_api_test"
   "../lidar_c_api_test.pdb"
   "CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o"
-  "CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

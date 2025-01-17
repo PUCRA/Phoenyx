@@ -1,6 +1,6 @@
 # CMake generated Testfile for 
-# Source directory: /home/icehot03/Phoenyx/YDLidar-SDK
-# Build directory: /home/icehot03/Phoenyx/YDLidar-SDK/cmake
+# Source directory: /home/pucra/Phoenyx/YDLidar-SDK
+# Build directory: /home/pucra/Phoenyx/YDLidar-SDK/cmake
 # 
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.

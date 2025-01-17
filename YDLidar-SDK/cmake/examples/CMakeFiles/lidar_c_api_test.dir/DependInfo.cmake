@@ -1,19 +1,27 @@
-
-# Consider dependencies only in project.
-set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
-
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "C"
   )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_C
+  "/home/pucra/Phoenyx/YDLidar-SDK/examples/lidar_c_api_test.c" "/home/pucra/Phoenyx/YDLidar-SDK/cmake/examples/CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o"
+  )
+set(CMAKE_C_COMPILER_ID "GNU")
 
-# The set of dependency files which are needed:
-set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/icehot03/Phoenyx/YDLidar-SDK/examples/lidar_c_api_test.c" "examples/CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o" "gcc" "examples/CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o.d"
+# The include file search paths:
+set(CMAKE_C_TARGET_INCLUDE_PATH
+  "../."
+  "../core"
+  "../src"
+  "../"
+  "../.."
+  "examples"
+  "."
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/icehot03/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/DependInfo.cmake"
+  "/home/pucra/Phoenyx/YDLidar-SDK/cmake/CMakeFiles/ydlidar_sdk.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

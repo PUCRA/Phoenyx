@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../gs_ota"
   "../gs_ota.pdb"
   "CMakeFiles/gs_ota.dir/gs_ota.cpp.o"
-  "CMakeFiles/gs_ota.dir/gs_ota.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

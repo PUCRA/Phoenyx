@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../tia_test"
   "../tia_test.pdb"
   "CMakeFiles/tia_test.dir/tia_test.cpp.o"
-  "CMakeFiles/tia_test.dir/tia_test.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.
