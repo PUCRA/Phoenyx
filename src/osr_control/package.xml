@@ -18,7 +18,6 @@
   <exec_depend>python3-serial</exec_depend>
   <exec_depend>teleop_twist_joy</exec_depend>
   <exec_depend>osr_interfaces</exec_depend>
-  <depend>python3-pygame</depend>
 
   <export>
     <build_type>ament_python</build_type>

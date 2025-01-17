@@ -13,7 +13,7 @@ class INA260Node(Node):
         super().__init__('ina260_node')
         
         # Initialize parameters
-        self.declare_parameter('sensor_address', "0x44")
+        self.declare_parameter('sensor_address', "0x45")
         self.declare_parameter('publish_rate', 2.0)
 
         # Get parameter values

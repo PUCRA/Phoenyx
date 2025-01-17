@@ -15,7 +15,7 @@ class node_killer(Node):
             10                            # QoS (Quality of Service). El valor de 10 es común.
           
         ) 
-          self.voltage_threshold = 12.0  # Define el umbral de voltaje
+        self.voltage_threshold = 12.0  # Define el umbral de voltaje
     def battery_callback(self, msg):
         # Este es el callback que se ejecutará cuando se reciba un mensaje en el tópico 'battery_state'
         voltage = msg.voltage

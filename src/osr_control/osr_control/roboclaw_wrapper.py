@@ -162,7 +162,9 @@ class RoboclawWrapper(Node):
             self.enc_pub.publish(self.current_enc_vals)
         except AssertionError as read_exc:
             self.get_logger().warn("Failed to read encoder values")
-            self.get_logger().warn(read_exc.args)
+            #self.get_logger().warn(read_exc.args)
+            self.get_logger().warn(f"Exception occurred: {read_exc}")
+
 
         # stop the motors if we haven't received a command in a while
         if not self.idle and (now - self.time_last_cmd > self.velocity_timeout):
@@ -537,17 +539,23 @@ class RoboclawWrapper(Node):
             err_string += "\nPosition Error Limit Warning"
 
         return err_string, is_error
+    
+    def closeSerial(self):
+        self.log.warn("Closing serial port")
+        self.rc.Close()
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     wrapper = RoboclawWrapper()
-
-    rclpy.spin(wrapper)
-    wrapper.stop_motors()
-    wrapper.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(wrapper)
+    finally:
+        wrapper.stop_motors()
+        wrapper.closeSerial()
+        wrapper.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

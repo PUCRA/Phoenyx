@@ -1079,3 +1079,9 @@ class Roboclaw:
 		except:
 			return 0
 		return 1
+
+	def Close(self):
+		#Pol Pavo
+		self._port.reset_input_buffer()
+		self._port.reset_output_buffer()
+		self._port.close()
