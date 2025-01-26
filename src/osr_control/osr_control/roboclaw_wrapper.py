@@ -201,6 +201,8 @@ class RoboclawWrapper(Node):
         serial_port = self.get_parameter('device').get_parameter_value().string_value
         baud_rate = self.get_parameter('baud_rate').get_parameter_value().integer_value
         self.rc = Roboclaw(serial_port, baud_rate)
+        # self.closeSerial()
+        # self.rc = Roboclaw(serial_port, baud_rate)
         serial_connected = self.rc.Open() == 1
         if not serial_connected:
             msg = f"Unable to connect to serial port {serial_port}."
@@ -547,7 +549,7 @@ class RoboclawWrapper(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
+    
     wrapper = RoboclawWrapper()
     try:
         rclpy.spin(wrapper)
