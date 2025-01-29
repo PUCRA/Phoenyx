@@ -34,7 +34,7 @@ def generate_launch_description():
         )
     )
     ld.add_action(
-        DeclareLaunchArgument('enable_odometry', default_value='false')
+        DeclareLaunchArgument('enable_odometry', default_value='true')
     )
     ld.add_action(
         Node(
@@ -48,7 +48,7 @@ def generate_launch_description():
         )
     )
     ld.add_action(
-        DeclareLaunchArgument('enable_odometry', default_value='false')
+        DeclareLaunchArgument('enable_odometry', default_value='true')
     )
     ld.add_action(
         Node(
