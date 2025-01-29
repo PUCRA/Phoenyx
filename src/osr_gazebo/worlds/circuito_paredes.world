@@ -1,0 +1,214 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="circuito_cuadrado">
+    <!-- Configuración del entorno -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Pared izquierda -->
+    <model name="wall_left_int">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size> <!-- Largo x Ancho x Altura -->
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient> <!-- Pared blanca -->
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3 3.75 0.5 0 0 1.5708</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared derecha -->
+    <model name="wall_right_int">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3 3.75 0.5 0 0 1.5708</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared superior -->
+    <model name="wall_top_int">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 6.75 0.5 0 0 0</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared inferior -->
+    <model name="wall_bottom_int">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 0.75 0.5 0 0 0</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Conectar las paredes para formar el circuito -->
+ <!-- Pared izquierda -->
+    <model name="wall_left_ext">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size> <!-- Largo x Ancho x Altura -->
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient> <!-- Pared blanca -->
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-4.5 3.75 0.5 0 0 1.5708</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared derecha -->
+    <model name="wall_right_ext">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.5 3.75 0.5 0 0 1.5708</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared superior -->
+    <model name="wall_top_ext">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 8.25 0.5 0 0 0</pose> <!-- Ubicación de la pared -->
+    </model>
+
+    <!-- Pared inferior -->
+    <model name="wall_bottom_ext">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>9 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 -0.75 0.5 0 0 0</pose> <!-- Ubicación de la pared -->
+    </model>
+
+  </world>
+</sdf>
