@@ -1,5 +1,6 @@
 from setuptools import setup
-
+from glob import glob
+import os
 package_name = 'phoenyx_nodes'
 
 setup(
@@ -10,6 +11,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/launch', glob(os.path.join('launch', '*.launch.py'))), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,6 +25,7 @@ setup(
             'imu_pub = phoenyx_nodes.imu_pub:main',
             'killer_node = phoenyx_nodes.KillerNode:main',
             'Vel_pub = phoenyx_nodes.Vel_pub:main'
+            'KF_launch=phoenyx'
         ],
     },
 )

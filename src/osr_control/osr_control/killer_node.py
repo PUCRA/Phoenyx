@@ -38,12 +38,14 @@ class KillerNode(Node):
             )
         if result3.returncode == 0:
             self.whitelist_pid.append(int(result3.stdout.strip().split('\n')[0]))
-        self.stop_Xbox = 0
+    
 
     def joy_callback(self, msg: Joy):
-        self.stop_Xbox = msg.buttons[1]
-        self.get_logger().info(f"Estado del segundo botón: {self.stop_Xbox}")
-        self.get_logger().info("Botón pulsado: activando kill_nodes")
+        stop_button = msg.buttons[1]
+        self.get_logger().info(f"Estado del segundo botón: {stop_button}")
+        if stop_button == 1: 
+            self.get_logger().info("Botón pulsado: activando kill_nodes")
+            self.kill_nodes()
         
     
 
