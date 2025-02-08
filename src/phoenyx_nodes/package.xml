@@ -12,6 +12,8 @@
   <depend>geometry_msgs</depend>
   <depend>adafruit_bno055</depend>
   <depend>robot_localization</depend>
+  <depend>cv2</depend>
+  <depend>cv_bridge</depend>
 
   <exec_depend>launch</exec_depend>
 

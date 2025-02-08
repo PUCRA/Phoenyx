@@ -12,6 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob(os.path.join('launch', '*.launch.py'))), 
+        ('share/' + package_name + '/conf', glob(os.path.join('conf', '*.yaml'))), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,8 +25,8 @@ setup(
         'console_scripts': [
             'imu_pub = phoenyx_nodes.imu_pub:main',
             'killer_node = phoenyx_nodes.KillerNode:main',
-            'Vel_pub = phoenyx_nodes.Vel_pub:main'
-            'KF_launch=phoenyx'
+            'Vel_pub = phoenyx_nodes.Vel_pub:main',
+            'camera_node = phoenyx_nodes.camera:main',
         ],
     },
 )

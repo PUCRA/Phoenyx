@@ -1,0 +1,12 @@
+camera:
+  # Resolución y FPS
+  width: 640
+  height: 480
+  fps: 30
+  # Configuración de exposición (en milisegundos)
+  exposure: 33
+  # Configuración de ganancia de color
+  color_gain: 0.5
+  # Ajuste de brillo y contraste
+  brightness: 0.5
+  contrast: 0.5
