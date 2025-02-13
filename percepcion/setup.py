@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'dar_vueltas = percepcion.dar_vueltas:main',
         ],
     },
 )
