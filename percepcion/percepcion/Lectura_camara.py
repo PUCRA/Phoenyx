@@ -6,17 +6,21 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import message_filters
 from message_filters import ApproximateTimeSynchronizer
+import yaml
 
 class LecturaCamara(Node):
     def __init__(self):
         super().__init__('lectura_camara')
         # Parámetros de la cámara
-        index = 0
-        exposicion = -5
-        ganancia = 1
-        brillo = 50
-        contraste = 85
-        
+        self.declare_parameters(namespace='', parameters=[
+            ('depth_filter.min', 1000), 
+            ('depth_filter.max', 2000),
+        ])
+
+        # Leer los parámetros
+        self.min_depth = self.get_parameter('depth_filter.min').get_parameter_value().integer_value
+        self.max_depth = self.get_parameter('depth_filter.max').get_parameter_value().integer_value
+        self.get_logger().info('Rango de profundidad: %d - %d' % (self.min_depth, self.max_depth))
         # Inicialización de la cámara
         self.converter = image2number()
         self.br = CvBridge()
@@ -40,27 +44,23 @@ class LecturaCamara(Node):
 
             # Filtrar los píxeles de color basándonos en el rango de profundidad
             # Definimos un rango de valores de profundidad (en milímetros)
-            min_depth = 1000  # 1 metro
-            max_depth = 2000  # 3 metros
 
             # Crear una máscara donde la profundidad está dentro del rango especificado
-            mask = (depth_image >= min_depth) & (depth_image <= max_depth)
+            mask = (depth_image >= self.min_depth) & (depth_image <= self.max_depth)
 
             # Crear una imagen filtrada de color con los píxeles que están dentro del rango de profundidad
             filtered_color_image = color_image.copy()
             filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
-
             # Mostrar la imagen filtrada de color
             cv2.imshow("Filtered Color Image", filtered_color_image)
+            recorte = self.converter.obtener_recorte(filtered_color_image)
+            if recorte is not None:
+                cv2.imshow("Recorte", recorte)
+
             cv2.waitKey(1)
 
         except Exception as e:
             self.get_logger().error('Error al procesar las imágenes: %s' % str(e))
-
-
-    def close_camera(self):
-        self.cap.release()
-        cv2.destroyAllWindows()
 
 
 

@@ -1,0 +1,5 @@
+lectura_camara:
+  ros__parameters:
+    depth_filter:
+      min: 10     #meters
+      max: 1000   #meters
