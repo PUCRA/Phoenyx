@@ -1,8 +1,146 @@
 import cv2
 import numpy as np
 import pytesseract  
+    
+
+
 
 def detectar_panel(log_level=0):
+    cap = cv2.VideoCapture(0)  # Capturar desde la webcam
+    cap.set(cv2.CAP_PROP_BRIGHTNESS, 0)  # Ajustar el brillo
+    if not cap.isOpened():
+        print("Error: No se pudo abrir la cámara.")
+        return
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: No se pudo capturar el frame.")
+            break
+
+        copy_image = frame.copy()
+
+        # Convertir la imagen a escala de grises
+        gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Aplicar umbral adaptativo para detectar áreas blancas
+        mask_white = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                          cv2.THRESH_BINARY, 11, 2)
+
+        # Procesamiento morfológico
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        # Cierre para eliminar pequeños agujeros
+        open_mask = cv2.morphologyEx(mask_white, cv2.MORPH_CLOSE, kernel)
+        cv2.imshow('Cleaned Mask 1', open_mask)
+
+        # Aplicar la apertura morfológica para eliminar ruido
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+        cleaned_mask = cv2.morphologyEx(open_mask, cv2.MORPH_OPEN, kernel)
+        cv2.imshow('Cleaned Mask', cleaned_mask)
+
+        # Detección de contornos
+        contours, _ = cv2.findContours(cleaned_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        for contour in contours:
+            epsilon = 0.02 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            if len(approx) == 4:  # Verificar si es cuadrilátero
+                area = cv2.contourArea(approx)
+                if area > 1200:  # Ajustar el valor según sea necesario
+                    x, y, w, h = cv2.boundingRect(approx)
+                    aspect_ratio = float(w) / h
+
+                    if 1.3 <= aspect_ratio <= 1.6:  # Relación de aspecto entre 1.3 y 1.6
+                        angles = []
+                        for i in range(4):
+                            pt1, pt2, pt3 = approx[i][0], approx[(i + 1) % 4][0], approx[(i + 2) % 4][0]
+                            v1 = np.array([pt1[0] - pt2[0], pt1[1] - pt2[1]])
+                            v2 = np.array([pt3[0] - pt2[0], pt3[1] - pt2[1]])
+                            angle = np.degrees(np.arccos(np.clip(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)), -1.0, 1.0)))
+                            angles.append(angle)
+
+                        if all(80 < angle < 100 for angle in angles):  # Verificar que los ángulos sean cercanos a 90°
+                            cv2.drawContours(copy_image, [approx], -1, (0, 255, 0), 3)
+                            for point in approx:
+                                cv2.circle(copy_image, tuple(point[0]), 5, (0, 0, 255), -1)
+
+        cv2.imshow('Detección de Rectángulos Blancos', copy_image)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+    cap = cv2.VideoCapture(0)  # Capturar desde la webcam
+    cap.set(cv2.CAP_PROP_BRIGHTNESS, -30)  # Ajustar el brillo
+    if not cap.isOpened():
+        print("Error: No se pudo abrir la cámara.")
+        return
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: No se pudo capturar el frame.")
+            break
+
+        copy_image = frame.copy()
+        hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Rango para el color blanco en HSV (opcional si lo usas en conjunto con el umbral adaptativo)
+        lower_white = np.array([0, 0, 150])
+        upper_white = np.array([180, 50, 255])
+
+        # Convertir la imagen a escala de grises
+        gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Aplicar umbral adaptativo para detectar áreas blancas
+        mask_white = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                          cv2.THRESH_BINARY, 11, 2)
+
+        # Procesamiento morfológico
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        # Cierre para eliminar pequeños agujeros
+        open_mask = cv2.morphologyEx(mask_white, cv2.MORPH_CLOSE, kernel)
+        cv2.imshow('Cleaned Mask 1', open_mask)
+
+        # Aplicar la apertura morfológica para eliminar ruido
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+        cleaned_mask = cv2.morphologyEx(open_mask, cv2.MORPH_OPEN, kernel)
+        cv2.imshow('Cleaned Mask', cleaned_mask)
+
+        # Detección de contornos
+        contours, _ = cv2.findContours(cleaned_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        for contour in contours:
+            epsilon = 0.02 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            if len(approx) == 4:  # Verificar si es cuadrilátero
+                area = cv2.contourArea(approx)
+                if area > 1200:  # Ajustar el valor según sea necesario
+                    x, y, w, h = cv2.boundingRect(approx)
+                    aspect_ratio = float(w) / h
+
+                    if 1.3 <= aspect_ratio <= 1.6:  # Relación de aspecto entre 1.3 y 1.6
+                        angles = []
+                        for i in range(4):
+                            pt1, pt2, pt3 = approx[i][0], approx[(i + 1) % 4][0], approx[(i + 2) % 4][0]
+                            v1 = np.array([pt1[0] - pt2[0], pt1[1] - pt2[1]])
+                            v2 = np.array([pt3[0] - pt2[0], pt3[1] - pt2[1]])
+                            angle = np.degrees(np.arccos(np.clip(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)), -1.0, 1.0)))
+                            angles.append(angle)
+
+                        if all(80 < angle < 100 for angle in angles):  # Verificar que los ángulos sean cercanos a 90°
+                            cv2.drawContours(copy_image, [approx], -1, (0, 255, 0), 3)
+                            for point in approx:
+                                cv2.circle(copy_image, tuple(point[0]), 5, (0, 0, 255), -1)
+
+        cv2.imshow('Detección de Rectángulos Blancos', copy_image)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
     cap = cv2.VideoCapture(0)  # Capturar desde la webcam
     cap.set(cv2.CAP_PROP_BRIGHTNESS, -30)  # Ajustar el brillo
     if not cap.isOpened():
@@ -444,4 +582,5 @@ if __name__ == "__main__":
     # numero = encontrar_num(imagen)
     # print("Número detectado: ", numero)
     detectar_panel()
+    # filter_depth_webcam()
     cv2.waitKey(0)

@@ -364,7 +364,7 @@ def leer_imagenes_de_la_camara(index):
 
 if __name__ == "__main__":
     # adjust_camera_settings()
-    leer_imagenes_de_la_camara(0)
+    leer_imagenes_de_la_camara(2)
     # imagen = cv2.imread("black_9.png")
     # imagen = cv2.threshold(cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
     # numero = encontrar_num(imagen)
