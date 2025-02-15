@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'dar_vueltas = percepcion.dar_vueltas:main',
+            'lectura_camara = percepcion.Lectura_camara:main',
         ],
     },
 )
