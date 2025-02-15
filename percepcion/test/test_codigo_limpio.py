@@ -302,7 +302,7 @@ def leer_imagenes_de_la_camara(index):
 
     # Brillo y contraste
     cap.set(cv2.CAP_PROP_BRIGHTNESS, 50)  # Baja un poco más el brillo
-    cap.set(cv2.CAP_PROP_CONTRAST, 85)  # Ajusta el contraste para mantener detalles
+    cap.set(cv2.CAP_PROP_CONTRAST, 100)  # Ajusta el contraste para mantener detalles
 
     # Balance de blancos
     cap.set(cv2.CAP_PROP_WHITE_BALANCE_BLUE_U, 4400)  # Pequeña corrección al azul
