@@ -230,7 +230,7 @@ def obtener_num(imagen, log_level = 0):
     finally:
             return copy_image, imagen_final, detected_color
 
-def detectar_color(numero_cuadrado, cleaned_num):
+def detectar_color(numero_cuadrado):
     # Convertir la imagen del cuadrado a HSV
     hsv_warped = cv2.cvtColor(numero_cuadrado, cv2.COLOR_BGR2HSV)
     # Crear una máscara para el cuadrado usando un rango de color específico (e.g., un rango para el borde)

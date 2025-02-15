@@ -2,6 +2,16 @@ import cv2
 import numpy as np
 import pytesseract  
 import traceback
+import os
+
+# Crear carpeta "datos" si no existe
+output_folder = "datos"
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# Ruta del archivo de salida
+output_file = os.path.join(output_folder, "detecciones.npy")
+
 
 def obtener_imagen(index):
     # Intentar abrir la cámara en el índice especificado
@@ -140,18 +150,107 @@ def obtener_recorte(frame, log_level=0):
         print("Error en la línea:", traceback.format_exc())
         return None
     
+def detectar_color_hsv(numero_cuadrado):
+    # Convertir la imagen del cuadrado a HSV
+    hsv_image = cv2.cvtColor(numero_cuadrado, cv2.COLOR_BGR2HSV)
+
+    # Promedio del matiz (H), saturación (S) y valor (V)
+    avg_h = np.mean(hsv_image[:, :, 0])  # Matiz (H)
+    avg_s = np.mean(hsv_image[:, :, 1])  # Saturación (S)
+    avg_v = np.mean(hsv_image[:, :, 2])  # Valor (V)
+
+    # Definir el rango de matiz para azul (aproximadamente 100-140 grados)
+    prob_azul = 0
+    if 100 <= avg_h <= 140:
+        prob_azul = (1 - abs(avg_h - 120) / 40) * (avg_s / 255) * (avg_v / 255)
+    
+    # Definir el rango de matiz para rojo (aproximadamente 0-10 grados y 170-180 grados)
+    prob_rojo = 0
+    if (0 <= avg_h <= 10) or (170 <= avg_h <= 180):
+        prob_rojo = (1 - abs(avg_h - 5) / 10) * (avg_s / 255) * (avg_v / 255)
+
+    # Asegurarse de que las probabilidades no sean negativas
+    prob_azul = max(0, prob_azul)
+    prob_rojo = max(0, prob_rojo)
+
+    # Si ambas probabilidades están en cero, intentar hacer un ajuste usando la saturación y valor
+    if prob_azul == 0 and prob_rojo == 0:
+        if avg_s > 100 and avg_v > 100:  # Si hay suficiente saturación y brillo
+            # Si hay alta saturación y brillo, dar más peso al color
+            prob_azul = 0.5
+            prob_rojo = 0.5
+
+    # Normalizar las probabilidades para que sumen 1
+    total_prob = prob_azul + prob_rojo
+    if total_prob > 0:
+        prob_azul /= total_prob
+        prob_rojo /= total_prob
+
+    return prob_rojo, prob_azul
+
+
+
+
+def detectar_color_bgr(numero_cuadrado):
+    """Detecta la probabilidad de ser rojo o azul basándose en la proporción de los canales BGR."""
+    bgr_image = numero_cuadrado
+
+    # Promedio de los canales BGR
+    avg_b = np.mean(bgr_image[:, :, 0])  # Azul
+    avg_g = np.mean(bgr_image[:, :, 1])  # Rojo
+    avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
+
+    if avg_b > avg_r and avg_b > avg_g:
+        # Intercambiar los valores si el azul es mayor que el rojo
+        detected = "Azul"
+    elif avg_r > avg_b and avg_r > avg_g:
+        detected = "Rojo"
+    else:
+        detected = "Indefinido"
+
+    # # Calcular la proporción entre los colores rojo y azul
+    # total = avg_r + avg_b +avg_g # Solo consideramos rojo y azul para la probabilidad
+    # prob_azul = avg_b / total if total > 0 else 0
+    # prob_rojo = avg_r / total if total > 0 else 0
+
+    # # Asegurar que las probabilidades sumen 1
+    # prob_azul = np.clip(prob_azul, 0, 1)
+    # prob_rojo = np.clip(prob_rojo, 0, 1)
+
+    return detected
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(0)  # Abre la cámara (puedes usar un archivo de video si lo prefieres)
+    cap = cv2.VideoCapture(2)  # Abre la cámara (cambiar el índice si es necesario)
+    data_list = []  # Lista para almacenar los datos
+
+    # Crear carpeta "datos" si no existe
+    output_dir = "datos"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, "detecciones.npy")
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        
-        recorte = obtener_recorte(frame, log_level=0)  # Llama a la función para cada frame
+
+        recorte = obtener_recorte(frame, log_level=1)  # Llama a la función para cada frame
 
         if recorte is not None:
+            # Usar la función detectora de colores en HSV o BGR
+            # prob_rojo, prob_azul = detectar_color_bgr(recorte)  # O puedes usar detectar_color_bgr()
+            detectado = detectar_color_bgr(recorte)
+            if detectado == "Azul":
+                data_list.append([0, 1, 0])
+            elif detectado == "Rojo":
+                data_list.append([1, 0, 0])
+            else:
+                data_list.append([0, 0, 1])
+            # Guardar los datos en la lista
+            # data_list.append([prob_rojo, prob_azul])
+
+            # Imprimir los valores
+            # print(f"Probabilidad Rojo: {prob_rojo:.2f}, Probabilidad Azul: {prob_azul:.2f}")
+
             cv2.imshow("Recorte", recorte)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # Salir si se presiona 'q'
@@ -159,4 +258,7 @@ if __name__ == "__main__":
 
     cap.release()
     cv2.destroyAllWindows()
-    cv2.waitKey(0)
+
+    # Guardar los datos en el archivo .npy
+    np.save(output_file, np.array(data_list, dtype=object))
+    print(f"Datos guardados en {output_file}")
