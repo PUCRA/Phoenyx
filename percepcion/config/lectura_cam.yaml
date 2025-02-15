@@ -3,3 +3,38 @@ lectura_camara:
     depth_filter:
       min: 10     #meters
       max: 1000   #meters
+
+orbbec_camera_launch:
+  ros__parameters:
+    #color
+    enable_point_cloud: true
+    enable_colored_point_cloud: false
+    color_width: 640
+    color_height: 480
+    color_fps: 30
+    color_format: "RGB888"
+    enable_color: true
+    flip_color: false
+    color_qos: "default"
+    color_camera_info_qos: "default"
+    #color auto exposure and white balance
+    enable_color_auto_exposure: true
+    color_exposure: -1
+    color_gain: -1
+    enable_color_auto_white_balance: true
+    color_white_balance: -1
+
+    #depth
+    depth_registration: true
+    enable_depth: true
+    depth_width: 640
+    depth_height: 480
+    depth_fps: 30
+    depth_format: "Y11"
+    flip_depth: false
+    depth_qos: "default"
+    depth_camera_info_qos: "default"
+
+    #ir
+    enable_ir: false
+    

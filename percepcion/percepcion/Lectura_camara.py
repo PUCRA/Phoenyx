@@ -7,6 +7,8 @@ from cv_bridge import CvBridge
 import message_filters
 from message_filters import ApproximateTimeSynchronizer
 import yaml
+import os
+
 
 class LecturaCamara(Node):
     def __init__(self):
@@ -35,6 +37,7 @@ class LecturaCamara(Node):
         )
         self.ts.registerCallback(self.listener_callback)
         self.get_logger().info('Lectura de cámara iniciada')
+        self.i = 0
 
     def listener_callback(self, color_msg, depth_msg):
         try:
@@ -56,6 +59,17 @@ class LecturaCamara(Node):
             recorte = self.converter.obtener_recorte(filtered_color_image)
             if recorte is not None:
                 cv2.imshow("Recorte", recorte)
+                image_gray = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
+                _, binary_image = cv2.threshold(image_gray, 127, 255, cv2.THRESH_BINARY)
+                cv2.imshow("Binary", binary_image)
+                self.i += 1
+                # output_filename = os.path.join("~/datasetrechulon", 'nunmber_1_'+str(self.i)+'.png')
+                output_filename = os.path.join(os.path.expanduser("~/datasetrechulon"), 'nunmber_9_' + str(self.i) + '.png')
+                if self.i >= 1000:
+                    cv2.destroyAllWindows()
+                    self.destroy_node()
+                # Guardar la imagen
+                cv2.imwrite(output_filename, binary_image)
 
             cv2.waitKey(1)
 
@@ -68,6 +82,5 @@ def main(args=None):
     rclpy.init(args=args)
     lectura_camara = LecturaCamara()
     rclpy.spin(lectura_camara)
-    lectura_camara.close_camera()
     lectura_camara.destroy_node()
     rclpy.shutdown()
