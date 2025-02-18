@@ -17,10 +17,16 @@ prob_rojo = [fila[0] for fila in data]  # Probabilidad de rojo
 prob_azul = [fila[1] for fila in data]  # Probabilidad de azul
 prob_indefinido = [fila[2] for fila in data]  # Probabilidad indefinida
 
+# Extraer los valores en la posición 3
+valores_pos3 = [fila[3] for fila in data]
+
 # Calcular la media de cada probabilidad
 media_rojo = np.mean(prob_rojo)
 media_azul = np.mean(prob_azul)
 media_indefinido = np.mean(prob_indefinido)
+
+# Contabilizar cuántas veces aparece cada número del 1 al 9 en la posición 3
+conteo_valores = [valores_pos3.count(i) for i in range(1, 10)]
 
 # Número de muestras extraídas
 num_muestras = len(data)
@@ -29,8 +35,11 @@ num_muestras = len(data)
 colores = ['Rojo', 'Azul', 'Indefinido']
 probabilidades = [media_rojo, media_azul, media_indefinido]
 
-# Crear la gráfica de barras
-plt.figure(figsize=(8, 6))
+# Crear la primera gráfica de barras
+plt.figure(figsize=(12, 6))
+
+# Gráfico de probabilidades
+plt.subplot(1, 2, 1)
 bars = plt.bar(colores, probabilidades, color=['red', 'blue', 'gray'])
 
 # Agregar las probabilidades encima de las barras
@@ -59,5 +68,16 @@ plt.ylim(0, 1)  # Limitar el rango de la gráfica entre 0 y 1
 plt.text(0.05, 0.95, f"Muestras extraídas: {num_muestras}", transform=plt.gca().transAxes,
          fontsize=12, verticalalignment='top')
 
+# Gráfico de conteo de valores en la posición 3
+plt.subplot(1, 2, 2)
+plt.bar(range(1, 10), conteo_valores, color='green')
+
+# Etiquetas y título del segundo gráfico
+plt.xlabel("Número")
+plt.ylabel("Frecuencia")
+plt.title("Frecuencia de Números en la Posición 3")
+plt.xticks(range(1, 10))
+
 # Mostrar la gráfica
+plt.tight_layout()
 plt.show()

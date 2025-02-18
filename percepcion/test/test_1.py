@@ -55,7 +55,7 @@ def obtener_recorte(frame, log_level=0):
         hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  
 
         # Mostrar la imagen HSV
-        if log_level == 1:
+        if log_level > 0:
             cv2.imshow('HSV Image', hsv_image)
         
         # Definir el rango para el color azul
@@ -73,7 +73,7 @@ def obtener_recorte(frame, log_level=0):
         mask_red = cv2.bitwise_or(mask_red_1, mask_red_2)
         combined_mask = cv2.bitwise_or(mask_blue, mask_red)
 
-        if log_level == 1:
+        if log_level > 0:
             cv2.imshow('Combined Mask', combined_mask)
 
         # Tratamiento morfológico
@@ -82,7 +82,7 @@ def obtener_recorte(frame, log_level=0):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
         cleaned_mask = cv2.morphologyEx(closed_mask, cv2.MORPH_OPEN, kernel)
 
-        if log_level == 1:
+        if log_level > 0:
             cv2.imshow('Cleaned Mask', cleaned_mask)
 
         contours, _ = cv2.findContours(cleaned_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -116,7 +116,7 @@ def obtener_recorte(frame, log_level=0):
                                 cv2.circle(copy_image, (x, y), 5, (0, 0, 255), -1)
                             vertices = approx
 
-        if log_level == 1:
+        if log_level > 0:
             cv2.imshow('Detected Squares', copy_image)
         # print(vertices)
         if len(vertices) == 0:
@@ -151,43 +151,20 @@ def obtener_recorte(frame, log_level=0):
         return None
     
 def detectar_color_hsv(numero_cuadrado):
-    # Convertir la imagen del cuadrado a HSV
+    """Detecta la probabilidad de ser rojo o azul basándose en el matiz (H) en HSV."""
     hsv_image = cv2.cvtColor(numero_cuadrado, cv2.COLOR_BGR2HSV)
-
-    # Promedio del matiz (H), saturación (S) y valor (V)
-    avg_h = np.mean(hsv_image[:, :, 0])  # Matiz (H)
-    avg_s = np.mean(hsv_image[:, :, 1])  # Saturación (S)
-    avg_v = np.mean(hsv_image[:, :, 2])  # Valor (V)
-
-    # Definir el rango de matiz para azul (aproximadamente 100-140 grados)
-    prob_azul = 0
-    if 100 <= avg_h <= 140:
-        prob_azul = (1 - abs(avg_h - 120) / 40) * (avg_s / 255) * (avg_v / 255)
     
-    # Definir el rango de matiz para rojo (aproximadamente 0-10 grados y 170-180 grados)
-    prob_rojo = 0
-    if (0 <= avg_h <= 10) or (170 <= avg_h <= 180):
-        prob_rojo = (1 - abs(avg_h - 5) / 10) * (avg_s / 255) * (avg_v / 255)
-
-    # Asegurarse de que las probabilidades no sean negativas
-    prob_azul = max(0, prob_azul)
-    prob_rojo = max(0, prob_rojo)
-
-    # Si ambas probabilidades están en cero, intentar hacer un ajuste usando la saturación y valor
-    if prob_azul == 0 and prob_rojo == 0:
-        if avg_s > 100 and avg_v > 100:  # Si hay suficiente saturación y brillo
-            # Si hay alta saturación y brillo, dar más peso al color
-            prob_azul = 0.5
-            prob_rojo = 0.5
-
-    # Normalizar las probabilidades para que sumen 1
-    total_prob = prob_azul + prob_rojo
-    if total_prob > 0:
-        prob_azul /= total_prob
-        prob_rojo /= total_prob
-
-    return prob_rojo, prob_azul
-
+    # Promedio del canal de matiz (H)
+    avg_h = np.mean(hsv_image[:, :, 0])  # Hue (Matiz)
+    
+    if (avg_h < 10 or avg_h > 160):  # Rojos típicos en OpenCV HSV (0-10 y 160-180)
+        detected = "Rojo"
+    elif 100 < avg_h < 140:  # Azules típicos en OpenCV HSV (90-130)
+        detected = "Azul"
+    else:
+        detected = "Indefinido"
+    
+    return detected
 
 
 
@@ -208,16 +185,37 @@ def detectar_color_bgr(numero_cuadrado):
     else:
         detected = "Indefinido"
 
-    # # Calcular la proporción entre los colores rojo y azul
-    # total = avg_r + avg_b +avg_g # Solo consideramos rojo y azul para la probabilidad
-    # prob_azul = avg_b / total if total > 0 else 0
-    # prob_rojo = avg_r / total if total > 0 else 0
-
-    # # Asegurar que las probabilidades sumen 1
-    # prob_azul = np.clip(prob_azul, 0, 1)
-    # prob_rojo = np.clip(prob_rojo, 0, 1)
-
     return detected
+
+
+def obtener_num(image, log_level=1):
+    """Preprocesa la imagen y extrae un número usando OCR."""
+    try:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
+        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)  # Binarización con inversión
+        if log_level > 0:
+            cv2.imshow('Umbral', thresh)
+        resized = cv2.resize(thresh, (100, 100))  # Redimensionar
+        processed_image = cv2.morphologyEx(resized, cv2.MORPH_ERODE, np.ones((5, 5), np.uint8))  # Erosión
+        if log_level > 0:
+            cv2.imshow('Procesada', processed_image)
+        
+        config = '--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'
+        number = pytesseract.image_to_string(processed_image, config=config).strip()
+        data = pytesseract.image_to_data(processed_image, config=config, output_type=pytesseract.Output.DICT)
+        confidences = data['conf']
+        average_confidence = sum(confidences) / len(confidences) if len(confidences) > 0 else 0
+        
+        if log_level > 0:
+            print(f"Número detectado: {number}, Confianza: {average_confidence}")
+        
+        if not number or average_confidence < 1:
+            return None, 0
+        
+        return int(number[0]), average_confidence
+    except Exception as e:
+        print(f"Ocurrió un error: {e}")
+        return None, 0
 
 if __name__ == "__main__":
     cap = cv2.VideoCapture(2)  # Abre la cámara (cambiar el índice si es necesario)
@@ -236,20 +234,16 @@ if __name__ == "__main__":
         recorte = obtener_recorte(frame, log_level=1)  # Llama a la función para cada frame
 
         if recorte is not None:
-            # Usar la función detectora de colores en HSV o BGR
-            # prob_rojo, prob_azul = detectar_color_bgr(recorte)  # O puedes usar detectar_color_bgr()
             detectado = detectar_color_bgr(recorte)
-            if detectado == "Azul":
-                data_list.append([0, 1, 0])
-            elif detectado == "Rojo":
-                data_list.append([1, 0, 0])
-            else:
-                data_list.append([0, 0, 1])
-            # Guardar los datos en la lista
-            # data_list.append([prob_rojo, prob_azul])
+            num_detectado, _ = obtener_num(recorte, log_level=1)
+            num_detectado = num_detectado if num_detectado is not None else -1
 
-            # Imprimir los valores
-            # print(f"Probabilidad Rojo: {prob_rojo:.2f}, Probabilidad Azul: {prob_azul:.2f}")
+            if detectado == "Azul":
+                data_list.append([0, 1, 0, num_detectado])
+            elif detectado == "Rojo":
+                data_list.append([1, 0, 0, num_detectado])
+            else:
+                data_list.append([0, 0, 1, num_detectado])
 
             cv2.imshow("Recorte", recorte)
 
