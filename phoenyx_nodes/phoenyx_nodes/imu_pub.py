@@ -11,12 +11,12 @@ class IMU_Publisher(Node):
     def __init__(self):
         super().__init__('IMU')
         self.get_logger().info("IMU node started")
-        self.create_timer(1, self.timer_callback)
+        self.create_timer(0.02, self.timer_callback)
         # Configuración del bus I2C
-        # i2c = busio.I2C(board.SCL, board.SDA)
+        i2c = busio.I2C(board.SCL, board.SDA)
 
         # Inicializar el sensor
-        # self.bno = BNO055_I2C(i2c, address=0x28)
+        self.bno = BNO055_I2C(i2c, address=0x28)
         self.pub = self.create_publisher(Twist, 'imu/data', 10)
         self.frame_id = self.declare_parameter('frame_id', "base_imu_link").value
         self.gyro = Twist()
@@ -29,16 +29,19 @@ class IMU_Publisher(Node):
         """
         try:
             try:
-                self.gyro.linear.x, self.gyro.linear.y, self.gyro.linear.z = self.bno.gyro
+                self.gyro.linear.x, self.gyro.linear.y, self.gyro.linear.z = self.bno.euler #euler
                 self.gyro.angular.x, self.gyro.angular.y, self.gyro.angular.z = self.bno.acceleration
+                # Imprimir en logs para ver qué está pasando
+                #self.get_logger().info(f"Euler angles: {self.bno.euler}")
+                #self.get_logger().info(f"Acceleration: {self.bno.acceleration}")
             except Exception as e:
                 # gyro.x, gyro.y, gyro.z = 0, 0, 0
                 self.get_logger().warning('No data from IMU')
-            self.get_logger().info(f"Now gathering data for message")
+            #self.get_logger().info(f"Now gathering data for message")
 
             # add header
 
-            self.get_logger().info('Publishing imu message')
+            #self.get_logger().info('Publishing imu message')
             #self.pub_imu_raw.publish(imu_raw_msg)
             self.pub.publish(self.gyro)
 
