@@ -110,6 +110,17 @@ def generate_launch_description():
 
     ld.add_action(
         Node(
+            package='osr_control',
+            executable='killer_node',
+            name='killer_node',
+            output='screen',
+            emulate_tty=True,
+            parameters=[]
+        )
+    )
+
+    ld.add_action(
+        Node(
             package='phoenyx_nodes',
             executable='imu_pub',
             name='imu_pub',

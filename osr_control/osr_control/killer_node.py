@@ -38,11 +38,12 @@ class KillerNode(Node):
             )
         if result3.returncode == 0:
             self.whitelist_pid.append(int(result3.stdout.strip().split('\n')[0]))
+        self.get_logger().info("Killer Node Iniciado")
     
 
     def joy_callback(self, msg: Joy):
         stop_button = msg.buttons[1]
-        self.get_logger().info(f"Estado del segundo botón: {stop_button}")
+        # self.get_logger().info(f"Estado del segundo botón: {stop_button}")
         if stop_button == 1: 
             self.get_logger().info("Botón pulsado: activando kill_nodes")
             self.kill_nodes()
@@ -52,8 +53,8 @@ class KillerNode(Node):
     def battery_callback(self, msg):
         self.voltage = msg.voltage
         self.current = msg.current
-        self.get_logger().info(f'Voltaje: {msg.voltage} V, Corriente: {msg.current} A')
         if self.voltage <= 14.8 or self.voltage >= 18.0:
+            self.get_logger().info(f'Voltaje: {msg.voltage} V, Corriente: {msg.current} A')
             self.timer = self.create_timer(2.0, self.kill_nodes)
         else:
             self.destroy_timer(self.timer)
