@@ -6,16 +6,17 @@ class pid():
         self.setpoint = setpoint
         self.prev_error = 0
         self.integral = 0
+        self.error = 0
         self.max_val = max_val
 
     def update(self, feedback, dt):
-        error = (self.setpoint - feedback)
-        self.integral += error*dt
-        derivative = (error - self.prev_error)/dt
-        self.prev_error = error
-        value = self.kp * error + self.ki * self.integral + self.kd * derivative
+        self.error = (self.setpoint - feedback)
+        self.integral += self.error*dt
+        derivative = (self.error - self.prev_error)/dt
+        self.prev_error = self.error
+        value = self.kp * self.error + self.ki * self.integral + self.kd * derivative
         if value > self.max_val:
-            value = self.max_val
+            value = self.max_val*value/abs(value)
             self.integral = 0
         return value
 
@@ -25,6 +26,9 @@ class pid():
 
     def set_max_val(self, max_val):
         self.max_val = max_val
+
+    def get_error(self):
+        return self.error
 
     def reset(self):
         self.integral = 0

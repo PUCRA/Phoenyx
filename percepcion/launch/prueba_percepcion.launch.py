@@ -34,14 +34,99 @@ def generate_launch_description():
         )
     )
 
-    orbbec_params = load_yaml(lectura_cam_params, "orbbec_camera_launch")
-    ld.add_action(Node(
-            package="orbbec_camera",
-            executable="orbbec_camera_node",
-            name="ob_camera_node",
-            namespace='camera',
-            parameters=[orbbec_params],
-            output="screen",
+    # orbbec_params = load_yaml(lectura_cam_params, "orbbec_camera_launch")
+    # ld.add_action(Node(
+    #         package="orbbec_camera",
+    #         executable="orbbec_camera_node",
+    #         name="ob_camera_node",
+    #         namespace='camera',
+    #         parameters=[orbbec_params],
+    #         output="screen",
+    #     )
+    # )
+    roboclaw_params = os.path.join(
+        get_package_share_directory('osr_bringup'),
+        'config',
+        'roboclaw_params_mod.yaml'
+    )
+    osr_params = os.path.join(
+        get_package_share_directory('osr_bringup'),
+        'config',
+        'osr_params_mod.yaml'
+    )
+
+    ld = LaunchDescription()
+    
+    ld.add_action(
+        Node(
+            package='osr_control',
+            executable='roboclaw_wrapper',
+            name='roboclaw_wrapper',
+            output='screen',
+            emulate_tty=True,
+            respawn=True,
+            parameters=[roboclaw_params]
+        )
+    )
+
+    ld.add_action(
+        Node(
+            package='osr_control',
+            executable='servo_control',
+            name='servo_wrapper',
+            output='screen',
+            emulate_tty=True,
+            respawn=True,
+            parameters=[{'centered_pulse_widths': [157, 147, 152, 147]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
+        )
+    )
+
+    ld.add_action(
+        Node(
+            package='osr_control',
+            executable='rover',
+            name='rover',
+            output='screen',
+            emulate_tty=True,
+            respawn=True,
+            parameters=[osr_params,
+                        {'enable_odometry': True}]
+        )
+    )
+
+    ld.add_action(
+        Node(
+            package='osr_control',
+            executable='ina260',
+            name='ina260_node',
+            output='screen',
+            emulate_tty=True,
+            parameters=[
+                {"publish_rate": 1.0},
+                {"sensor_address": "0x44"},
+            ]        
+        )
+    )
+
+    ld.add_action(
+        Node(
+            package='phoenyx_nodes',
+            executable='imu_pub',
+            name='imu_pub',
+            output='screen',
+            emulate_tty=True,
+            parameters=[]
+        )
+    )
+
+    ld.add_action(
+        Node(
+            package='percepcion',
+            executable='dar_vueltas',
+            name='dar_vueltas',
+            output='screen',
+            emulate_tty=True,
+            parameters=[]
         )
     )
     return ld
