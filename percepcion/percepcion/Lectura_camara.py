@@ -65,12 +65,12 @@ class LecturaCamara(Node):
                 # cv2.imshow("Recorte", recorte)
 
                 ros_image = self.br.cv2_to_imgmsg(recorte, encoding='bgr8')
-                _, encoded_image = cv2.imencode('.jpg', recorte, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                success, encoded_image = cv2.imencode('.png', recorte)
                 ros_image2 = CompressedImage()
-                ros_image2.header.stamp = self.get_clock().now().to_msg()
-                ros_image2.format = "jpeg"
-                ros_image2.data = np.array(encoded_image).tobytes()
-                self.get_logger().info("Enviando recorte")
+                ros_image2.header.stamp = self.get_clock().now().to_msg()  # Marca el tiempo
+                ros_image2.format = "png"  # ROS necesita saber el formato
+                ros_image2.data = encoded_image.tobytes()  # Convierte la imagen a bytes
+                self.get_logger().info("Enviando recorte ")
                 self.pub2.publish(ros_image2)
                 self.pub.publish(ros_image)
 
