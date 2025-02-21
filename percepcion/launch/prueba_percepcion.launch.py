@@ -34,16 +34,17 @@ def generate_launch_description():
         )
     )
 
-    # orbbec_params = load_yaml(lectura_cam_params, "orbbec_camera_launch")
-    # ld.add_action(Node(
-    #         package="orbbec_camera",
-    #         executable="orbbec_camera_node",
-    #         name="ob_camera_node",
-    #         namespace='camera',
-    #         parameters=[orbbec_params],
-    #         output="screen",
-    #     )
-    # )
+    orbbec_params = load_yaml(lectura_cam_params, "orbbec_camera_launch")
+    ld.add_action(
+        Node(
+            package="orbbec_camera",
+            executable="orbbec_camera_node",
+            name="ob_camera_node",
+            namespace='camera',
+            parameters=[orbbec_params],
+            output="screen",
+        )
+    )
     roboclaw_params = os.path.join(
         get_package_share_directory('osr_bringup'),
         'config',
@@ -55,7 +56,7 @@ def generate_launch_description():
         'osr_params_mod.yaml'
     )
 
-    ld = LaunchDescription()
+    # ld = LaunchDescription()
     
     ld.add_action(
         Node(

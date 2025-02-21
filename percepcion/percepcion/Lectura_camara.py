@@ -3,11 +3,13 @@ from rclpy.node import Node
 from percepcion.Img2number import image2number
 import cv2
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
 import message_filters
 from message_filters import ApproximateTimeSynchronizer
 import yaml
 import os
+import numpy as np
 
 
 class LecturaCamara(Node):
@@ -28,6 +30,8 @@ class LecturaCamara(Node):
         self.br = CvBridge()
         self.color_subscription = message_filters.Subscriber(self, Image, '/camera/color/image_raw')
         self.depth_subscription = message_filters.Subscriber(self, Image, 'camera/depth/image_raw')
+        self.pub = self.create_publisher(Image, 'percepcion/recorte', 10)
+        self.pub2 = self.create_publisher(CompressedImage, 'percepcion/recorte_compressed', 10)
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
         self.ts = ApproximateTimeSynchronizer(
@@ -55,21 +59,32 @@ class LecturaCamara(Node):
             filtered_color_image = color_image.copy()
             filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
             # Mostrar la imagen filtrada de color
-            cv2.imshow("Filtered Color Image", filtered_color_image)
+            # cv2.imshow("Filtered Color Image", filtered_color_image)
             recorte = self.converter.obtener_recorte(filtered_color_image)
             if recorte is not None:
-                cv2.imshow("Recorte", recorte)
-                image_gray = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
-                _, binary_image = cv2.threshold(image_gray, 127, 255, cv2.THRESH_BINARY)
-                cv2.imshow("Binary", binary_image)
-                self.i += 1
-                # output_filename = os.path.join("~/datasetrechulon", 'nunmber_1_'+str(self.i)+'.png')
-                output_filename = os.path.join(os.path.expanduser("~/datasetrechulon"), 'nunmber_9_' + str(self.i) + '.png')
-                if self.i >= 1000:
-                    cv2.destroyAllWindows()
-                    self.destroy_node()
-                # Guardar la imagen
-                cv2.imwrite(output_filename, binary_image)
+                # cv2.imshow("Recorte", recorte)
+
+                ros_image = self.br.cv2_to_imgmsg(recorte, encoding='bgr8')
+                _, encoded_image = cv2.imencode('.jpg', recorte, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                ros_image2 = CompressedImage()
+                ros_image2.header.stamp = self.get_clock().now().to_msg()
+                ros_image2.format = "jpeg"
+                ros_image2.data = np.array(encoded_image).tobytes()
+                self.get_logger().info("Enviando recorte")
+                self.pub2.publish(ros_image2)
+                self.pub.publish(ros_image)
+
+                # image_gray = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
+                # _, binary_image = cv2.threshold(image_gray, 127, 255, cv2.THRESH_BINARY)
+                # cv2.imshow("Binary", binary_image)
+                # self.i += 1
+                # # output_filename = os.path.join("~/datasetrechulon", 'nunmber_1_'+str(self.i)+'.png')
+                # output_filename = os.path.join(os.path.expanduser("~/datasetrechulon"), 'nunmber_9_' + str(self.i) + '.png')
+                # if self.i >= 1000:
+                #     cv2.destroyAllWindows()
+                #     self.destroy_node()
+                # # Guardar la imagen
+                # cv2.imwrite(output_filename, binary_image)
 
             cv2.waitKey(1)
 
