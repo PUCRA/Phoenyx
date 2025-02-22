@@ -31,7 +31,7 @@ class LecturaCamara(Node):
         self.color_subscription = message_filters.Subscriber(self, Image, '/camera/color/image_raw')
         self.depth_subscription = message_filters.Subscriber(self, Image, 'camera/depth/image_raw')
         self.pub = self.create_publisher(Image, 'percepcion/recorte', 10)
-        self.pub2 = self.create_publisher(CompressedImage, 'percepcion/recorte_compressed', 10)
+        # self.pub2 = self.create_publisher(CompressedImage, 'percepcion/recorte_compressed', 10)
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
         self.ts = ApproximateTimeSynchronizer(
@@ -63,15 +63,15 @@ class LecturaCamara(Node):
             recorte = self.converter.obtener_recorte(filtered_color_image)
             if recorte is not None:
                 # cv2.imshow("Recorte", recorte)
-
-                ros_image = self.br.cv2_to_imgmsg(recorte, encoding='bgr8')
-                success, encoded_image = cv2.imencode('.png', recorte)
-                ros_image2 = CompressedImage()
-                ros_image2.header.stamp = self.get_clock().now().to_msg()  # Marca el tiempo
-                ros_image2.format = "png"  # ROS necesita saber el formato
-                ros_image2.data = encoded_image.tobytes()  # Convierte la imagen a bytes
+                imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
+                ros_image = self.br.cv2_to_imgmsg(imagen_redimensionada, encoding='bgr8')
+                # success, encoded_image = cv2.imencode('.png', recorte)
+                # ros_image2 = CompressedImage()
+                # ros_image2.header.stamp = self.get_clock().now().to_msg()  # Marca el tiempo
+                # ros_image2.format = "png"  # ROS necesita saber el formato
+                # ros_image2.data = encoded_image.tobytes()  # Convierte la imagen a bytes
                 self.get_logger().info("Enviando recorte ")
-                self.pub2.publish(ros_image2)
+                # self.pub2.publish(ros_image2)
                 self.pub.publish(ros_image)
 
                 # image_gray = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
