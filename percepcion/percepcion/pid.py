@@ -15,7 +15,7 @@ class pid():
         derivative = (self.error - self.prev_error)/dt
         self.prev_error = self.error
         value = self.kp * self.error + self.ki * self.integral + self.kd * derivative
-        if value > self.max_val:
+        if abs(value) > self.max_val:
             value = self.max_val*value/abs(value)
             self.integral = 0
         return value

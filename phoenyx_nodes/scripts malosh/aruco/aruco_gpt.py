@@ -6,15 +6,17 @@ import numpy as np
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_1000)
 
 # Parámetros para la detección
-parameters = cv2.aruco.DetectorParameters()
+parameters = cv2.aruco.DetectorParameters_create()  # Cambiado a 4.2.0
 
 # Longitud del lado del marcador ArUco en metros
 aruco_marker_length = 0.1745
 
 # Matriz de cámara y coeficientes de distorsión
-camera_matrix = np.load('camera_matrix.npy')
-dist_coeffs = np.load('dist_coeffs.npy')
- 
+camera_matrix = np.array([[538.89195661, 0., 318.90980029],
+                          [0., 538.95172846, 236.9285148],
+                          [0., 0., 1.]])
+dist_coeffs = np.array([[ 1.34862200e-01, -3.28759580e-01, -3.07326727e-04, 
+                          1.51748960e-03, 2.58691494e-01]])
 
 # === FUNCIONES ===
 def detect_aruco_and_estimate_pose(frame):
@@ -68,7 +70,7 @@ def main():
     Captura video desde la cámara, detecta ArUco markers y muestra resultados.
     """
     # Inicializar la cámara
-    camera_index = 2  # Cambiar este índice para seleccionar otra cámara
+    camera_index = 0  # Cambiar este índice para seleccionar otra cámara
     cap = cv2.VideoCapture(camera_index)
     
     if not cap.isOpened():
@@ -89,15 +91,15 @@ def main():
         frame_with_markers = detect_aruco_and_estimate_pose(frame)
 
         # Mostrar el frame procesado
-        cv2.imshow('ArUco Marker Detection', frame_with_markers)
+        # cv2.imshow('ArUco Marker Detection', frame_with_markers)
 
         # Salir al presionar 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     # Liberar recursos
-    cap.release()
-    cv2.destroyAllWindows()
+    # cap.release()
+    # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

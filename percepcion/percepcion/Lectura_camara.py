@@ -1,9 +1,8 @@
 import rclpy
 from rclpy.node import Node
-from percepcion.Img2number import image2number
+from percepcion.Img2recorte import image2recorte
 import cv2
 from sensor_msgs.msg import Image
-from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
 import message_filters
 from message_filters import ApproximateTimeSynchronizer
@@ -26,12 +25,12 @@ class LecturaCamara(Node):
         self.max_depth = self.get_parameter('depth_filter.max').get_parameter_value().integer_value
         self.get_logger().info('Rango de profundidad: %d - %d' % (self.min_depth, self.max_depth))
         # Inicialización de la cámara
-        self.converter = image2number()
+        self.converter = image2recorte()
         self.br = CvBridge()
         self.color_subscription = message_filters.Subscriber(self, Image, '/camera/color/image_raw')
         self.depth_subscription = message_filters.Subscriber(self, Image, 'camera/depth/image_raw')
         self.pub = self.create_publisher(Image, 'percepcion/recorte', 10)
-        self.pub2 = self.create_publisher(CompressedImage, 'percepcion/recorte_compressed', 10)
+        # self.pub2 = self.create_publisher(CompressedImage, 'percepcion/recorte_compressed', 10)
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
         self.ts = ApproximateTimeSynchronizer(
@@ -63,30 +62,12 @@ class LecturaCamara(Node):
             recorte = self.converter.obtener_recorte(filtered_color_image)
             if recorte is not None:
                 # cv2.imshow("Recorte", recorte)
-
-                ros_image = self.br.cv2_to_imgmsg(recorte, encoding='bgr8')
-                success, encoded_image = cv2.imencode('.png', recorte)
-                ros_image2 = CompressedImage()
-                ros_image2.header.stamp = self.get_clock().now().to_msg()  # Marca el tiempo
-                ros_image2.format = "png"  # ROS necesita saber el formato
-                ros_image2.data = encoded_image.tobytes()  # Convierte la imagen a bytes
+                imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
+                ros_image = self.br.cv2_to_imgmsg(imagen_redimensionada, encoding='bgr8')
                 self.get_logger().info("Enviando recorte ")
-                self.pub2.publish(ros_image2)
+                # self.pub2.publish(ros_image2)
                 self.pub.publish(ros_image)
 
-                # image_gray = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
-                # _, binary_image = cv2.threshold(image_gray, 127, 255, cv2.THRESH_BINARY)
-                # cv2.imshow("Binary", binary_image)
-                # self.i += 1
-                # # output_filename = os.path.join("~/datasetrechulon", 'nunmber_1_'+str(self.i)+'.png')
-                # output_filename = os.path.join(os.path.expanduser("~/datasetrechulon"), 'nunmber_9_' + str(self.i) + '.png')
-                # if self.i >= 1000:
-                #     cv2.destroyAllWindows()
-                #     self.destroy_node()
-                # # Guardar la imagen
-                # cv2.imwrite(output_filename, binary_image)
-
-            cv2.waitKey(1)
 
         except Exception as e:
             self.get_logger().error('Error al procesar las imágenes: %s' % str(e))

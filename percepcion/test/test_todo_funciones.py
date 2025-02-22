@@ -251,7 +251,7 @@ if __name__ == "__main__":
                 else:
                     data_list.append([0, 0, 1, num_detectado, average_confidence])
 
-            cv2.imshow("Recorte", recorte)
+            # cv2.imshow("Recorte", recorte)
 
         # Espera por una tecla y verifica si es 'w' o 'a' o 'q'
         key = cv2.waitKey(1) & 0xFF

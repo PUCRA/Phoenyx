@@ -3,33 +3,7 @@ import numpy as np
 import pytesseract  
 import traceback
 import os
-
-# Crear carpeta "datos" si no existe
-output_folder = "datos"
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
-# Ruta del archivo de salida
-output_file = os.path.join(output_folder, "detecciones.npy")
-
-def obtener_imagen(index):
-    # Intentar abrir la cámara en el índice especificado
-    cap = cv2.VideoCapture(index)
-    
-    if not cap.isOpened():
-        print(f"Error: No se pudo abrir la cámara en el índice {index}")
-        return None
-
-    # Intentar leer un fotograma
-    ret, frame = cap.read()
-    
-    if not ret:
-        print("Error: No se pudo capturar un fotograma")
-        cap.release()
-        return None
-
-    cap.release()  # Liberar la cámara después de capturar el fotograma
-    return frame
+import time  # Importar la librería time para medir el tiempo
 
 def ordenar_puntos(pts):
     # Convertir a un array 2D normal si es necesario
@@ -106,7 +80,7 @@ def obtener_recorte(frame, log_level=0):
                             vertices = approx
 
         if len(vertices) == 0:
-            if(log_level):
+            if(log_level > 0):
                 print("No se detectó un cuadrado.")
             return None
         
@@ -175,8 +149,8 @@ def obtener_num(image, log_level=0):
         
         config = '--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'
         number = pytesseract.image_to_string(processed_image, config=config).strip()
-        data = pytesseract.image_to_data(processed_image, config=config, output_type=pytesseract.Output.DICT)
-        confidences = data['conf']
+        data_list = pytesseract.image_to_data(processed_image, config=config, output_type=pytesseract.Output.DICT)
+        confidences = data_list['conf']
         average_confidence = sum(confidences) / len(confidences) if len(confidences) > 0 else 0
         
         if not number or average_confidence < 1:
@@ -187,18 +161,64 @@ def obtener_num(image, log_level=0):
         print(f"Ocurrió un error: {e}")
         return None, 0
 
+def decision_making(data_list):
+    prob_rojo = [fila[0] for fila in data_list]  # Probabilidad de rojo
+    prob_azul = [fila[1] for fila in data_list]  # Probabilidad de azul
+
+    # Extraer los valores en la posición 3 y sus confianzas
+    numeros = [fila[3] for fila in data_list if fila[3] not in [None, '']]
+    confianzas = [fila[4] for fila in data_list if fila[4] not in [None, '']]
+
+    # Calcular la media de cada probabilidad
+    media_rojo = np.mean(prob_rojo)
+    media_azul = np.mean(prob_azul)
+    
+    frecuencia_por_numero = {i: 0 for i in range(1, 10)}
+
+    for valor, confianza in zip(numeros, confianzas):
+        # Filtrar por confianza: solo contar si la confianza supera el umbral
+        if confianza >= 1:
+            if valor in frecuencia_por_numero:
+                frecuencia_por_numero[valor] += confianza  # Ponderar por la confianza
+
+    # Determinar el número con mayor frecuencia ponderada
+    numero = max(frecuencia_por_numero, key=frecuencia_por_numero.get)
+    prob_numero = frecuencia_por_numero[numero] / sum(frecuencia_por_numero.values())  # Frecuencia relativa ponderada
+
+    # Determinar el color con mayor probabilidad
+    if media_rojo > media_azul:
+        color = "Rojo"
+        prob_color = media_rojo
+    elif media_azul > media_rojo:
+        color = "Azul"
+        prob_color = media_azul
+    else:
+        color = "Indefinido"
+
+    medidas_usadas = len(numeros)
+
+    return color, prob_color, numero, prob_numero, medidas_usadas
+
 if __name__ == "__main__":
     cap = cv2.VideoCapture(0)  # Abre la cámara (cambiar el índice si es necesario)
     data_list = []  # Lista para almacenar los datos
-
-    # Crear carpeta "datos" si no existe
-    output_dir = "datos"
-    os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, "detecciones.npy")
+    start_time = time.time()  # Tiempo de inicio
 
     while True:
         ret, frame = cap.read()
         if not ret:
+            break
+
+        current_time = time.time() - start_time  # Tiempo transcurrido
+
+        # Esperar 3 segundos antes de comenzar la captura
+        if current_time < 3:
+            print(f"Esperando para comenzar... {3 - current_time:.1f} segundos restantes")
+            continue
+
+        # Detener la captura después de 15 segundos (12 segundos de captura)
+        if current_time >= 43:
+            print("Tiempo de captura finalizado.")
             break
 
         recorte = obtener_recorte(frame, log_level=0)  # Llama a la función para cada frame
@@ -208,9 +228,7 @@ if __name__ == "__main__":
             num_detectado, average_confidence = obtener_num(recorte, log_level=0)
             num_detectado = num_detectado if num_detectado is not None else -1
 
-            # Imprimir en la terminal
-            print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
-
+            # Agregar datos a la lista
             if detectado == "Azul":
                 data_list.append([0, 1, 0, num_detectado, average_confidence])
             elif detectado == "Rojo":
@@ -218,12 +236,11 @@ if __name__ == "__main__":
             else:
                 data_list.append([0, 0, 1, num_detectado, average_confidence])
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):  # Salir si se presiona 'q'
-            break
+            # Imprimir en la terminal
+            print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
 
-    cap.release()
-    cv2.destroyAllWindows()
 
-    # Guardar los datos en el archivo .npy
-    np.save(output_file, np.array(data_list, dtype=object))
-    print(f"Datos guardados en {output_file}")
+    # Tomar la decisión final
+    if len(data_list) > 0:
+        color, prob_color, numero, prob_numero, medidas_usadas = decision_making(data_list)
+        print(f"Decisión final: Color: {color}, Prob: {prob_color:.2f}, Número: {numero}, Prob: {prob_numero:.2f}, Medidas usadas: {medidas_usadas}")

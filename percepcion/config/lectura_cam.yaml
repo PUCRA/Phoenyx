@@ -1,8 +1,9 @@
-lectura_camara:
+brain_percepcion:
   ros__parameters:
     depth_filter:
       min: 10     #meters
-      max: 1000   #meters
+      max: 2000   #meters
+    numero_muestras: 3
 
 orbbec_camera_launch:
   ros__parameters:

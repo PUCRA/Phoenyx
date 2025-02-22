@@ -12,7 +12,7 @@ class DarVueltas(Node):
         self.subscriber_ = self.create_subscription(Int32, '/num_vueltas', self.callback, 10)
         self.subs_imu = self.create_subscription(Twist, '/imu/data', self.imu_update, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.controlador = pid(1.0, 0, 0, 0)
+        self.controlador = pid(0.0298, 0.00395, 0.00035, 0)
         self.controlador.set_max_val(2)
         self.rotation = 0
         self.num_vueltas = 0
@@ -37,7 +37,7 @@ class DarVueltas(Node):
         Twist_msg.angular.y = float(value)
         Twist_msg.linear.x = 0.0
 
-        if abs(self.controlador.get_error()) < 0.1:
+        if abs(self.controlador.get_error()) < 0.5:
             self.get_logger().info('Deteniendo robot')
             self.num_vueltas = 0
             Twist_msg.angular.y = 0.0

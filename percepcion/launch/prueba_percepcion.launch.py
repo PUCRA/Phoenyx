@@ -25,14 +25,14 @@ def generate_launch_description():
     
     ld = LaunchDescription()
 
-    ld.add_action(
-        Node(
-            package='percepcion',
-            executable='lectura_camara',
-            name='lectura_camara',
-            parameters=[lectura_cam_params]
-        )
-    )
+    # ld.add_action(
+    #     Node(
+    #         package='percepcion',
+    #         executable='lectura_camara',
+    #         name='lectura_camara',
+    #         parameters=[lectura_cam_params]
+    #     )
+    # )
 
     orbbec_params = load_yaml(lectura_cam_params, "orbbec_camera_launch")
     ld.add_action(
@@ -109,16 +109,16 @@ def generate_launch_description():
         )
     )
 
-    ld.add_action(
-        Node(
-            package='osr_control',
-            executable='killer_node',
-            name='killer_node',
-            output='screen',
-            emulate_tty=True,
-            parameters=[]
-        )
-    )
+    # ld.add_action(
+    #     Node(
+    #         package='osr_control',
+    #         executable='killer_node',
+    #         name='killer_node',
+    #         output='screen',
+    #         emulate_tty=True,
+    #         parameters=[]
+    #     )
+    # )
 
     ld.add_action(
         Node(
@@ -139,6 +139,17 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
             parameters=[]
+        )
+    )
+    ld.add_action(
+        Node(
+            package='percepcion',
+            executable='brain_percepcion',
+            name='brain_percepcion',
+            output='screen',
+            emulate_tty=True,
+            # parameters=[]
+            parameters=[lectura_cam_params]
         )
     )
     return ld

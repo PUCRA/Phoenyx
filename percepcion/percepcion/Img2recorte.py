@@ -3,7 +3,7 @@ import numpy as np
 import pytesseract
 import traceback
 
-class image2number():
+class image2recorte():
     def __init__(self):
         pass
 
