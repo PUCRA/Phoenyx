@@ -206,7 +206,7 @@ if __name__ == "__main__":
     counter = 0
 
     while True:
-        if counter <= 9:
+        if counter <= 5:
             ret, frame = cap.read()
             if not ret:
                 break
@@ -230,9 +230,9 @@ if __name__ == "__main__":
                     counter += 1
 
                 # Imprimir en la terminal
-                # print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
+                print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
 
-        elif counter > 9:
+        elif counter > 5:
             counter = 0
             color, prob_color, numero, prob_numero, medidas_usadas = decision_making(data_list)
             data_list.clear()
