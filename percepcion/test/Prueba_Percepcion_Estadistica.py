@@ -203,41 +203,40 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)  # Abre la cámara (cambiar el índice si es necesario)
     data_list = []  # Lista para almacenar los datos
     start_time = time.time()  # Tiempo de inicio
+    counter = 0
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+        if counter <= 9:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        current_time = time.time() - start_time  # Tiempo transcurrido
+            recorte = obtener_recorte(frame, log_level=0)  # Llama a la función para cada frame
 
-        # Esperar 3 segundos antes de comenzar la captura
-        if current_time < 3:
-            print(f"Esperando para comenzar... {3 - current_time:.1f} segundos restantes")
-            continue
+            if recorte is not None:
+                detectado = detectar_color_bgr(recorte)
+                num_detectado, average_confidence = obtener_num(recorte, log_level=0)
+                num_detectado = num_detectado if num_detectado is not None else -1
 
-        # Detener la captura después de 15 segundos (12 segundos de captura)
-        if current_time >= 43:
-            print("Tiempo de captura finalizado.")
-            break
+                # Agregar datos a la lista
+                if detectado == "Azul":
+                    data_list.append([0, 1, 0, num_detectado, average_confidence])
+                    counter += 1
+                elif detectado == "Rojo":
+                    data_list.append([1, 0, 0, num_detectado, average_confidence])
+                    counter += 1
+                else:
+                    data_list.append([0, 0, 1, num_detectado, average_confidence])
+                    counter += 1
 
-        recorte = obtener_recorte(frame, log_level=0)  # Llama a la función para cada frame
+                # Imprimir en la terminal
+                # print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
 
-        if recorte is not None:
-            detectado = detectar_color_bgr(recorte)
-            num_detectado, average_confidence = obtener_num(recorte, log_level=0)
-            num_detectado = num_detectado if num_detectado is not None else -1
-
-            # Agregar datos a la lista
-            if detectado == "Azul":
-                data_list.append([0, 1, 0, num_detectado, average_confidence])
-            elif detectado == "Rojo":
-                data_list.append([1, 0, 0, num_detectado, average_confidence])
-            else:
-                data_list.append([0, 0, 1, num_detectado, average_confidence])
-
-            # Imprimir en la terminal
-            print(f"Color detectado: {detectado}, Número detectado: {num_detectado}, Confianza: {average_confidence}")
+        elif counter > 9:
+            counter = 0
+            color, prob_color, numero, prob_numero, medidas_usadas = decision_making(data_list)
+            data_list.clear()
+            print(f"Decisión final: Color: {color}, Prob: {prob_color:.2f}, Número: {numero}, Prob: {prob_numero:.2f}, Medidas usadas: {medidas_usadas}")
 
 
     # Tomar la decisión final
