@@ -1,10 +1,12 @@
+import sklearn
+import joblib
 import cv2
 import numpy as np
 import pytesseract  
 
 class Recorte2number():
     def __init__(self):
-        pass
+        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
 
     def obtener_num(self, image, log_level=0):
         """Preprocesa la imagen y extrae un número usando OCR."""
@@ -47,7 +49,13 @@ class Recorte2number():
 
         return detected
     
+    def obtener_knn_num(self, img):
+        img_flat = img.reshape(1, -1)
+        prediccion = self.knn.predict(img_flat)
+        return prediccion
+
     def obtener_colorYnum(self, image):
         color = self.detectar_color_bgr(image)
-        numero = self.obtener_num(image)
+        # numero = self.obtener_num(image)
+        numero = self.obtener_knn_num(image)
         return numero, color

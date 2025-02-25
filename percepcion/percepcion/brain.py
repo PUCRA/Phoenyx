@@ -1,9 +1,10 @@
+import sklearn
+from percepcion.Recorte2number import Recorte2number
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge
-from percepcion.Recorte2number import Recorte2number
 from std_msgs.msg import Int32
 import message_filters
 from message_filters import ApproximateTimeSynchronizer
@@ -95,12 +96,13 @@ class brain_percepcion(Node):
             filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
             # Mostrar la imagen filtrada de color
             # cv2.imshow("Filtered Color Image", filtered_color_image)
+            self.get_logger().info("Obteniendo recorte...")
             recorte = self.converter.obtener_recorte(filtered_color_image)
             if recorte is not None:
                 # cv2.imshow("Recorte", recorte)
-                imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
+                # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
                 self.get_logger().info("Tratando_imagen...")
-                self.tratar_recorte(imagen_redimensionada)
+                self.tratar_recorte(recorte)
                 self.get_logger().info("Imagen tratada con exito!")
 
 

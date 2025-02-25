@@ -58,42 +58,42 @@ def generate_launch_description():
 
     # ld = LaunchDescription()
     
-    ld.add_action(
-        Node(
-            package='osr_control',
-            executable='roboclaw_wrapper',
-            name='roboclaw_wrapper',
-            output='screen',
-            emulate_tty=True,
-            respawn=True,
-            parameters=[roboclaw_params]
-        )
-    )
+    # ld.add_action(
+    #     Node(
+    #         package='osr_control',
+    #         executable='roboclaw_wrapper',
+    #         name='roboclaw_wrapper',
+    #         output='screen',
+    #         emulate_tty=True,
+    #         respawn=True,
+    #         parameters=[roboclaw_params]
+    #     )
+    # )
 
-    ld.add_action(
-        Node(
-            package='osr_control',
-            executable='servo_control',
-            name='servo_wrapper',
-            output='screen',
-            emulate_tty=True,
-            respawn=True,
-            parameters=[{'centered_pulse_widths': [157, 147, 152, 147]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
-        )
-    )
+    # ld.add_action(
+    #     Node(
+    #         package='osr_control',
+    #         executable='servo_control',
+    #         name='servo_wrapper',
+    #         output='screen',
+    #         emulate_tty=True,
+    #         respawn=True,
+    #         parameters=[{'centered_pulse_widths': [157, 147, 152, 147]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
+    #     )
+    # )
 
-    ld.add_action(
-        Node(
-            package='osr_control',
-            executable='rover',
-            name='rover',
-            output='screen',
-            emulate_tty=True,
-            respawn=True,
-            parameters=[osr_params,
-                        {'enable_odometry': True}]
-        )
-    )
+    # ld.add_action(
+    #     Node(
+    #         package='osr_control',
+    #         executable='rover',
+    #         name='rover',
+    #         output='screen',
+    #         emulate_tty=True,
+    #         respawn=True,
+    #         parameters=[osr_params,
+    #                     {'enable_odometry': True}]
+    #     )
+    # )
 
     ld.add_action(
         Node(
