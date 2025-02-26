@@ -3,20 +3,17 @@ import numpy as np
 
 # === CONFIGURACIÓN ===
 # Selecciona el diccionario de ArUco
-aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_1000)
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
 
 # Parámetros para la detección
 parameters = cv2.aruco.DetectorParameters_create()  # Cambiado a 4.2.0
 
 # Longitud del lado del marcador ArUco en metros
-aruco_marker_length = 0.1745
+aruco_marker_length = 0.278  # 27.8 cm
 
 # Matriz de cámara y coeficientes de distorsión
-camera_matrix = np.array([[538.89195661, 0., 318.90980029],
-                          [0., 538.95172846, 236.9285148],
-                          [0., 0., 1.]])
-dist_coeffs = np.array([[ 1.34862200e-01, -3.28759580e-01, -3.07326727e-04, 
-                          1.51748960e-03, 2.58691494e-01]])
+camera_matrix = np.array([[538.8919566149616, 0.0, 318.9098002909721], [0.0, 538.9517284561799, 236.92851480349427], [0.0, 0.0, 1.0]])
+dist_coeffs = np.array([[0.13486220047763986, -0.3287595801091004, -0.0003073267274296028, 0.0015174896015572492, 0.2586914942067916]])
 
 # === FUNCIONES ===
 def detect_aruco_and_estimate_pose(frame):
