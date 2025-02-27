@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 
+
 # Configuración
-CHESSBOARD_SIZE = (7, 6)  # Número de esquinas internas del patrón de ajedrez (columnas, filas)
-SQUARE_SIZE = 0.025  # Tamaño real de cada cuadrado en metros
-TOTAL_IMAGES = 20  # Número de imágenes para calibración
+CHESSBOARD_SIZE = (9, 6)  # Número de esquinas internas del patrón de ajedrez (columnas, filas)
+SQUARE_SIZE = 0.0235  # Tamaño real de cada cuadrado en metros
+TOTAL_IMAGES = 100  # Número de imágenes para calibración
 
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -55,6 +56,7 @@ if len(objpoints) >= TOTAL_IMAGES:
 
     np.save("camera_matrix.npy", camera_matrix)
     np.save("dist_coeffs.npy", dist_coeffs)
+    print("\nParámetros guardados en 'camera_matrix.npy' y 'dist_coeffs.npy'.")
     print("\nParámetros guardados en 'camera_matrix.npy' y 'dist_coeffs.npy'.")
 
 else:

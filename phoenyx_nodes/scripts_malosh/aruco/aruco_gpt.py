@@ -1,19 +1,26 @@
 import cv2
 import numpy as np
+import os
 
 # === CONFIGURACIÓN ===
 # Selecciona el diccionario de ArUco
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
 
+# Ruta a los archivos de calibración
+calibration_path = os.path.expanduser("~/Phoenyx/src/phoenyx_nodes/scripts_malosh/aruco/calib_params")
+camera_matrix_file = os.path.join(calibration_path, "camera_matrix.npy")
+dist_coeffs_file = os.path.join(calibration_path, "dist_coeffs.npy")
+
+
 # Parámetros para la detección
 parameters = cv2.aruco.DetectorParameters_create()  # Cambiado a 4.2.0
 
 # Longitud del lado del marcador ArUco en metros
-aruco_marker_length = 0.278  # 27.8 cm
+aruco_marker_length = 0.268  # 27.8 cm
 
 # Matriz de cámara y coeficientes de distorsión
-camera_matrix = np.array([[538.8919566149616, 0.0, 318.9098002909721], [0.0, 538.9517284561799, 236.92851480349427], [0.0, 0.0, 1.0]])
-dist_coeffs = np.array([[0.13486220047763986, -0.3287595801091004, -0.0003073267274296028, 0.0015174896015572492, 0.2586914942067916]])
+camera_matrix = np.load(camera_matrix_file)
+dist_coeffs = np.load(dist_coeffs_file)
 
 # === FUNCIONES ===
 def detect_aruco_and_estimate_pose(frame):
@@ -69,7 +76,10 @@ def main():
     # Inicializar la cámara
     camera_index = 0  # Cambiar este índice para seleccionar otra cámara
     cap = cv2.VideoCapture(camera_index)
-    
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Resolución de 480p
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Resolución de 480p
+
+
     if not cap.isOpened():
         print(f"Error: No se puede acceder a la cámara en índice {camera_index}.")
         return
@@ -91,8 +101,8 @@ def main():
         # cv2.imshow('ArUco Marker Detection', frame_with_markers)
 
         # Salir al presionar 'q'
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
     # Liberar recursos
     # cap.release()
