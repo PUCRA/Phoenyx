@@ -22,57 +22,18 @@ class image2recorte():
         # Inferior izquierdo: mayor diferencia (x - y)
         punto_inf_izq = pts[np.argmax(diferencia)]
         return np.array([punto_sup_izq, punto_sup_der, punto_inf_izq, punto_inf_der], dtype=np.float32)
-
-    def obtener_recorte(self, frame: np.ndarray, log_level=0):
-        try:
-            if not isinstance(frame, np.ndarray):
-                raise ValueError("El parámetro de entrada debe ser una imagen de OpenCV (numpy.ndarray).")
-
-            copy_image = frame.copy()
-            detected_color = None
-            hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  
-
-            # Mostrar la imagen HSV
-            if log_level == 1:
-                cv2.imshow('HSV Image', hsv_image)
-
-            # Definir el rango para el color azul
-            lower_blue = np.array([100, 150, 50])
-            upper_blue = np.array([140, 255, 255])
-            lower_red_1 = np.array([0, 50, 50])
-            upper_red_1 = np.array([10, 255, 255])
-            lower_red_2 = np.array([170, 50, 50])
-            upper_red_2 = np.array([180, 255, 255])
-
-            # Crear máscaras para azul y rojo
-            mask_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
-            mask_red_1 = cv2.inRange(hsv_image, lower_red_1, upper_red_1)
-            mask_red_2 = cv2.inRange(hsv_image, lower_red_2, upper_red_2)
-            mask_red = cv2.bitwise_or(mask_red_1, mask_red_2)
-            combined_mask = cv2.bitwise_or(mask_blue, mask_red)
-
-            if log_level == 1:
-                cv2.imshow('Combined Mask', combined_mask)
-
-            # Tratamiento morfológico
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-            closed_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
-            cleaned_mask = cv2.morphologyEx(closed_mask, cv2.MORPH_OPEN, kernel)
-
-            if log_level == 1:
-                cv2.imshow('Cleaned Mask', cleaned_mask)
-
-            contours, _ = cv2.findContours(cleaned_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            vertices = []
-
-            for contour in contours:
+    
+    def detectar_contornos(self, frame):
+        vertices = []
+        contours, _ = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
                 epsilon = 0.02 * cv2.arcLength(contour, True)
                 approx = cv2.approxPolyDP(contour, epsilon, True)
-
+                # print("len aprox: "+str(len(approx)))
                 if len(approx) == 4:
                     area = cv2.contourArea(approx)
-                    if area > 500:
+                    # print("area: "+str(area))
+                    if area > 2000:
                         x, y, w, h = cv2.boundingRect(approx)
                         aspect_ratio = float(w) / float(h)
                         if 0.8 < aspect_ratio < 1.2:
@@ -88,26 +49,86 @@ class image2recorte():
                                 angles.append(angle_deg)
 
                             if all(80 < angle < 100 for angle in angles):
-                                cv2.drawContours(copy_image, [approx], -1, (0, 255, 0), 3)
+                                # cv2.drawContours(copy_image, [approx], -1, (0, 255, 0), 3)
                                 for point in approx:
                                     x, y = point[0]
-                                    cv2.circle(copy_image, (x, y), 5, (0, 0, 255), -1)
+                                    # cv2.circle(copy_image, (x, y), 5, (0, 0, 255), -1)
                                 vertices = approx
+        return vertices
 
+    def obtener_recorte(self, frame: np.ndarray, log_level=0):
+        try:
+            if not isinstance(frame, np.ndarray):
+                raise ValueError("El parámetro de entrada debe ser una imagen de OpenCV (numpy.ndarray).")
+            img_peq = frame[40:440, 120:520]
+            copy_image = img_peq.copy()
+            detected_color = None
+            hsv_image = cv2.cvtColor(img_peq, cv2.COLOR_BGR2HSV)  
+
+            # Mostrar la imagen HSV
             if log_level == 1:
-                cv2.imshow('Detected Squares', copy_image)
+                cv2.imshow('HSV Image', hsv_image)
+
+            # Definir el rango para el color azul
+            lower_blue = np.array([100, 150, 50])
+            upper_blue = np.array([140, 255, 255])
+            lower_red_1 = np.array([0, 50, 50])
+            upper_red_1 = np.array([10, 255, 255])
+            lower_red_2 = np.array([170, 50, 50])
+            upper_red_2 = np.array([180, 255, 255])
+
+            # Crear máscaras para azul y rojo
+            # mask_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
+            # mask_red_1 = cv2.inRange(hsv_image, lower_red_1, upper_red_1)
+            # mask_red_2 = cv2.inRange(hsv_image, lower_red_2, upper_red_2)
+            # mask_red = cv2.bitwise_or(mask_red_1, mask_red_2)
+            # combined_mask = cv2.bitwise_or(mask_blue, mask_red)
+            combined_mask = cv2.cvtColor(img_peq, cv2.COLOR_BGR2GRAY)
+            combined_mask = cv2.equalizeHist(combined_mask)
+            _, combined_mask = cv2.threshold(combined_mask, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            # cleaned_mask = combined_mask
+            if log_level == 1:
+                cv2.imshow('Combined Mask', combined_mask)
+
+            # # Tratamiento morfológico
+            
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 25))
+            close_img = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
+            # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+            # cleaned_mask = cv2.morphologyEx(close_img, cv2.MORPH_OPEN, kernel)
+            cleaned_mask = close_img
+            cleaned_mask = cv2.bitwise_not(cleaned_mask)
+            if log_level == 1:
+                cv2.imshow('Cleaned Mask', cleaned_mask)
+
+            vertices = self.detectar_contornos(cleaned_mask)
+
+            # if log_level == 1:
+                # cv2.imshow('Detected Squares', copy_image)
             # print(vertices)
             if len(vertices) == 0:
-                if(log_level):
-                    print("No se detectó un cuadrado.")
-                return None
+                # Invertir las máscaras
+                # inverted_mask_blue = cv2.bitwise_not(mask_blue)
+                # inverted_mask_red_1 = cv2.bitwise_not(mask_red_1)
+                # inverted_mask_red_2 = cv2.bitwise_not(mask_red_2)
+                
+                # # Combinar las máscaras invertidas
+                # inverted_combined_mask = cv2.bitwise_or(inverted_mask_blue, cv2.bitwise_or(inverted_mask_red_1, inverted_mask_red_2))
+                # vertices = self.detectar_contornos(inverted_combined_mask)
+                # if log_level == 1:
+                #     cv2.imshow('INverted mask', inverted_combined_mask)
+                # Ahora inverted_combined_mask contiene todo lo que no está dentro de los rangos de azul y rojo
+                if len(vertices) == 0:
+                    # if(log_level == 1):
+                    #     print("No se detectó un cuadrado.")
+                    return None
 
             puntos_origen = np.array([vertices[2][0], vertices[3][0], vertices[0][0], vertices[1][0]], np.float32)
             puntos_origen = self.ordenar_puntos(puntos_origen)
 
-            mask_black = np.zeros_like(frame)
+            mask_black = np.zeros_like(img_peq)
             cv2.fillPoly(mask_black, [vertices], (255, 255, 255))
-            result = cv2.bitwise_and(frame, mask_black)
+            result = cv2.bitwise_and(img_peq, mask_black)
 
             if log_level == 1:
                 cv2.imshow('Masked Region', result)
