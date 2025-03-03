@@ -75,7 +75,7 @@ class brain_percepcion(Node):
 
 
         #Inicio de la FSM
-        self.timer = self.create_timer(0.2, self.FSM)
+        # self.timer = self.create_timer(0.2, self.FSM)
         self.get_logger().info("Brain node Iniciado")
         
 

@@ -49,15 +49,21 @@ class Recorte2number():
 
         return detected
     
-    def obtener_knn_num(self, img):
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    def obtener_knn_num(self, img_thresh):
         img_flat = img_thresh.reshape(1, -1)
+        white_pixels = np.sum(img_thresh == 255)
+        print(white_pixels)
+        if white_pixels < 5:
+            return 0
         prediccion = self.knn.predict(img_flat)
         return prediccion
 
     def obtener_colorYnum(self, image):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        img_thresh = cv2.resize(img_thresh, (28, 28))
+        image = cv2.resize(image, (28, 28))
         color = self.detectar_color_bgr(image)
         # numero = self.obtener_num(image)
-        numero = self.obtener_knn_num(image)
+        numero = self.obtener_knn_num(img_thresh)
         return numero, color

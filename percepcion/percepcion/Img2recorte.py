@@ -112,12 +112,12 @@ class image2recorte():
             if log_level == 1:
                 cv2.imshow('Masked Region', result)
 
-            ancho = 28
-            alto = 28
+            ancho = 100
+            alto = 100
             puntos_destino = np.float32([[0, 0], [ancho, 0], [0, alto], [ancho, alto]])
             matriz = cv2.getPerspectiveTransform(puntos_origen, puntos_destino)
             numero_cuadrado = cv2.warpPerspective(result, matriz, (ancho, alto))
-
+            # numero_bin = cv2.warpPerspective(result, matriz, (ancho, alto))
             if log_level == 1:
                 cv2.imshow('Corrected Image', numero_cuadrado)
 
