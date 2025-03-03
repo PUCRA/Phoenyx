@@ -37,18 +37,3 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cap.release()
-    # cv2.destroyAllWindows()
-    # nombre = "black_"
-    # ext = ".png"
-    # pruebas = [9, 8, 1, 5, 2, 3, 7, 4, 6]
-    # ini_time = time.time()
-    # for i in range(0, 9):
-    #     recorte = cv2.imread(nombre+str(pruebas[i])+ext)
-    #     imagen_gris = cv2.cvtColor(recorte, cv2.COLOR_BGR2GRAY)
-    #     # Aplicar umbral binario
-    #     _, recorte_bin = cv2.threshold(imagen_gris, 128, 255, cv2.THRESH_BINARY)
-    #     recorte_bin = cv2.resize(recorte_bin, (28, 28))
-    #     img_flat = recorte_bin.reshape(1, -1)  # Convierte en un array 2D con 1 fila y muchas columnas
-    #     predicciones = knn.predict(img_flat)
-    #     print("Numero "+str(i)+" predecido como: "+str(predicciones))
-    # print("9 imagenes en: "+str(time.time()-ini_time))

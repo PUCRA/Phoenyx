@@ -48,9 +48,16 @@ def detectar_color_bgr(numero_cuadrado):
         avg_b = np.mean(bgr_image[:, :, 0])  # Azul
         avg_g = np.mean(bgr_image[:, :, 1])  # Rojo
         avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
-        if avg_b > avg_r and (avg_b > avg_g and avg_g < 70 and avg_r < 70):
+        max_value = max(avg_b, avg_g, avg_r)
+        # print("max_value: ", max_value)
+        # print("avg_b: ", avg_b)
+        # print("avg_g: ", avg_g)
+        # print("avg_r: ", avg_r)
+        # if avg_b > avg_r and (avg_b > avg_g and avg_g < 70 and avg_r < 70):
+        if max_value == avg_b and avg_g < 70 and avg_r < 70:
             detected = "Azul"
-        elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
+        # elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
+        elif max_value == avg_r and avg_g < 70 and avg_b < 70:
             detected = "Rojo"
         else:
             detected = "Indefinido"
@@ -63,7 +70,7 @@ if __name__ == "__main__":
     knn = joblib.load("modelo_knn(1).pkl")
     print("Modelo cargado")
     # Cargar imagen
-    cap = cv2.VideoCapture(2, cv2.CAP_V4L2)
+    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
     # Desactivar balance de blancos automático
     cap.set(cv2.CAP_PROP_AUTO_WB, 1)
 
