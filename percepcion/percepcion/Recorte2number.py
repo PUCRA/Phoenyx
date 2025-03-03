@@ -50,7 +50,9 @@ class Recorte2number():
         return detected
     
     def obtener_knn_num(self, img):
-        img_flat = img.reshape(1, -1)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+        img_flat = img_thresh.reshape(1, -1)
         prediccion = self.knn.predict(img_flat)
         return prediccion
 
