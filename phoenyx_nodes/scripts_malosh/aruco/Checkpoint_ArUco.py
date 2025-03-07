@@ -3,24 +3,32 @@ import numpy as np
 import os
 
 # === CONFIGURACIÓN ===
-# Selecciona el diccionario de ArUco
+# Selecciona el diccionario de ArUco 5x5 (50, 100, 250, 1000)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+
+# Selección de resolución
+resolution = "720p"  # Cambiar entre "720p" y "480p" para seleccionar la resolución deseada
+
+# Configuración de resolución
+resolutions = {
+    "720p": (1280, 720),
+    "480p": (640, 480)
+}
 
 # Ruta a los archivos de calibración
 calibration_path = os.path.expanduser("~/Phoenyx/src/phoenyx_nodes/scripts_malosh/aruco/calib_params")
-camera_matrix_file = os.path.join(calibration_path, "camera_matrix_720p.npy")
-dist_coeffs_file = os.path.join(calibration_path, "dist_coeffs_720p.npy")
+camera_matrix_file = os.path.join(calibration_path, f"camera_matrix_{resolution}.npy") # ajusta el nombre del archivo de la matriz de la camara
+dist_coeffs_file = os.path.join(calibration_path, f"dist_coeffs_{resolution}.npy")
 
+# Matriz de cámara y coeficientes de distorsión
+camera_matrix = np.load(camera_matrix_file)
+dist_coeffs = np.load(dist_coeffs_file)
 
 # Parámetros para la detección
 parameters = cv2.aruco.DetectorParameters_create()  # Cambiado a 4.2.0
 
 # Longitud del lado del marcador ArUco en metros
-aruco_marker_length = 0.268  # 26.8 cm y 17.4 cm
-
-# Matriz de cámara y coeficientes de distorsión
-camera_matrix = np.load(camera_matrix_file)
-dist_coeffs = np.load(dist_coeffs_file)
+aruco_marker_length = 0.268  # 0.268 m y 0.174 cm
 
 # === FUNCIONES ===
 def undistort_image(frame, camera_matrix, dist_coeffs):
@@ -85,8 +93,8 @@ def main():
     # Inicializar la cámara
     camera_index = 0  # Cambiar este índice para seleccionar otra cámara
     cap = cv2.VideoCapture(camera_index)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Resolución de 480p
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Resolución de 480p
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolutions[resolution][0]) # las resoluciones cambian en funcion de la variable resolution 
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolutions[resolution][1])
 
 
     if not cap.isOpened():
