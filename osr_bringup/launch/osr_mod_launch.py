@@ -47,9 +47,7 @@ def generate_launch_description():
             parameters=[{'centered_pulse_widths': [157, 147, 152, 147]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
         )
     )
-    ld.add_action(
-        DeclareLaunchArgument('enable_odometry', default_value='true')
-    )
+
     ld.add_action(
         Node(
             package='osr_control',
