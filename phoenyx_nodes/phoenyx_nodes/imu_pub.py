@@ -18,11 +18,13 @@ class IMU_Publisher(Node):
         # Inicializar el sensor
         self.bno = BNO055_I2C(i2c, address=0x28)
         self.pub = self.create_publisher(Twist, 'imu/data', 10)
+        #self.bno.offsets_magnetometer = (407,337, 407)
+        #self.bno.offsets_gyroscope = (-1, -1, 0)
+        #self.bno.offsets_accelerometer = (-26, -60, -22)
         self.frame_id = self.declare_parameter('frame_id', "base_imu_link").value
         self.gyro = Twist()
         self.gyro.linear.x, self.gyro.linear.y, self.gyro.linear.z = 0.0, 0.0, 0.0
         self.gyro.angular.x, self.gyro.angular.y, self.gyro.angular.z = 0.0, 0.0, 0.0
-
 
     def timer_callback(self):
         """Publish the sensor message with new data
