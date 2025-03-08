@@ -1,55 +1,61 @@
-
 import rclpy
 from rclpy.node import Node
 import board
 import busio
 from adafruit_bno055 import BNO055_I2C
-from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Imu  # 📌 Cambiado de Twist a Imu
+import numpy as np
 
 class IMU_Publisher(Node):
-    
+
     def __init__(self):
         super().__init__('IMU')
         self.get_logger().info("IMU node started")
         self.create_timer(0.02, self.timer_callback)
-        # Configuración del bus I2C
-        i2c = busio.I2C(board.SCL, board.SDA)
 
-        # Inicializar el sensor
-        self.bno = BNO055_I2C(i2c, address=0x28)
-        self.pub = self.create_publisher(Twist, 'imu/data', 10)
-        #self.bno.offsets_magnetometer = (407,337, 407)
-        #self.bno.offsets_gyroscope = (-1, -1, 0)
-        #self.bno.offsets_accelerometer = (-26, -60, -22)
-        self.frame_id = self.declare_parameter('frame_id', "base_imu_link").value
-        self.gyro = Twist()
-        self.gyro.linear.x, self.gyro.linear.y, self.gyro.linear.z = 0.0, 0.0, 0.0
-        self.gyro.angular.x, self.gyro.angular.y, self.gyro.angular.z = 0.0, 0.0, 0.0
+        try:
+            i2c = busio.I2C(board.SCL, board.SDA)
+            self.bno = BNO055_I2C(i2c, address=0x28)
+        except Exception as e:
+            self.get_logger().error(f"Error initializing IMU: {e}")
+            return
+
+        self.pub = self.create_publisher(Imu, 'imu/data', 10)
+        self.frame_id = self.declare_parameter('frame_id', "imu_link").value
 
     def timer_callback(self):
-        """Publish the sensor message with new data
-        """
         try:
-            try:
-                self.gyro.linear.x, self.gyro.linear.y, self.gyro.linear.z = self.bno.euler #euler
-                self.gyro.angular.x, self.gyro.angular.y, self.gyro.angular.z = self.bno.acceleration
-                # Imprimir en logs para ver qué está pasando
-                #self.get_logger().info(f"Euler angles: {self.bno.euler}")
-                #self.get_logger().info(f"Acceleration: {self.bno.acceleration}")
-            except Exception as e:
-                # gyro.x, gyro.y, gyro.z = 0, 0, 0
-                self.get_logger().warning('No data from IMU')
-            #self.get_logger().info(f"Now gathering data for message")
+            imu_msg = Imu()
 
-            # add header
+            # Timestamp
+            imu_msg.header.stamp = self.get_clock().now().to_msg()
+            imu_msg.header.frame_id = self.frame_id
 
-            #self.get_logger().info('Publishing imu message')
-            #self.pub_imu_raw.publish(imu_raw_msg)
-            self.pub.publish(self.gyro)
+            # Orientación (usando quaternion en lugar de Euler)
+            quaternion = self.bno.quaternion
+            if quaternion:
+                imu_msg.orientation.x = quaternion[0]
+                imu_msg.orientation.y = quaternion[1]
+                imu_msg.orientation.z = quaternion[2]
+                imu_msg.orientation.w = quaternion[3]
 
+            # Velocidad angular
+            gyro = self.bno.gyro
+            if gyro:
+                imu_msg.angular_velocity.x = gyro[0]
+                imu_msg.angular_velocity.y = gyro[1]
+                imu_msg.angular_velocity.z = gyro[2]
+
+            # Aceleración lineal
+            acceleration = self.bno.acceleration
+            if acceleration:
+                imu_msg.linear_acceleration.x = acceleration[0]
+                imu_msg.linear_acceleration.y = acceleration[1]
+                imu_msg.linear_acceleration.z = acceleration[2]
+
+            self.pub.publish(imu_msg)
         except Exception as ex:
             self.get_logger().error(f"Error in publishing sensor message: {ex}")
-
 
 def main(args=None):
     rclpy.init(args=args)
