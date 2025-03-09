@@ -60,10 +60,10 @@ class image2recorte():
         try:
             if not isinstance(frame, np.ndarray):
                 raise ValueError("El parámetro de entrada debe ser una imagen de OpenCV (numpy.ndarray).")
-            img_peq = frame[40:440, 120:520]
+            # img_peq = frame[40:440, 120:520]
             # copy_image = img_peq.copy()
             # detected_color = None
-            hsv_image = cv2.cvtColor(img_peq, cv2.COLOR_BGR2HSV)  
+            hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  
 
             # Mostrar la imagen HSV
             if log_level == 1:
@@ -83,7 +83,7 @@ class image2recorte():
             # mask_red_2 = cv2.inRange(hsv_image, lower_red_2, upper_red_2)
             # mask_red = cv2.bitwise_or(mask_red_1, mask_red_2)
             # combined_mask = cv2.bitwise_or(mask_blue, mask_red)
-            combined_mask = cv2.cvtColor(img_peq, cv2.COLOR_BGR2GRAY)
+            combined_mask = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             combined_mask = cv2.equalizeHist(combined_mask)
             _, combined_mask = cv2.threshold(combined_mask, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
             # cleaned_mask = combined_mask
@@ -112,9 +112,9 @@ class image2recorte():
             puntos_origen = np.array([vertices[2][0], vertices[3][0], vertices[0][0], vertices[1][0]], np.float32)
             puntos_origen = self.ordenar_puntos(puntos_origen)
 
-            mask_black = np.zeros_like(img_peq)
+            mask_black = np.zeros_like(frame)
             cv2.fillPoly(mask_black, [vertices], (255, 255, 255))
-            result = cv2.bitwise_and(img_peq, mask_black)
+            result = cv2.bitwise_and(frame, mask_black)
 
             if log_level == 1:
                 cv2.imshow('Masked Region', result)

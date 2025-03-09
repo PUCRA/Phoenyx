@@ -10,7 +10,8 @@ import message_filters
 from message_filters import ApproximateTimeSynchronizer
 from percepcion.Img2recorte import image2recorte
 from std_srvs.srv import SetBool
-
+from sensor_msgs.msg import BatteryState, Joy 
+import time
 
 class brain_percepcion(Node):
     def __init__(self):
@@ -33,6 +34,7 @@ class brain_percepcion(Node):
         #publisher nodo dar_vueltas
         self.pub_vueltas = self.create_publisher(Int32, '/num_vueltas', 10)
 
+
         #Objetos de librerias
         self.bridge = CvBridge()
         self.conversor = Recorte2number()
@@ -40,7 +42,7 @@ class brain_percepcion(Node):
         # Variables varias
         self.conteo_muestras = 0
         self.estado = 0
-        self.enable_muestras = True
+        self.enable_muestras = False
         self.numeros = []
         self.colores = []
         self.numero_final = 0
@@ -52,6 +54,9 @@ class brain_percepcion(Node):
         self.converter = image2recorte()
         self.color_subscription = message_filters.Subscriber(self, Image, '/camera/color/image_raw')
         self.depth_subscription = message_filters.Subscriber(self, Image, 'camera/depth/image_raw')
+        self.joy_subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
+        self.go_button = 0
+        self.publish_recorte = self.create_publisher(Image, '/recorte', 10)
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
         self.ts = ApproximateTimeSynchronizer(
@@ -75,37 +80,51 @@ class brain_percepcion(Node):
 
 
         #Inicio de la FSM
-        # self.timer = self.create_timer(0.2, self.FSM)
+        self.timer = self.create_timer(0.2, self.FSM)
         self.get_logger().info("Brain node Iniciado")
         
-
+    def joy_callback(self, msg: Joy):
+        self.go_button = msg.buttons[2]
+        # self.get_logger().info(f"Estado del segundo botón: {self.go_button}")
+        # self.get_logger().info(f"Estado del segundo botón: {stop_button}")
+        # if stop_button == 1: 
+            # self.get_logger().info("Botón pulsado: activando kill_nodes")
+            # self.kill_nodes()
+    
     def camara_callback(self, color_msg, depth_msg):
         try:
-            # Convertir las imágenes de ROS a formato OpenCV
-            color_image = self.bridge.imgmsg_to_cv2(color_msg, desired_encoding='bgr8')
-            depth_image = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='16UC1')
+            if(self.enable_muestras):
+                # Convertir las imágenes de ROS a formato OpenCV
+                color_image = self.bridge.imgmsg_to_cv2(color_msg, desired_encoding='bgr8')
+                depth_image = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='16UC1')
 
-            # Filtrar los píxeles de color basándonos en el rango de profundidad
-            # Definimos un rango de valores de profundidad (en milímetros)
+                # Filtrar los píxeles de color basándonos en el rango de profundidad
+                # Definimos un rango de valores de profundidad (en milímetros)
 
-            # Crear una máscara donde la profundidad está dentro del rango especificado
-            mask = (depth_image >= self.min_depth) & (depth_image <= self.max_depth)
+                # Crear una máscara donde la profundidad está dentro del rango especificado
+                mask = (depth_image >= self.min_depth) & (depth_image <= self.max_depth)
 
-            # Crear una imagen filtrada de color con los píxeles que están dentro del rango de profundidad
-            filtered_color_image = color_image.copy()
-            filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
-            # Mostrar la imagen filtrada de color
-            # cv2.imshow("Filtered Color Image", filtered_color_image)
-            self.get_logger().info("Obteniendo recorte...")
-            recorte = self.converter.obtener_recorte(filtered_color_image)
-            if recorte is not None:
-                # cv2.imshow("Recorte", recorte)
-                # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
-                self.get_logger().info("Tratando_imagen...")
-                self.tratar_recorte(recorte)
-                self.get_logger().info("Imagen tratada con exito!")
-
-
+                # Crear una imagen filtrada de color con los píxeles que están dentro del rango de profundidad
+                filtered_color_image = color_image.copy()
+                filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
+                # Mostrar la imagen filtrada de color
+                # cv2.imshow("Filtered Color Image", filtered_color_image)
+                # self.get_logger().info("Obteniendo recorte...")
+                recorte = self.converter.obtener_recorte(filtered_color_image)
+                if recorte is not None:
+                    # cv2.imshow("Recorte", recorte)
+                    # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
+                    msg = self.bridge.cv2_to_imgmsg(recorte, encoding='bgr8')
+                    progreso = len(self.numeros) / self.numero_muestras
+                    porcentaje = int(progreso * 100)
+                    barra = "#" * (porcentaje // 2)  # Barra de 50 caracteres máx.
+                    espacio = " " * (50 - len(barra))  # Relleno para mantener tamaño fijo
+                    self.get_logger().info(f"[{barra}{espacio}] {porcentaje}%")
+                    # Publica la imagen en el tópico
+                    self.publish_recorte.publish(msg)
+                    # self.get_logger().info("Tratando_imagen...")
+                    self.tratar_recorte(recorte)
+                    # self.get_logger().info("Imagen tratada con exito!")
 
         except Exception as e:
             self.get_logger().error('Error al procesar las imágenes: %s' % str(e))
@@ -116,24 +135,14 @@ class brain_percepcion(Node):
         request = SetBool.Request()
         request.data = enable
         future = self.color_client.call_async(request)
-        # rclpy.spin_until_future_complete(self, future)
 
-        # if future.result() is not None and future.result().success:
-        #     self.get_logger().info(f'Color cambiado a {enable}')
-        # else:
-        #     self.get_logger().error('Error al cambiar color')
 
     def toggle_depth(self, enable: bool):
         """ Llama al servicio para activar/desactivar profundidad """
         request = SetBool.Request()
         request.data = enable
         future = self.depth_client.call_async(request)
-        # rclpy.spin_until_future_complete(self, future)
 
-        # if future.result() is not None and future.result().success:
-        #     self.get_logger().info(f'Profundidad cambiada a {enable}')
-        # else:
-        #     self.get_logger().error('Error al cambiar profundidad')
 
     def tratar_recorte(self, image):
         if self.enable_muestras:
@@ -144,11 +153,13 @@ class brain_percepcion(Node):
             if color is not None:
                 self.colores.append(color)
             self.conteo_muestras += 1
-            self.get_logger().info('Color:'+color+'Numero: '+str(numero))
+            # self.get_logger().info('Color: '+color+'Numero: '+str(numero))
         else:
             pass
 
-    def decision_making(numeros, colores):
+    def decision_making(self):
+        numeros = self.numeros
+        colores = self.colores
         prob_rojo = 0  # Probabilidad de rojo
         prob_azul = 0 # Probabilidad de azul
         for color in colores:
@@ -183,10 +194,22 @@ class brain_percepcion(Node):
         return numero, color
 
     def FSM(self):
+        # print("Estado: {}".format(self.estado))
         if self.estado == 0:
+            self.enable_muestras = False
+            # self.get_logger().info(f"Estado del segundo botón: {self.go_button}")
+            if self.go_button == 1:
+                self.get_logger().info("Activamos camara color")
+                self.toggle_color(True)
+                self.get_logger().info("Activamos camara depth")
+                self.toggle_depth(True) # Apaga la imagen en color
+                self.get_logger().info("Iniciando detección...")
+                time.sleep(3)
+                self.estado = 1
+        elif self.estado == 1:
             self.enable_muestras = True
             if self.conteo_muestras >= self.numero_muestras:
-                self.estado = 1
+                self.estado = 2
                 self.get_logger().info("Desactivamos camara color")
                 self.toggle_color(False)
                 self.get_logger().info("Desactivamos camara depth")
@@ -194,10 +217,11 @@ class brain_percepcion(Node):
                 self.get_logger().info("Pasamos a calcular estadistica")
             # Cogemos muestras y las tratamos
             pass
-        elif self.estado == 1:
+        elif self.estado == 2:
             # calculamos estadistica
             self.enable_muestras = False
             self.numero_final, self.color_final = self.decision_making()
+            self.get_logger().info("Numeros: {}".format(self.numeros))
             numero_print = str(self.numero_final)
             if self.numero_final == 0:
                 numero_print = "No hay numero"
@@ -210,9 +234,13 @@ class brain_percepcion(Node):
             else:
                 msg.data = 0
             self.pub_vueltas.publish(msg)
-            self.estado = 2
-        elif self.estado == 2:
+            self.estado = 3
+        elif self.estado == 3:
             # estado de reposo
+            time.sleep(10)
+            self.numeros = []
+            self.colores = []
+            self.estado = 0
             pass
 
 

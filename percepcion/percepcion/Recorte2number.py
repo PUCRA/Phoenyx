@@ -30,7 +30,7 @@ class Recorte2number():
             print(f"Ocurrió un error: {e}")
             return None, 0
         
-    def detectar_color_bgr(numero_cuadrado):
+    def detectar_color_bgr(self, numero_cuadrado):
         """Detecta la probabilidad de ser rojo o azul basándose en la proporción de los canales BGR."""
         bgr_image = numero_cuadrado
 
@@ -51,16 +51,16 @@ class Recorte2number():
     
     def obtener_knn_num(self, img_thresh):
         img_flat = img_thresh.reshape(1, -1)
-        white_pixels = np.sum(img_thresh == 255)
-        print(white_pixels)
-        if white_pixels < 5:
+        white_pixels = np.count_nonzero(img_thresh > 100)
+        # print(white_pixels)
+        if white_pixels < 20:
             return 0
-        prediccion = self.knn.predict(img_flat)
+        prediccion = self.knn.predict(img_flat)[0]
         return prediccion
 
     def obtener_colorYnum(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         img_thresh = cv2.resize(img_thresh, (28, 28))
         image = cv2.resize(image, (28, 28))
         color = self.detectar_color_bgr(image)
