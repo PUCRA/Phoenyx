@@ -30,7 +30,7 @@ class Recorte2number():
             print(f"Ocurrió un error: {e}")
             return None, 0
         
-    def detectar_color_bgr(self, numero_cuadrado):
+    def detectar_color_bgr(numero_cuadrado):
         """Detecta la probabilidad de ser rojo o azul basándose en la proporción de los canales BGR."""
         bgr_image = numero_cuadrado
 
@@ -38,15 +38,15 @@ class Recorte2number():
         avg_b = np.mean(bgr_image[:, :, 0])  # Azul
         avg_g = np.mean(bgr_image[:, :, 1])  # Rojo
         avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
-
-        if avg_b > avg_r and avg_b > avg_g:
-            # Intercambiar los valores si el azul es mayor que el rojo
+        max_value = max(avg_b, avg_g, avg_r)
+        
+        if max_value == avg_b and avg_g < 70 and avg_r < 70:
             detected = "Azul"
-        elif avg_r > avg_b and avg_r > avg_g:
+        # elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
+        elif max_value == avg_r and avg_g < 70 and avg_b < 70:
             detected = "Rojo"
         else:
             detected = "Indefinido"
-
         return detected
     
     def obtener_knn_num(self, img_thresh):

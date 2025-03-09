@@ -148,28 +148,27 @@ class brain_percepcion(Node):
         else:
             pass
 
-    def decision_making(self):
+    def decision_making(numeros, colores):
         prob_rojo = 0  # Probabilidad de rojo
         prob_azul = 0 # Probabilidad de azul
-        for color in self.colores:
+        for color in colores:
             if color == "Azul":
                 prob_azul += 1
             elif color =="Rojo":
                 prob_rojo += 1
-        prob_rojo /= float(len(self.colores))
-        prob_azul /= float(len(self.colores))
+        prob_rojo /= float(len(colores))
+        prob_azul /= float(len(colores))
 
-        frecuencia_por_numero = {i: 0 for i in range(1, 10)}
+        frecuencia_por_numero = {i: 0 for i in range(0, 10)}
 
-        for valor, confianza in self.numeros:
+        for valor in numeros:
             # Filtrar por confianza: solo contar si la confianza supera el umbral
-            if confianza >= 1:
-                if valor in frecuencia_por_numero:
-                    frecuencia_por_numero[valor] += confianza  # Ponderar por la confianza
+            if valor in frecuencia_por_numero:
+                frecuencia_por_numero[valor] += 1  # Ponderar por la confianza
 
         # Determinar el número con mayor frecuencia ponderada
         numero = max(frecuencia_por_numero, key=frecuencia_por_numero.get)
-        prob_numero = frecuencia_por_numero[numero] / sum(frecuencia_por_numero.values())  # Frecuencia relativa ponderada
+        # prob_numero = frecuencia_por_numero[numero] / sum(frecuencia_por_numero.values())  # Frecuencia relativa ponderada
 
         # Determinar el color con mayor probabilidad
         if prob_rojo > prob_azul:
@@ -179,7 +178,7 @@ class brain_percepcion(Node):
             color = "Azul"
             prob_color = prob_azul
         else:
-            color = "Indefinido"
+            color = "Distractorio"
 
         return numero, color
 
@@ -199,7 +198,10 @@ class brain_percepcion(Node):
             # calculamos estadistica
             self.enable_muestras = False
             self.numero_final, self.color_final = self.decision_making()
-            self.get_logger().info("Numero: "+str(self.numero_final)+" Color: "+str(self.color_final))
+            numero_print = str(self.numero_final)
+            if self.numero_final == 0:
+                numero_print = "No hay numero"
+            self.get_logger().info("Numero: "+numero_print+" Color: "+str(self.color_final))
             msg = Int32()
             if self.color_final == "Azul":
                 msg.data = -self.numero_final

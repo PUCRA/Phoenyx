@@ -49,11 +49,7 @@ def detectar_color_bgr(numero_cuadrado):
         avg_g = np.mean(bgr_image[:, :, 1])  # Rojo
         avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
         max_value = max(avg_b, avg_g, avg_r)
-        # print("max_value: ", max_value)
-        # print("avg_b: ", avg_b)
-        # print("avg_g: ", avg_g)
-        # print("avg_r: ", avg_r)
-        # if avg_b > avg_r and (avg_b > avg_g and avg_g < 70 and avg_r < 70):
+        
         if max_value == avg_b and avg_g < 70 and avg_r < 70:
             detected = "Azul"
         # elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
