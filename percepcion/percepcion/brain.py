@@ -12,6 +12,7 @@ from percepcion.Img2recorte import image2recorte
 from std_srvs.srv import SetBool
 from sensor_msgs.msg import BatteryState, Joy 
 import time
+import numpy as np
 
 class brain_percepcion(Node):
     def __init__(self):
@@ -106,12 +107,20 @@ class brain_percepcion(Node):
 
                 # Crear una imagen filtrada de color con los píxeles que están dentro del rango de profundidad
                 filtered_color_image = color_image.copy()
-                filtered_color_image[~mask] = 0  # Ponemos en negro los píxeles fuera del rango
+                # kernel = np.ones((5, 5), np.uint8)  # El tamaño del kernel controla cuánto se dilata la máscara
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+                dilated_mask = cv2.dilate(mask.astype(np.uint8), kernel, iterations=5)
+                filtered_color_image[dilated_mask == 0] = 255  # Ponemos en negro los píxeles fuera del rango
                 # Mostrar la imagen filtrada de color
                 # cv2.imshow("Filtered Color Image", filtered_color_image)
+                # cv2.waitKey(0)
+
+                # cv2.waitKey(0)
                 # self.get_logger().info("Obteniendo recorte...")
+                
                 recorte = self.converter.obtener_recorte(filtered_color_image)
                 if recorte is not None:
+                    
                     # cv2.imshow("Recorte", recorte)
                     # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
                     msg = self.bridge.cv2_to_imgmsg(recorte, encoding='bgr8')
@@ -121,6 +130,7 @@ class brain_percepcion(Node):
                     espacio = " " * (50 - len(barra))  # Relleno para mantener tamaño fijo
                     self.get_logger().info(f"[{barra}{espacio}] {porcentaje}%")
                     # Publica la imagen en el tópico
+                    # cv2.imshow("Recorte", recorte)
                     self.publish_recorte.publish(msg)
                     # self.get_logger().info("Tratando_imagen...")
                     self.tratar_recorte(recorte)
@@ -180,7 +190,7 @@ class brain_percepcion(Node):
         # Determinar el número con mayor frecuencia ponderada
         numero = max(frecuencia_por_numero, key=frecuencia_por_numero.get)
         # prob_numero = frecuencia_por_numero[numero] / sum(frecuencia_por_numero.values())  # Frecuencia relativa ponderada
-
+        print(self.colores)
         # Determinar el color con mayor probabilidad
         if prob_rojo > prob_azul:
             color = "Rojo"
@@ -240,6 +250,7 @@ class brain_percepcion(Node):
             time.sleep(10)
             self.numeros = []
             self.colores = []
+            self.conteo_muestras = 0
             self.estado = 0
             pass
 

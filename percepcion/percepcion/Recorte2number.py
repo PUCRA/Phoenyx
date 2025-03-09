@@ -6,7 +6,9 @@ import pytesseract
 
 class Recorte2number():
     def __init__(self):
-        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        # self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+
 
     def obtener_num(self, image, log_level=0):
         """Preprocesa la imagen y extrae un número usando OCR."""
@@ -39,11 +41,11 @@ class Recorte2number():
         avg_g = np.mean(bgr_image[:, :, 1])  # Rojo
         avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
         max_value = max(avg_b, avg_g, avg_r)
-        
-        if max_value == avg_b and avg_g < 70 and avg_r < 70:
+        print(f"avg_b: {avg_b}, avg_g: {avg_g}, avg_r: {avg_r}")
+        if max_value == avg_b and avg_g < 80 and avg_r < 80:
             detected = "Azul"
         # elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
-        elif max_value == avg_r and avg_g < 70 and avg_b < 70:
+        elif max_value == avg_r and avg_g < 80 and avg_b < 80:
             detected = "Rojo"
         else:
             detected = "Indefinido"

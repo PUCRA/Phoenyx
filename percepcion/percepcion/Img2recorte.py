@@ -23,38 +23,42 @@ class image2recorte():
         punto_inf_izq = pts[np.argmax(diferencia)]
         return np.array([punto_sup_izq, punto_sup_der, punto_inf_izq, punto_inf_der], dtype=np.float32)
     
+
     def detectar_contornos(self, frame):
         vertices = []
         contours, _ = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         for contour in contours:
                 epsilon = 0.02 * cv2.arcLength(contour, True)
                 approx = cv2.approxPolyDP(contour, epsilon, True)
-                # print("len aprox: "+str(len(approx)))
                 if len(approx) == 4:
                     area = cv2.contourArea(approx)
-                    # print("area: "+str(area))
-                    if area > 2000:
-                        x, y, w, h = cv2.boundingRect(approx)
-                        aspect_ratio = float(w) / float(h)
-                        if 0.8 < aspect_ratio < 1.2:
-                            angles = []
-                            for i in range(4):
-                                pt1 = approx[i][0]
-                                pt2 = approx[(i + 1) % 4][0]
-                                pt3 = approx[(i + 2) % 4][0]
-                                v1 = np.array([pt1[0] - pt2[0], pt1[1] - pt2[1]])
-                                v2 = np.array([pt3[0] - pt2[0], pt3[1] - pt2[1]])
-                                angle = np.arccos(np.clip(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)), -1.0, 1.0))
-                                angle_deg = np.degrees(angle)
-                                angles.append(angle_deg)
-
-                            if all(80 < angle < 100 for angle in angles):
-                                # cv2.drawContours(copy_image, [approx], -1, (0, 255, 0), 3)
-                                for point in approx:
-                                    x, y = point[0]
-                                    # cv2.circle(copy_image, (x, y), 5, (0, 0, 255), -1)
-                                vertices = approx
+                    # print(area)
+                    if area < 40000 and area > 5000:
+                        if len(approx) == 4:
+                            return approx                    
         return vertices
+
+    # def detectar_contornos(self, frame):
+    #     vertices = []
+    #     contours, _ = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    #     for contour in contours:
+    #         # Calcular el área y el perímetro
+    #         area = cv2.contourArea(contour)
+    #         perimeter = cv2.arcLength(contour, True)
+
+    #         # Calcular la circularidad
+    #         if perimeter > 0:
+    #             circularity = 4 * np.pi * area / (perimeter ** 2)
+
+    #             # Filtrar formas que tengan una circularidad que corresponda a un cuadrado o rectángulo con bordes redondeados
+    #             if 0.7 < circularity < 1.2:
+    #                 # Si tiene la circularidad esperada, puede ser un cuadrado con bordes redondeados
+    #                 # A continuación, se puede aplicar más lógica si es necesario, como verificar el área
+    #                 if area > 2000:
+    #                     vertices = contour
+    #                     break
+    #     return vertices
 
     def obtener_recorte(self, frame: np.ndarray, log_level=0):
         try:
@@ -84,18 +88,19 @@ class image2recorte():
             # mask_red = cv2.bitwise_or(mask_red_1, mask_red_2)
             # combined_mask = cv2.bitwise_or(mask_blue, mask_red)
             combined_mask = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            combined_mask = cv2.equalizeHist(combined_mask)
-            _, combined_mask = cv2.threshold(combined_mask, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            # combined_mask = cv2.equalizeHist(combined_mask)
+            # combined_mask = cv2.GaussianBlur(combined_mask, (5, 5), 0)
+            _, combined_mask = cv2.threshold(combined_mask, 120, 255, cv2.THRESH_BINARY)
             # cleaned_mask = combined_mask
             if log_level == 1:
                 cv2.imshow('Combined Mask', combined_mask)
 
             # # Tratamiento morfológico
             
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 25))
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
             close_img = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
-            # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
-            # cleaned_mask = cv2.morphologyEx(close_img, cv2.MORPH_OPEN, kernel)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+            cleaned_mask = cv2.morphologyEx(close_img, cv2.MORPH_OPEN, kernel)
             cleaned_mask = close_img
             cleaned_mask = cv2.bitwise_not(cleaned_mask)
             if log_level == 1:

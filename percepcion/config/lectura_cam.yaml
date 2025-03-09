@@ -1,8 +1,8 @@
 brain_percepcion:
   ros__parameters:
     depth_filter:
-      min: 1000     #meters
-      max: 2000   #meters
+      min: 1300     #meters
+      max: 1800   #meters
     numero_muestras: 50
 
 orbbec_camera_launch:
@@ -24,7 +24,7 @@ orbbec_camera_launch:
     color_gain: -1
     enable_color_auto_white_balance: true
     color_white_balance: -1
-    # color_brightness: 300
+    # color_brightness: 5000
 
 
     #depth
