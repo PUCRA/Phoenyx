@@ -20,6 +20,17 @@ class pid():
             self.integral = 0
         return value
 
+    def update_with_error(self, error, dt):
+        self.error = error
+        self.integral += self.error*dt
+        derivative = (self.error - self.prev_error)/dt
+        self.prev_error = self.error
+        value = self.kp * self.error + self.ki * self.integral + self.kd * derivative
+        if abs(value) > self.max_val:
+            value = self.max_val*value/abs(value)
+            self.integral = 0
+        return value
+
     def set_setpoint(self, setpoint):
         self.setpoint = setpoint
         self.integral = 0
