@@ -177,7 +177,7 @@ class image2recorte():
                 # cv2.imshow('Detected Squares', copy_image)
             # print(vertices)
             if len(vertices) == 0:
-                return None
+                return None, cleaned_mask
 
             puntos_origen = np.array([vertices[2][0], vertices[3][0], vertices[0][0], vertices[1][0]], np.float32)
             puntos_origen = self.ordenar_puntos(puntos_origen)
@@ -203,4 +203,4 @@ class image2recorte():
         except Exception as e:
             print(f"Ocurrió un error: {e}")
             print("Error en la línea:", traceback.format_exc())
-            return None
+            return None, None
