@@ -14,7 +14,7 @@ class DarVueltas(Node):
         self.subscriber_ = self.create_subscription(Int32, '/num_vueltas', self.callback, 10)
         self.subs_imu = self.create_subscription(Imu, '/imu/data', self.imu_update, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.controlador = pid(0.06, 0.03, 0.0, 0)
+        self.controlador = pid(0.045, 0.02, 0.0, 0)
         self.controlador.set_max_val(3)
         self.first_iteration = True #esta variable determina si es la primera iteración del codigo (en func. imu_update)
         self.rotation = 0 
