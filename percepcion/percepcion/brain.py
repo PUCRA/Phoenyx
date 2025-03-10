@@ -13,6 +13,7 @@ from std_srvs.srv import SetBool
 from sensor_msgs.msg import BatteryState, Joy 
 import time
 import numpy as np
+import traceback
 
 class brain_percepcion(Node):
     def __init__(self):
@@ -48,6 +49,7 @@ class brain_percepcion(Node):
         self.colores = []
         self.numero_final = 0
         self.color_final = ""
+        self.ini_time = 0
 
         
         
@@ -57,8 +59,9 @@ class brain_percepcion(Node):
         self.depth_subscription = message_filters.Subscriber(self, Image, 'camera/depth/image_raw')
         self.joy_subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.go_button = 0
-        self.publish_recorte = self.create_publisher(Image, '/recorte', 10)
-        self.publish_recorte_bin = self.create_publisher(Image, '/recorte_bin', 10)
+        # self.publish_recorte = self.create_publisher(Image, '/recorte', 10)
+        # self.publish_recorte_bin = self.create_publisher(Image, '/recorte_bin', 10)
+        # self.publisher_recorte_bin_2 = self.create_publisher(Image, '/recorte_bin_2', 10)
 
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
@@ -115,17 +118,19 @@ class brain_percepcion(Node):
                 filtered_color_image[dilated_mask == 0] = 255  # Ponemos en negro los píxeles fuera del rango
                 # Mostrar la imagen filtrada de color
                 # cv2.imshow("Filtered Color Image", filtered_color_image)
-                cv2.waitKey(0)
+                # cv2.waitKey(0)
 
                 # cv2.waitKey(0)
                 # self.get_logger().info("Obteniendo recorte...")
                 
-                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image, 1)
+                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image)
+                # if img_bin is not None:
+                #     self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
                 if recorte is not None:
                     
                     # cv2.imshow("Recorte", recorte)
                     # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
-                    msg = self.bridge.cv2_to_imgmsg(recorte, encoding='bgr8')
+                    # msg = self.bridge.cv2_to_imgmsg(recorte, encoding='bgr8')
                     progreso = len(self.numeros) / self.numero_muestras
                     porcentaje = int(progreso * 100)
                     barra = "#" * (porcentaje // 2)  # Barra de 50 caracteres máx.
@@ -133,14 +138,15 @@ class brain_percepcion(Node):
                     self.get_logger().info(f"[{barra}{espacio}] {porcentaje}%")
                     # Publica la imagen en el tópico
                     # cv2.imshow("Recorte", recorte)
-                    self.publish_recorte.publish(msg)
-                    self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
+                    # self.publish_recorte.publish(msg)
                     # self.get_logger().info("Tratando_imagen...")
                     self.tratar_recorte(recorte)
                     # self.get_logger().info("Imagen tratada con exito!")
 
         except Exception as e:
             self.get_logger().error('Error al procesar las imágenes: %s' % str(e))
+            traceback.print_exc()
+
             
 
     def toggle_color(self, enable: bool):
@@ -161,8 +167,10 @@ class brain_percepcion(Node):
         if self.enable_muestras:
             # imagen = self.bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
             numero, color = self.conversor.obtener_colorYnum(image)
+            # self.publisher_recorte_bin_2.publish(self.bridge.cv2_to_imgmsg(image_thresh, encoding='mono8'))
             if numero is not None:
                 self.numeros.append(numero)
+                self.get_logger().info("Numero: "+str(numero))
             if color is not None:
                 self.colores.append(color)
             self.conteo_muestras += 1
@@ -175,14 +183,17 @@ class brain_percepcion(Node):
         colores = self.colores
         prob_rojo = 0  # Probabilidad de rojo
         prob_azul = 0 # Probabilidad de azul
+        prob_distract = 0
         for color in colores:
             if color == "Azul":
                 prob_azul += 1
             elif color =="Rojo":
                 prob_rojo += 1
+            else:
+                prob_distract += 1
         prob_rojo /= float(len(colores))
         prob_azul /= float(len(colores))
-
+        prob_distract /= float(len(colores))
         frecuencia_por_numero = {i: 0 for i in range(0, 10)}
 
         for valor in numeros:
@@ -192,13 +203,14 @@ class brain_percepcion(Node):
 
         # Determinar el número con mayor frecuencia ponderada
         numero = max(frecuencia_por_numero, key=frecuencia_por_numero.get)
+        color = max(prob_rojo, prob_azul, prob_distract)
         # prob_numero = frecuencia_por_numero[numero] / sum(frecuencia_por_numero.values())  # Frecuencia relativa ponderada
         print(self.colores)
         # Determinar el color con mayor probabilidad
-        if prob_rojo > prob_azul:
+        if prob_rojo == color:
             color = "Rojo"
             prob_color = prob_rojo
-        elif prob_azul > prob_rojo:
+        elif prob_azul == color:
             color = "Azul"
             prob_color = prob_azul
         else:
@@ -219,9 +231,12 @@ class brain_percepcion(Node):
                 self.get_logger().info("Iniciando detección...")
                 time.sleep(3)
                 self.estado = 1
+                self.ini_time = time.time()
         elif self.estado == 1:
             self.enable_muestras = True
-            if self.conteo_muestras >= self.numero_muestras:
+            # if time.time()-self.ini_time >= 40:
+            #     self.estado = 2
+            if self.conteo_muestras >= self.numero_muestras or time.time()-self.ini_time >= 40:
                 self.estado = 2
                 self.get_logger().info("Desactivamos camara color")
                 self.toggle_color(False)

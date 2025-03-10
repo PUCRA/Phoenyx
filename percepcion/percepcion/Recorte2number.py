@@ -6,8 +6,10 @@ import pytesseract
 
 class Recorte2number():
     def __init__(self):
-        # self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
-        self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
+        self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.prev_num = 0
+        # self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
 
 
     def obtener_num(self, image, log_level=0):
@@ -54,17 +56,24 @@ class Recorte2number():
     def obtener_knn_num(self, img_thresh):
         img_flat = img_thresh.reshape(1, -1)
         white_pixels = np.count_nonzero(img_thresh > 100)
-        # print(white_pixels)
-        if white_pixels < 20:
+        print(white_pixels)
+        if white_pixels < 20 or white_pixels > 300:
             return 0
-        prediccion = self.knn.predict(img_flat)[0]
+        if self.prev_num == 2 or self.prev_num == 3:
+            img_resize = cv2.resize(img_thresh, (28, 28))
+            img_resize = img_resize.reshape(1, -1)
+            prediccion = self.knn2.predict(img_resize)[0]
+        else:
+            
+            prediccion = self.knn.predict(img_flat)[0]
+        self.prev_num = prediccion
         return prediccion
 
     def obtener_colorYnum(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        img_thresh = cv2.resize(img_thresh, (28, 28))
-        image = cv2.resize(image, (28, 28))
+        img_thresh = cv2.resize(img_thresh, (50, 50))
+        image = cv2.resize(image, (50, 50))
         color = self.detectar_color_bgr(image)
         # numero = self.obtener_num(image)
         numero = self.obtener_knn_num(img_thresh)

@@ -20,8 +20,8 @@ orbbec_camera_launch:
     color_camera_info_qos: "default"
     #color auto exposure and white balance
     enable_color_auto_exposure: false
-    color_exposure: 1600
-    color_gain: 10
+    color_exposure: 1300
+    color_gain: 5
     enable_color_auto_white_balance: true
     color_white_balance: -1
     # color_brightness: 5000
