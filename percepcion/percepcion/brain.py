@@ -113,12 +113,12 @@ class brain_percepcion(Node):
                 filtered_color_image[dilated_mask == 0] = 255  # Ponemos en negro los píxeles fuera del rango
                 # Mostrar la imagen filtrada de color
                 # cv2.imshow("Filtered Color Image", filtered_color_image)
-                # cv2.waitKey(0)
+                cv2.waitKey(0)
 
                 # cv2.waitKey(0)
                 # self.get_logger().info("Obteniendo recorte...")
                 
-                recorte = self.converter.obtener_recorte(filtered_color_image)
+                recorte = self.converter.obtener_recorte(filtered_color_image, 1)
                 if recorte is not None:
                     
                     # cv2.imshow("Recorte", recorte)

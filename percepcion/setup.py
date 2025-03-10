@@ -33,6 +33,7 @@ setup(
             'dar_vueltas = percepcion.dar_vueltas:main',
             'lectura_camara = percepcion.Lectura_camara:main',
             'brain_percepcion = percepcion.brain:main',
+            'recorte = percepcion.recorte_view:main',
         ],
     },
 )

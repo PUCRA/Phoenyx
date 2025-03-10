@@ -23,7 +23,52 @@ class image2recorte():
         punto_inf_izq = pts[np.argmax(diferencia)]
         return np.array([punto_sup_izq, punto_sup_der, punto_inf_izq, punto_inf_der], dtype=np.float32)
     
+    # def detectar_contornos2(self, frame):
 
+    #     # Convertir a escala de grises y aplicar desenfoque
+    #     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    #     # Aplicar detector de bordes Canny
+    #     edges = cv2.Canny(blurred, 50, 150)
+    #     # Detectar contornos
+    #     contornos, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    #     for contorno in contornos:
+    #         # Aproximar el contorno a un polígono
+    #         epsilon = 0.02 * cv2.arcLength(contorno, True)  # Tolerancia más baja
+    #         approx = cv2.approxPolyDP(contorno, epsilon, True)
+    #         # Si el contorno tiene 4 vértices, podría ser un cuadrado
+    #         if len(approx) == 4 and cv2.isContourConvex(approx):
+    #             x, y, w, h = cv2.boundingRect(approx)
+    #             aspect_ratio = float(w) / h  # Relación de aspecto
+    #             # Verificar que la relación de aspecto sea aproximadamente 1
+    #             if 0.95 <= aspect_ratio <= 1.05 and w * h > 5000:
+    #                 # Verificar que los ángulos sean cercanos a 90 grados
+    #                 angles = []
+    #                 for i in range(4):
+    #                     p1 = approx[i][0]
+    #                     p2 = approx[(i + 1) % 4][0]
+    #                     p3 = approx[(i + 2) % 4][0]
+    #                     v1 = p1 - p2
+    #                     v2 = p3 - p2
+    #                     cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    #                     angle = np.arccos(cosine_angle) * (180.0 / np.pi)
+    #                     angles.append(angle)
+    #                 # Comprobar si los ángulos están cerca de 90 grados
+    #                 if all(85 <= ang <= 95 for ang in angles):
+    #                     cv2.drawContours(frame, [approx], -1, (0, 255, 0), 2)
+    #                     print("🟢 Se ha detectado un cuadrado")
+    #                     # Extraer solo la parte interna del cuadrado
+    #                     mask = np.zeros_like(frame)
+    #                     cv2.drawContours(mask, [approx], -1, (255, 255, 255), -1)
+    #                     result = cv2.bitwise_and(frame, mask)
+    #                     # Recortar la región del cuadrado
+    #                     cropped = frame[y:y+h, x:x+w]
+    #                     # Mostrar la imagen solo con el cuadrado detectado
+    #                     cv2.imshow("Cuadrado Detectado", cropped)
+    #     # Mostrar imágenes de depuración
+    #     cv2.imshow("Bordes Canny", edges)
+    #     cv2.imshow("Detección General", frame)
+        
     def detectar_contornos(self, frame):
         vertices = []
         contours, _ = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -35,7 +80,26 @@ class image2recorte():
                     # print(area)
                     if area < 40000 and area > 5000:
                         if len(approx) == 4:
-                            return approx                    
+                            x, y, w, h = cv2.boundingRect(approx)
+                            aspect_ratio = float(w) / h  # Relación de aspecto
+                            # Verificar que la relación de aspecto sea aproximadamente 1
+                            if 0.9 <= aspect_ratio <= 1.1:
+                                # Verificar que los ángulos sean cercanos a 90 grados
+                                angles = []
+                                for i in range(4):
+                                    p1 = approx[i][0]
+                                    p2 = approx[(i + 1) % 4][0]
+                                    p3 = approx[(i + 2) % 4][0]
+                                    v1 = p1 - p2
+                                    v2 = p3 - p2
+                                    cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                                    angle = np.arccos(cosine_angle) * (180.0 / np.pi)
+                                    angles.append(angle)
+                                # Comprobar si los ángulos están cerca de 90 grados
+                                if all(80 <= ang <= 100 for ang in angles):
+                                    # cv2.drawContours(frame, [approx], -1, (0, 255, 0), 2)
+                                    # print("🟢 Se ha detectado un cu
+                                    return approx                    
         return vertices
 
     # def detectar_contornos(self, frame):
@@ -71,7 +135,7 @@ class image2recorte():
 
             # Mostrar la imagen HSV
             if log_level == 1:
-                cv2.imshow('HSV Image', hsv_image)
+                cv2.imshow('Frame Image', frame)
 
             # Definir el rango para el color azul
             # lower_blue = np.array([100, 150, 50])
@@ -107,6 +171,7 @@ class image2recorte():
                 cv2.imshow('Cleaned Mask', cleaned_mask)
 
             vertices = self.detectar_contornos(cleaned_mask)
+            # vertices = self.detectar_contornos2(combined_mask)
 
             # if log_level == 1:
                 # cv2.imshow('Detected Squares', copy_image)
