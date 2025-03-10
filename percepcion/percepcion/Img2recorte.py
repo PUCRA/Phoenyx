@@ -198,7 +198,7 @@ class image2recorte():
             if log_level == 1:
                 cv2.imshow('Corrected Image', numero_cuadrado)
 
-            return numero_cuadrado
+            return numero_cuadrado, cleaned_mask
 
         except Exception as e:
             print(f"Ocurrió un error: {e}")

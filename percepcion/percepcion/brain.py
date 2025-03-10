@@ -58,6 +58,8 @@ class brain_percepcion(Node):
         self.joy_subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.go_button = 0
         self.publish_recorte = self.create_publisher(Image, '/recorte', 10)
+        self.publish_recorte_bin = self.create_publisher(Image, '/recorte_bin', 10)
+
 
         # Sincronizador de los dos tópicos con una tolerancia en el tiempo
         self.ts = ApproximateTimeSynchronizer(
@@ -118,7 +120,7 @@ class brain_percepcion(Node):
                 # cv2.waitKey(0)
                 # self.get_logger().info("Obteniendo recorte...")
                 
-                recorte = self.converter.obtener_recorte(filtered_color_image, 1)
+                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image, 1)
                 if recorte is not None:
                     
                     # cv2.imshow("Recorte", recorte)
@@ -132,6 +134,7 @@ class brain_percepcion(Node):
                     # Publica la imagen en el tópico
                     # cv2.imshow("Recorte", recorte)
                     self.publish_recorte.publish(msg)
+                    self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
                     # self.get_logger().info("Tratando_imagen...")
                     self.tratar_recorte(recorte)
                     # self.get_logger().info("Imagen tratada con exito!")
