@@ -1,52 +1,49 @@
-import cv2
 import numpy as np
-import os
 import math
 
 # Posiciones conocidas de los ArUcos en el mundo (x, y)
 aruco_positions = {
-    0: (1.0, 1.0),
+    0: (0, 1.0),
     1: (2.0, 1.0),
     2: (1.0, 2.0),
     3: (2.0, 2.0)
 }
 
-def triangulate_position(aruco_positions, detected_aruco_ids, tvecs):
-    """Realiza la triangulación para determinar la posición del robot."""
-    if len(detected_aruco_ids) < 2:
-        print("Se necesitan al menos 2 ArUcos para la triangulación.")
-        return None
+def calculate_robot_pos(x1, y1, x2, y2, theta1, theta2):
+    # Convertir ángulos de grados a radianes si es necesario
+    theta1 = math.radians(90-theta1)# el angulo que dan los arucos es el contrario al que se necesita
+    theta2 = math.radians(90-theta2)
+    
+    # Calcular x3
+    x3 = ((y1 - y2) + x2 * math.tan(theta2) - x1 * math.tan(theta1)) / (math.tan(theta2) - math.tan(theta1))
+    
+    # Calcular y3
+    y3 = ((y1 * math.tan(theta2)) - (y2 * math.tan(theta1)) - ((x1 - x2) * math.tan(theta2) * math.tan(theta1))) / (math.tan(theta2) - math.tan(theta1))
 
-    # Obtener las posiciones conocidas de los ArUcos detectados
-    positions = [aruco_positions[id[0]] for id in detected_aruco_ids]
-    # Obtener las distancias medidas desde el robot a los ArUcos
-    distances = [np.linalg.norm(tvec[0][0]) for tvec in tvecs]
-
-    # Resolver el sistema de ecuaciones para encontrar la posición del robot
-    A = []
-    B = []
-    for (x, y), d in zip(positions, distances):
-        A.append([2*x, 2*y, 1])
-        B.append([x**2 + y**2 - d**2])
-    A = np.array(A)
-    B = np.array(B)
-    pos = np.linalg.lstsq(A, B, rcond=None)[0]
-    return pos[0][0], pos[1][0]
+    return x3, y3
 
 # === PROGRAMA PRINCIPAL ===
 def main():
     # IDs de los ArUcos detectados (ejemplo)
-    detected_aruco_ids = np.array([[0], [1]])
+    detected_aruco_ids = [0, 1]
 
-    # Vectores de traslación de los ArUcos detectados (ejemplo)
-    tvecs = [np.array([[[1.0, 0.0, 0.0]]]), np.array([[[2.0, 0.0, 0.0]]])]
+    if len(detected_aruco_ids) >= 2:
+        # Obtener las posiciones de los ArUcos detectados
+        id1, id2 = detected_aruco_ids[:2]
+        (x1, y1) = aruco_positions[id1]
+        (x2, y2) = aruco_positions[id2]
 
-    # Realizar la triangulación
-    robot_position = triangulate_position(aruco_positions, detected_aruco_ids, tvecs)
-    if robot_position is not None:
-        print(f"Posición del robot: X={robot_position[0]:.3f}, Y={robot_position[1]:.3f}")
+        # Ejemplo de ángulos (deberían ser obtenidos de alguna manera)
+        theta1, theta2 = 45, 26.57  # Ángulos en grados
+
+        # Realizar la triangulación
+        robot_position = calculate_robot_pos(x1, y1, x2, y2, theta1, theta2)
+        if robot_position is not None:
+            print(f"Posición del robot: X={robot_position[0]:.3f}, Y={robot_position[1]:.3f}")
+        else:
+            print("No se pudo determinar la posición del robot.")
     else:
-        print("No se pudo determinar la posición del robot.")
+        print("Se necesitan al menos dos ArUcos detectados para calcular la posición del robot.")
 
 if __name__ == "__main__":
     main()
