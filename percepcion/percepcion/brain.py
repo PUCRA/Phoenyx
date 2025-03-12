@@ -88,6 +88,7 @@ class brain_percepcion(Node):
         #Inicio de la FSM
         self.timer = self.create_timer(0.2, self.FSM)
         self.get_logger().info("Brain node Iniciado")
+        self.numero_really = 5
         
     def joy_callback(self, msg: Joy):
         self.go_button = msg.buttons[2]
@@ -166,10 +167,14 @@ class brain_percepcion(Node):
     def tratar_recorte(self, image):
         if self.enable_muestras:
             # imagen = self.bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
-            numero, color = self.conversor.obtener_colorYnum(image)
+            numero, color, img = self.conversor.obtener_colorYnum(image)
             # self.publisher_recorte_bin_2.publish(self.bridge.cv2_to_imgmsg(image_thresh, encoding='mono8'))
             if numero is not None:
                 self.numeros.append(numero)
+                if numero != self.numero_really:
+                    self.get_logger().info("Numero erroneo")
+                    cv2.imwrite(f"percepcion/imagenes/{self.numero_really}_{numero}_{self.i}.png", img)
+                    self.i += 1
                 self.get_logger().info("Numero: "+str(numero))
             if color is not None:
                 self.colores.append(color)
@@ -222,6 +227,7 @@ class brain_percepcion(Node):
         # print("Estado: {}".format(self.estado))
         if self.estado == 0:
             self.enable_muestras = False
+            # self.numero_really = input("Introduce el número de vueltas: ")
             # self.get_logger().info(f"Estado del segundo botón: {self.go_button}")
             if self.go_button == 1:
                 self.get_logger().info("Activamos camara color")

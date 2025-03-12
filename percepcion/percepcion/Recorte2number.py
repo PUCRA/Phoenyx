@@ -6,10 +6,12 @@ import pytesseract
 
 class Recorte2number():
     def __init__(self):
-        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
-        self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        # self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
+        # self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
         self.prev_num = 0
-        # self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.knn2 = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
+
 
 
     def obtener_num(self, image, log_level=0):
@@ -70,11 +72,61 @@ class Recorte2number():
         return prediccion
 
     def obtener_colorYnum(self, image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, img_thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        img_thresh = cv2.resize(img_thresh, (50, 50))
-        image = cv2.resize(image, (50, 50))
         color = self.detectar_color_bgr(image)
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        umbral = 150
+        if color == "Rojo":
+            umbral = 100
+        elif color == "Azul":
+            umbral = 150
+        else:
+            umbral = 120
+        _, img_thresh = cv2.threshold(gray, umbral, 255, cv2.THRESH_BINARY)
+        frame_thickness = 10  # Ajusta este valor según el grosor del marco que quieras
+
+        # Poner en negro los píxeles del marco exterior (bordes)
+        img_thresh[-frame_thickness:, :] = 0  # Borde inferior
+        img_thresh[:, :frame_thickness] = 0  # Borde izquierdo
+        img_thresh[:frame_thickness, :] = 0  # Borde superior
+        img_thresh[:, -frame_thickness:] = 0  # Borde derecho
+
+
+        contornos, jerarquia = cv2.findContours(img_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Crear una imagen vacía para dibujar los contornos suavizados
+        img_smooth = np.zeros_like(img_thresh)  # Inicializa la imagen con ceros (negro)
+        contornos_vacios = []
+        # Suavizar y dibujar contornos
+        for i, contorno in enumerate(contornos):
+            # Comprobar si el contorno es exterior (nivel 0 en la jerarquía)
+            epsilon = 0.01 * cv2.arcLength(contorno, True)  # Ajustar epsilon para más suavizado
+            contorno_suavizado = cv2.approxPolyDP(contorno, epsilon, True)
+            if jerarquia[0][i][3] == -1:  # Contorno exterior
+                
+                
+                # Dibujar el contorno suavizado en la nueva imagen binaria, relleno de blanco
+                new_image = cv2.drawContours(img_smooth, [contorno_suavizado], -1, (255), thickness=cv2.FILLED)
+            else:
+                contornos_vacios.append(contorno_suavizado)
+            # elif cv2.contourArea(contorno) < 10:
+            #     new_image = cv2.drawContours(new_image, [contorno_suavizado], -1, (0), thickness=cv2.FILLED)
+        
+        for contorno in contornos_vacios:
+            new_image = cv2.drawContours(new_image, [contorno], -1, (0), thickness=cv2.FILLED)
+
+        
+        # Mostrar la imagen binaria resultante con los contornos suavizados
+        # cv2.imshow('Contornos Suavizados', img_smooth)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        
+        # Guardar la imagen suavizada
+        # img_thresh = cv2.resize(img_thresh, (50, 50))
+        img_thresh = cv2.resize(new_image, (50, 50))
+        cv2.imwrite('imagen_suavizada.png', img_thresh)
+        
+        # image = cv2.resize(image, (50, 50))
         # numero = self.obtener_num(image)
         numero = self.obtener_knn_num(img_thresh)
-        return numero, color
+        return numero, color, img_thresh
