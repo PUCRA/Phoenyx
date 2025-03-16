@@ -22,7 +22,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
         ]),
-        launch_arguments={'world': world_file}.items(),
+        launch_arguments={'world': world_file, 'use_sim_time': 'true'}.items(),  # use_sim_time agregado aquí
     )
 
     # Ruta al archivo URDF/Xacro
@@ -42,7 +42,7 @@ def generate_launch_description():
         raise RuntimeError(f"Error al procesar el archivo Xacro: {e}")
 
     # Parámetros para el robot_description
-    params = {'robot_description': doc.toxml()}
+    params = {'robot_description': doc.toxml(), 'use_sim_time': True}  # use_sim_time agregado aquí
 
     # Nodo para publicar el estado del robot
     node_robot_state_publisher = Node(
@@ -56,7 +56,8 @@ def generate_launch_description():
     controller_spawn = Node(
         package='osr_gazebo',
         executable='osr_controller',
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
     )
     
     # Nodo para spawn de la entidad en Gazebo
@@ -64,7 +65,8 @@ def generate_launch_description():
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=['-topic', 'robot_description', '-entity', 'rover'],
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
     )
 
     # Controladores
