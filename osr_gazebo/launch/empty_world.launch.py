@@ -24,7 +24,7 @@ def generate_launch_description():
 
     xacro_file = os.path.join(osr_urdf_path,
                               'urdf',
-                              'osr.urdf.xacro')
+                              'osr_mod.urdf.xacro')
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
