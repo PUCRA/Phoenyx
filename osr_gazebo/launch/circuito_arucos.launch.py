@@ -27,7 +27,7 @@ def generate_launch_description():
 
     # Ruta al archivo URDF/Xacro
     osr_gazebo_path = get_package_share_directory('osr_gazebo')
-    xacro_file = os.path.join(osr_gazebo_path, 'urdf', 'osr.urdf.xacro')
+    xacro_file = os.path.join(osr_gazebo_path, 'urdf', 'osr_mod.urdf.xacro')
     
     # Verificar si el archivo Xacro existe
     print("Ruta al archivo Xacro:", xacro_file)

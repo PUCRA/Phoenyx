@@ -16,8 +16,8 @@ import xacro
 def generate_launch_description():
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('gazebo_ros'), 'launch'), '/gazebo.launch.py']),
-             )
+                    get_package_share_directory('gazebo_ros'), 'launch'), '/gazebo.launch.py']),)
+                # launch_arguments={'use_sim_time': 'true'}.items())
 
     osr_urdf_path = os.path.join(
         get_package_share_directory('osr_gazebo'))
@@ -40,31 +40,38 @@ def generate_launch_description():
     controller_spawn = Node(
         package='osr_gazebo',
         executable='osr_controller',
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
+
     )
     
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'rover'],
-                        output='screen')
+                        output='screen',
+                        parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
+                        )
 
 
     # joint_state_controller
     load_joint_state_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'joint_state_broadcaster'],
         output='screen'
+
     )
 
     # wheel_velocity_controller
     rover_wheel_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'wheel_controller'],
         output='screen'
+
     )
 
     # servo_controller
     servo_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'servo_controller'],
         output='screen'
+
     )
     
     return LaunchDescription([
