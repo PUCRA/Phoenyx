@@ -1,0 +1,41 @@
+arucos:
+  - id: 1
+    position:
+      x: 0.0
+      y: 0.0
+  - id: 2
+    position:
+      x: 1.0
+      y: 1.0
+  - id: 3
+    position:
+      x: 2.0
+      y: 2.0
+  - id: 4
+    position:
+      x: 3.0
+      y: 3.0
+  - id: 5
+    position:
+      x: 4.0
+      y: 4.0
+  - id: 6
+    position:
+      x: 5.0
+      y: 5.0
+  - id: 7
+    position:
+      x: 6.0
+      y: 6.0
+  - id: 8
+    position:
+      x: 7.0
+      y: 7.0
+  - id: 9
+    position:
+      x: 8.0
+      y: 8.0
+  - id: 10
+    position:
+      x: 9.0
+      y: 9.0
