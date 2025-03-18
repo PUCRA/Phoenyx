@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 import glob
 
-package_name = 'phoenyx_nodse'
+package_name = 'phoenyx_nodes'
 
 # Usar glob para encontrar todos los archivos .yaml en config
 config_files = glob.glob(os.path.join('config', '*.yaml'))

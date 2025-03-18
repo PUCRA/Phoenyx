@@ -12,7 +12,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'params_file',
             default_value=os.path.join(
-                get_package_share_directory('phoenyx_nodse'), 'config', 'mapper_params_online_async.yaml'),
+                get_package_share_directory('phoenyx_nodes'), 'config', 'mapper_params_online_async.yaml'),
             description='Path to the parameter file'
         ),
         Node(
