@@ -20,8 +20,9 @@ def generate_launch_description():
             executable='async_slam_toolbox_node',
             name='slam_toolbox',
             output='screen',
-            parameters=[param_file],
-            remappings=[('/scan', '/scan')],
+            parameters=[param_file,
+                        {'use_sim_time': True}],
+            # remappings=[('/scan', '/scan')],
             emulate_tty=True,
         ),
     ])
