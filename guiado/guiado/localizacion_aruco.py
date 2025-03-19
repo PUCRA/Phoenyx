@@ -31,7 +31,7 @@ class ArucoDetector(Node):
         self.aruco_positions = self.load_aruco_positions()
 
     def load_aruco_positions(self):
-        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/guiado/config/Aruco_pos.yaml'), 'r') as file:
+        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
         # Ruta a los archivos de calibración
         # calibration_path = os.path.expanduser("~/Phoenyx/src/")
