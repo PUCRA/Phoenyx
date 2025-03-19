@@ -33,7 +33,7 @@ private:
 
     double angle_data;
 
-    #define ROVER_WHEEL_RADIUS 0.075
+    #define ROVER_WHEEL_RADIUS 0.1
 
     #define d1 0.177 // Distance from the center to the front-left wheel along the x-axis
     #define d2 0.310 // Distance from the center to the front-left wheel along the y-axis
@@ -361,7 +361,7 @@ int main(int argc, char* argv[]) {
     auto node = std::make_shared<Controller>();
 
     // Using std::chrono to create a rate object
-    auto rate = std::chrono::milliseconds(300); // 200 Hz = 5ms per loop
+    auto rate = std::chrono::milliseconds(5); // 200 Hz = 5ms per loop
 
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
