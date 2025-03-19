@@ -33,7 +33,7 @@ private:
 
     double angle_data;
 
-    #define ROVER_WHEEL_RADIUS 0.1
+    #define ROVER_WHEEL_RADIUS 0.082
 
     #define d1 0.177 // Distance from the center to the front-left wheel along the x-axis
     #define d2 0.310 // Distance from the center to the front-left wheel along the y-axis
@@ -89,13 +89,21 @@ public:
     }
 
     void jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg) {
-
-        fl_vel = msg->position[5];
-        fr_vel = msg->position[7];
-        ml_vel = msg->position[2];
-        mr_vel = msg->position[3];
-        rl_vel = msg->position[8];
-        rr_vel = msg->position[9];
+        static std::map<std::string, size_t> joint_indices;
+        if (joint_indices.empty()) {
+            // Guardar los índices de cada articulación al inicio
+            for (size_t i = 0; i < msg->name.size(); i++) {
+                joint_indices[msg->name[i]] = i;
+            }
+        }
+    
+        // Obtener los valores con los índices correctos
+        fl_vel = msg->position[joint_indices["front_wheel_joint_left"]];
+        fr_vel = msg->position[joint_indices["front_wheel_joint_right"]];
+        ml_vel = msg->position[joint_indices["middle_wheel_joint_left"]];
+        mr_vel = msg->position[joint_indices["middle_wheel_joint_right"]];
+        rl_vel = msg->position[joint_indices["rear_wheel_joint_left"]];
+        rr_vel = msg->position[joint_indices["rear_wheel_joint_right"]];
 
         Odometry(theta);
 
