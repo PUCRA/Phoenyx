@@ -31,9 +31,11 @@ class ArucoDetector(Node):
         self.aruco_positions = self.load_aruco_positions()
 
     def load_aruco_positions(self):
-        with open('aruco_pos.yaml', 'r') as file:
+        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
-        return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
+        # Ruta a los archivos de calibración
+        # calibration_path = os.path.expanduser("~/Phoenyx/src/")
+        # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
 
     def image_callback(self, msg):
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')

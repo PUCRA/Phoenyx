@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'localizacion_aruco = guiado.localizacion_aruco:main'
         ],
     },
 )
