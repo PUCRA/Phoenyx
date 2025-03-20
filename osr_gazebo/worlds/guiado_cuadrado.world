@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="circuito_cuadrado">
+    <!-- Configuración del entorno -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Pared izquierda -->
+    <model name="wall_left">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3.5 0 0.5 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared derecha -->
+    <model name="wall_right">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.5 0 0.5 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared superior -->
+    <model name="wall_top">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 3.5 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Pared inferior -->
+    <model name="wall_bottom">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>7 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 -3.5 0.5 0 0 0</pose>
+    </model>
+  </world>
+</sdf>
