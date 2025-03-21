@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 import os
 import yaml
+from geometry_msgs.msg import Twist
 
 class ArucoDetector(Node):
     def __init__(self):
@@ -20,6 +21,11 @@ class ArucoDetector(Node):
             '/camera/camera_info',
             self.camera_info_callback,
             10)
+        self.publisher_aruco_pos = self.create_publisher(
+            Twist,
+            '/aruco_pos',
+            10)
+        
         self.bridge = CvBridge()
         self.camera_matrix = None
         self.dist_coeffs = None
@@ -29,6 +35,14 @@ class ArucoDetector(Node):
 
         # Cargar posiciones de ArUcos desde el archivo YAML
         self.aruco_positions = self.load_aruco_positions()
+
+
+    def publish_aruco_position(self, x, y, theta):
+        msg = Twist()
+        msg.linear.x = x
+        msg.linear.y = y
+        msg.angular.z = theta
+        self.publisher_aruco_pos.publish(msg)
 
     def load_aruco_positions(self):
         with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
@@ -65,7 +79,7 @@ class ArucoDetector(Node):
                 Xrel = tvec[0][0][0]
                 Zrel = tvec[0][0][2]
                 thetaArucoRel = rvec[0][0][2]
-                self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
+            self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
         return frame
 
     def print_pose(self, marker_id, tvec, rvec):
@@ -94,6 +108,8 @@ class ArucoDetector(Node):
 
         if AngleRobot >= 360:
             AngleRobot = AngleRobot - 360 #encontraremos angulos mas grandes de 720
+        
+        self.publish_aruco_position(posXabs, posZabs, AngleRobot)
 
         self.get_logger().info(f"Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
 

@@ -10,7 +10,7 @@
 
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_listener.h"
@@ -30,6 +30,11 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub;
+
+    //añadido para subscribirse a los arucos
+    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr aruco_sub;
+
+
 
     double angle_data;
 
@@ -70,6 +75,8 @@ private:
     double test = 0;
     nav_msgs::msg::Odometry odom_msg;
 
+    bool aruco_detected = false; // Added member variable
+
 public:
     Controller() : Node("controller") {
         motor_wheel_pub = this->create_publisher<std_msgs::msg::Float64MultiArray>("/wheel_controller/commands", 1);
@@ -83,6 +90,10 @@ public:
 
         imu_sub = this->create_subscription<sensor_msgs::msg::Imu>(
             "imu_plugin/out", 1, std::bind(&Controller::imuCallback, this, std::placeholders::_1));
+
+        // //añadido para subscribirse a los arucos
+        aruco_sub = this->create_subscription<geometry_msgs::msg::Twist>(
+            "aruco_pos", 1, std::bind(&Controller::arucoCallback, this, std::placeholders::_1));
 
         odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("osr/odom", 10);
 
@@ -105,7 +116,7 @@ public:
         rl_vel = msg->position[joint_indices["rear_wheel_joint_left"]];
         rr_vel = msg->position[joint_indices["rear_wheel_joint_right"]];
 
-        Odometry(theta);
+        Odometry(theta /*, Aruco_msg*/);
 
     }
 
@@ -119,6 +130,22 @@ public:
         x_postion += dl * cos(theta);
         y_postion += dl * sin(theta);
         // RCLCPP_INFO(this->get_logger(), "x_position: %f, y_position: %f", x_postion, y_postion);
+        
+        
+        // Odometria rectificada por aruco
+        if (aruco_detected) {
+            
+            auto aruco_data = arucoCallback(std::make_shared<geometry_msgs::msg::Twist>());
+            x_postion = static_cast<float>(std::get<0>(aruco_data));
+            y_postion = static_cast<float>(std::get<1>(aruco_data));
+            angle = static_cast<float>(std::get<2>(aruco_data));
+            // x_postion = std::get<0>(aruco_data);
+            // y_postion = std::get<1>(aruco_data);
+            // angle = std::get<2>(aruco_data);
+            aruco_detected = false;
+            
+        }
+        RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", x_postion, y_postion, angle);
 
         odom_msg.header.stamp = this->get_clock()->now();
         odom_msg.header.frame_id = "odom";
@@ -163,6 +190,15 @@ public:
         m.getRPY(roll, pitch, yaw);
         theta = yaw;
 
+    }
+
+    std::tuple<float, float, float> arucoCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+        aruco_detected = true;
+        x_postion = msg->linear.x;
+        y_postion = msg->linear.y;
+        theta = msg->angular.z;
+        // RCLCPP_INFO(this->get_logger(), "Aruco detected at x: %f, y: %f, angle: %f", msg->linear.x, msg->linear.y, msg->angular.z);
+    return std::make_tuple(x_postion, y_postion, theta);
     }
 
     void msgCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
