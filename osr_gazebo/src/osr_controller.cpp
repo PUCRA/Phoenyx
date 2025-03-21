@@ -10,7 +10,11 @@
 
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+<<<<<<< HEAD
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+=======
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+>>>>>>> c53e81d (definición del material "red")
 
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_listener.h"
