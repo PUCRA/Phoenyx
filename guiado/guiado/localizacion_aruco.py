@@ -30,7 +30,7 @@ class ArucoDetector(Node):
         self.camera_matrix = None
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
-        self.parameters = cv2.aruco.DetectorParameters_create()
+        self.parameters = cv2.aruco.DetectorParameters()
         self.aruco_marker_length = 0.268  # 0.268 m y 0.174 cm
 
         # Cargar posiciones de ArUcos desde el archivo YAML
@@ -45,7 +45,7 @@ class ArucoDetector(Node):
         self.publisher_aruco_pos.publish(msg)
 
     def load_aruco_positions(self):
-        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
+        with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
         # Ruta a los archivos de calibración
         # calibration_path = os.path.expanduser("~/Phoenyx/src/")
