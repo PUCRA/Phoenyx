@@ -39,14 +39,16 @@ class ArucoDetector(Node):
 
     def publish_aruco_position(self, x, y, theta):
         msg = Twist()
-        msg.linear.x = x
-        msg.linear.y = y
-        msg.angular.z = theta
+        
+        msg.linear.x = float(x)
+        msg.linear.y = float(y)
+        msg.angular.z = float(theta)
         self.publisher_aruco_pos.publish(msg)
 
     def load_aruco_positions(self):
-        with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
+        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
+        return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
         # Ruta a los archivos de calibración
         # calibration_path = os.path.expanduser("~/Phoenyx/src/")
         # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
@@ -87,6 +89,9 @@ class ArucoDetector(Node):
 
     def calculate_robot_pos2(self, Xrel, Zrel, aruco_id, thetaArucoRel):
         aruco_positions = self.aruco_positions
+        thetaArucoAbs = 0
+        posXabs = 0
+        posZabs = 0
         if aruco_positions[aruco_id][0] == 0: #x minimo
             thetaArucoAbs = 0
             posXabs = Zrel
