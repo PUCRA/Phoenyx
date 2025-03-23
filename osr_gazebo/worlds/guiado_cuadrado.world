@@ -31,7 +31,7 @@
           </geometry>
         </collision>
       </link>
-      <pose>-3.5 0 0.5 0 0 1.5708</pose>
+      <pose>0 3.5 0.5 0 0 1.5708</pose>
     </model>
 
     <!-- Pared derecha -->
@@ -56,7 +56,7 @@
           </geometry>
         </collision>
       </link>
-      <pose>3.5 0 0.5 0 0 1.5708</pose>
+      <pose>7 3.5 0.5 0 0 1.5708</pose>
     </model>
 
     <!-- Pared superior -->
@@ -81,7 +81,7 @@
           </geometry>
         </collision>
       </link>
-      <pose>0 3.5 0.5 0 0 0</pose>
+      <pose>3.5 7 0.5 0 0 0</pose>
     </model>
 
     <!-- Pared inferior -->
@@ -106,7 +106,7 @@
           </geometry>
         </collision>
       </link>
-      <pose>0 -3.5 0.5 0 0 0</pose>
+      <pose>3.5 0 0.5 0 0 0</pose>
     </model>
   </world>
 </sdf>
