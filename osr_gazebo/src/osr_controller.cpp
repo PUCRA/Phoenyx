@@ -63,6 +63,7 @@ private:
     double fl_vel, fr_vel, ml_vel, mr_vel, rl_vel, rr_vel;
     double current_dl, dl, pre_dl;
     double x_postion, y_postion;
+    double angle_robot, angle_aruco, offsetImu = 0;
 
     double FL_data, FR_data, ML_data, MR_data, RL_data, RR_data;
 
@@ -120,32 +121,43 @@ public:
 
     }
 
-    void Odometry(double angle)
+    void Odometry(double angle_Imu)
     {
         current_dl = (fl_vel + fr_vel + ml_vel + mr_vel + rl_vel + rr_vel) * ROVER_WHEEL_RADIUS / 6;
         dl = current_dl - pre_dl;
-
         pre_dl = current_dl;
 
-        x_postion += dl * cos(theta);
-        y_postion += dl * sin(theta);
-        // RCLCPP_INFO(this->get_logger(), "x_position: %f, y_position: %f", x_postion, y_postion);
-        
-        
         // Odometria rectificada por aruco
         if (aruco_detected) {
             
             auto aruco_data = arucoCallback(std::make_shared<geometry_msgs::msg::Twist>());
             x_postion = static_cast<float>(std::get<0>(aruco_data));
             y_postion = static_cast<float>(std::get<1>(aruco_data));
-            angle = static_cast<float>(std::get<2>(aruco_data));
-            // x_postion = std::get<0>(aruco_data);
-            // y_postion = std::get<1>(aruco_data);
-            // angle = std::get<2>(aruco_data);
-            aruco_detected = false;
-            
+            angle_aruco = static_cast<float>(std::get<2>(aruco_data));
+
+            offsetImu = -angle_Imu;
+            angle_robot = angle_Imu + offsetImu + angle_aruco; // cálculo para setear el ángulo al del aruco
+
+            // Normalize angle_robot to the range [-PI, PI)
+            angle_robot = fmod(angle_robot + M_PI, 2 * M_PI) - M_PI;
+            aruco_detected = false;   
         }
-        RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", x_postion, y_postion, angle);
+        else {
+            // Odometría sin aruco
+            angle_robot = angle_Imu + offsetImu + angle_aruco;
+
+            // Normalize angle_robot to the range [-PI, PI)
+            angle_robot = fmod(angle_robot + M_PI, 2 * M_PI) - M_PI;
+            x_postion += dl * cos(angle_robot);
+            y_postion += dl * sin(angle_robot);
+        }
+        
+        // cambio de radianes [-pi, pi] a grados [0, 360] para visualización de terminal
+        double angle_robot_degrees = fmod((angle_robot * 180 / M_PI + 360), 360);
+        double angle_imu_degrees = fmod((angle_Imu * 180 / M_PI + 360), 360);
+
+        // RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, angle_robot: %f, imu: %f, angleAruco: %f", 
+        //     x_postion, y_postion, angle_robot_degrees, angle_imu_degrees, angle_aruco);
 
         odom_msg.header.stamp = this->get_clock()->now();
         odom_msg.header.frame_id = "odom";
@@ -154,7 +166,7 @@ public:
         odom_msg.pose.pose.position.y = y_postion;
 
         tf2::Quaternion quaternion;
-        quaternion.setRPY(0, 0, angle);
+        quaternion.setRPY(0, 0, angle_robot);
 
         odom_msg.pose.pose.orientation.x = quaternion.x();
         odom_msg.pose.pose.orientation.y = quaternion.y();
@@ -197,6 +209,8 @@ public:
         x_postion = msg->linear.x;
         y_postion = msg->linear.y;
         theta = msg->angular.z;
+        //RCLCPP_INFO(this->get_logger(), "Aruco msg - Linear: x: %f, y: %f | Angular: z: %f", 
+           // msg->linear.x, msg->linear.y, msg->angular.z);
         // RCLCPP_INFO(this->get_logger(), "Aruco detected at x: %f, y: %f, angle: %f", msg->linear.x, msg->linear.y, msg->angular.z);
     return std::make_tuple(x_postion, y_postion, theta);
     }
