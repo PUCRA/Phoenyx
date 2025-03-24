@@ -1,0 +1,616 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="circuito_cuadrado">
+    <!-- Configuración del entorno -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Pared i1 -->
+    <model name="wall_int_1">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 0.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared i2 -->
+    <model name="wall_int_2">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>1.5 2.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared i3 -->
+    <model name="wall_int_3">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3 3.75 0.5 0 0 0</pose> 
+    </model>
+ 
+    <!-- Pared i4 -->
+    <model name="wall_int_4">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.5 5.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared i5 -->
+    <model name="wall_int_5">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3 6.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared i6 -->
+    <model name="wall_int_6">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>1.5 8.25 0.5 0 0 1.5708</pose> 
+    </model>
+    
+    <!-- Pared i7 -->
+    <model name="wall_int_7">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 9.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared i8 -->
+    <model name="wall_int_8">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-1.5 8.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared i9 -->
+    <model name="wall_int_9">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3 6.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared i10 -->
+    <model name="wall_int_10">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-4.5 5.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared i11 -->
+    <model name="wall_int_11">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3 3.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared i12 -->
+    <model name="wall_int_12">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-1.5 2.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+
+
+
+    <!-- Pared e1 -->
+    <model name="wall_ext_1">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 -0.75 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared e2 -->
+    <model name="wall_ext_2">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3 0.75 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared e3 -->
+    <model name="wall_ext_3">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.5 2.25 0.5 0 0 0</pose> 
+    </model>
+ 
+    <!-- Pared e4 -->
+    <model name="wall_ext_4">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>6 5.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared e5 -->
+    <model name="wall_ext_5">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.5 8.25 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared e6 -->
+    <model name="wall_ext_6">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3 9.75 0.5 0 0 1.5708</pose> 
+    </model>
+    
+    <!-- Pared e7 -->
+    <model name="wall_ext_7">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 11.25 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared e8 -->
+    <model name="wall_ext_8">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3 9.75 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared e9 -->
+    <model name="wall_ext_9">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-4.5 8.25 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared e10 -->
+    <model name="wall_ext_10">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-6 5.25 0.5 0 0 1.5708</pose> 
+    </model>
+
+    <!-- Pared e11 -->
+    <model name="wall_ext_11">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-4.5 2.25 0.5 0 0 0</pose> 
+    </model>
+
+    <!-- Pared e12 -->
+    <model name="wall_ext_12">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>-3 0.75 0.5 0 0 1.5708</pose> 
+    </model>
+
+  </world>
+</sdf>
