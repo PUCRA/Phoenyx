@@ -92,31 +92,31 @@ class ArucoDetector(Node):
         thetaArucoAbs = 0
         posXabs = 0
         posZabs = 0
-        if aruco_positions[aruco_id][0] == 0: #x minimo
-            thetaArucoAbs = 0
+        if aruco_positions[aruco_id][0] == 0:  # x minimo
+            thetaArucoAbs = np.pi
             posXabs = Zrel
             posZabs = Xrel + aruco_positions[aruco_id][1]
-        elif aruco_positions[aruco_id][0] == 7: #x maximo
-            thetaArucoAbs = 180
+        elif aruco_positions[aruco_id][0] == 7:  # x maximo
+            thetaArucoAbs = 0
             posXabs = aruco_positions[aruco_id][0] - Zrel
             posZabs = aruco_positions[aruco_id][1] - Xrel
-        elif aruco_positions[aruco_id][1] == 0: #z minimo
-            thetaArucoAbs = 90
+        elif aruco_positions[aruco_id][1] == 0:  # z minimo
+            thetaArucoAbs = -np.pi / 2
             posXabs = aruco_positions[aruco_id][0] - Xrel
             posZabs = Zrel
-        elif aruco_positions[aruco_id][1] == 7: #z maximo
-            thetaArucoAbs = 270
+        elif aruco_positions[aruco_id][1] == 7:  # z maximo
+            thetaArucoAbs = np.pi / 2
             posXabs = aruco_positions[aruco_id][0] - Xrel
             posZabs = aruco_positions[aruco_id][1] - Zrel
 
         AngleRobot = thetaArucoAbs - thetaArucoRel
 
-        if AngleRobot >= 360:
-            AngleRobot = AngleRobot - 360 #encontraremos angulos mas grandes de 720
+        # Normalize AngleRobot to be within the range [-pi, pi]
+        AngleRobot = (AngleRobot + np.pi) % (2 * np.pi) - np.pi
         
         self.publish_aruco_position(posXabs, posZabs, AngleRobot)
 
-        self.get_logger().info(f"Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
+        # self.get_logger().info(f"Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
 
 def main(args=None):
     rclpy.init(args=args)
