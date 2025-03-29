@@ -32,7 +32,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # Aquí puedes agregar tus scripts si los tienes
+            'waypoint_generator = phoenyx_nodes.waypoint_generator:main',
         ],
     },
 )
