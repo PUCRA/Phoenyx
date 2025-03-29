@@ -33,6 +33,9 @@ setup(
     entry_points={
         'console_scripts': [
             'waypoint_generator = phoenyx_nodes.waypoint_generator:main',
+            'explorer_node = phoenyx_nodes.explorer_node:main',
+            'explorer_node_rectas = phoenyx_nodes.explorer_node_rectas:main',
+            'map_processor = phoenyx_nodes.map_processor:main'
         ],
     },
 )
