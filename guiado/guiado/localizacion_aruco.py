@@ -46,7 +46,8 @@ class ArucoDetector(Node):
         self.publisher_aruco_pos.publish(msg)
 
     def load_aruco_positions(self):
-        with open(os.path.expanduser('~/Phoenyx_sym/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
+
+        with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
         return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
         # Ruta a los archivos de calibración

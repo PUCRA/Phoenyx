@@ -30,6 +30,9 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub;
+    //añadido para subscribirse a los arucos
+    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr aruco_sub;
+
 
     double angle_data;
 
@@ -57,7 +60,12 @@ private:
 
     double fl_vel, fr_vel, ml_vel, mr_vel, rl_vel, rr_vel;
     double current_dl, dl, pre_dl;
-    double x_postion, y_postion;
+    double x_position, y_position;
+    double x_aruco_position, y_aruco_position;
+
+
+    double angle_robot, angle_aruco, offsetImu = 0;
+
 
     double FL_data, FR_data, ML_data, MR_data, RL_data, RR_data;
 
@@ -69,6 +77,8 @@ private:
     double test1;
     double test = 0;
     nav_msgs::msg::Odometry odom_msg;
+
+    bool aruco_detected = false; // Added member variable
 
 public:
     Controller() : Node("controller") {
@@ -84,6 +94,13 @@ public:
         imu_sub = this->create_subscription<sensor_msgs::msg::Imu>(
             "imu_plugin/out", 1, std::bind(&Controller::imuCallback, this, std::placeholders::_1));
 
+            // //añadido para subscribirse a los arucos
+            aruco_sub = this->create_subscription<geometry_msgs::msg::Twist>(
+                "aruco_pos", 1, std::bind(&Controller::arucoCallback, this, std::placeholders::_1));
+
+            odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("osr/odom", 10);
+           
+            
         odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
 
     }
@@ -109,25 +126,56 @@ public:
 
     }
 
-    void Odometry(double angle)
+    void Odometry(double angle_Imu)
     {
         current_dl = (fl_vel + fr_vel + ml_vel + mr_vel + rl_vel + rr_vel) * ROVER_WHEEL_RADIUS / 6;
         dl = current_dl - pre_dl;
 
         pre_dl = current_dl;
 
-        x_postion += dl * cos(theta);
-        y_postion += dl * sin(theta);
+        x_position += dl * cos(theta);
+        y_position += dl * sin(theta);
+        
+        // Odometria rectificada por aruco
+        if (aruco_detected) {
+    
+            x_position = x_aruco_position;
+            y_position = y_aruco_position;
+
+            offsetImu = -angle_Imu;
+            angle_robot = angle_Imu + offsetImu + angle_aruco; // cálculo para setear el ángulo al del aruco
+
+            // Normalize angle_robot to the range [-PI, PI)
+            angle_robot = fmod(angle_robot + M_PI, 2 * M_PI) - M_PI;
+            aruco_detected = false;   
+        }
+        else {
+            // Odometría sin aruco
+            angle_robot = angle_Imu + offsetImu + angle_aruco;
+
+            // Normalize angle_robot to the range [-PI, PI)
+            angle_robot = fmod(angle_robot + M_PI, 2 * M_PI) - M_PI;
+            x_position += dl * cos(angle_robot);
+            y_position += dl * sin(angle_robot);
+        }
+        
+        // cambio de radianes [-pi, pi] a grados [0, 360] para visualización de terminal
+        // double angle_robot_degrees = fmod((angle_robot * 180 / M_PI + 360), 360);
+        // double angle_imu_degrees = fmod((angle_Imu * 180 / M_PI + 360), 360);
+
+        // RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, angle_robot: %f, imu: %f, angleAruco: %f", 
+        //     x_position, y_position, angle_robot_degrees, angle_imu_degrees, angle_aruco);
+        
         // RCLCPP_INFO(this->get_logger(), "x_position: %f, y_position: %f", x_postion, y_postion);
 
         odom_msg.header.stamp = this->get_clock()->now();
         odom_msg.header.frame_id = "odom";
 
-        odom_msg.pose.pose.position.x = x_postion;
-        odom_msg.pose.pose.position.y = y_postion;
+        odom_msg.pose.pose.position.x = x_position;
+        odom_msg.pose.pose.position.y = y_position;
 
         tf2::Quaternion quaternion;
-        quaternion.setRPY(0, 0, angle);
+        quaternion.setRPY(0, 0, angle_robot);
 
         odom_msg.pose.pose.orientation.x = quaternion.x();
         odom_msg.pose.pose.orientation.y = quaternion.y();
@@ -141,8 +189,8 @@ public:
         transformStamped.header.frame_id = "odom";
         transformStamped.child_frame_id = "base_footprint";
 
-        transformStamped.transform.translation.x = x_postion;
-        transformStamped.transform.translation.y = y_postion;
+        transformStamped.transform.translation.x = x_position;
+        transformStamped.transform.translation.y = y_position;
         transformStamped.transform.translation.z = 0.0;
 
         transformStamped.transform.rotation = odom_msg.pose.pose.orientation;
@@ -163,6 +211,16 @@ public:
         m.getRPY(roll, pitch, yaw);
         theta = yaw;
         Odometry(theta);
+    }
+
+    void arucoCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+        aruco_detected = true;
+        x_aruco_position = msg->linear.x;
+        y_aruco_position = msg->linear.y;
+        angle_aruco = msg->angular.z;
+        //RCLCPP_INFO(this->get_logger(), "Aruco msg - Linear: x: %f, y: %f | Angular: z: %f", 
+           // msg->linear.x, msg->linear.y, msg->angular.z);
+        // RCLCPP_INFO(this->get_logger(), "Aruco detected at x: %f, y: %f, angle: %f", msg->linear.x, msg->linear.y, msg->angular.z);
     }
 
     void msgCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
