@@ -7,6 +7,7 @@ import cv2
 import os
 import yaml
 from geometry_msgs.msg import Twist
+from ament_index_python import get_package_share_directory
 
 class ArucoDetector(Node):
     def __init__(self):
@@ -47,9 +48,19 @@ class ArucoDetector(Node):
 
     def load_aruco_positions(self):
 
-        with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
+        package_name = 'guiado' 
+        package_dir = get_package_share_directory(package_name)
+        yaml_path = os.path.join(package_dir, 'config', 'Aruco_pos.yaml')
+        # Cargar el archivo YAML
+        with open(yaml_path, 'r') as file:
             aruco_data = yaml.safe_load(file)
+        # Extraer las posiciones de los ArUcos
         return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
+
+            
+        # with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
+        #     aruco_data = yaml.safe_load(file)
+        # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
         # Ruta a los archivos de calibración
         # calibration_path = os.path.expanduser("~/Phoenyx/src/")
         # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
