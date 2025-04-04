@@ -29,9 +29,9 @@ def generate_launch_description():
     
     return LaunchDescription([
         # Incluir el launch de osr_mod_launch
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(osr_mod_launch)
-        ),
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(osr_mod_launch)
+        # ),
         # Nodos adicionales no incluidos en osr_mod_launch
         Node(
             package="orbbec_camera",
@@ -41,20 +41,20 @@ def generate_launch_description():
             parameters=[orbbec_params],
             output="screen",
         ),
-        Node(
-            package='phoenyx_nodes',
-            executable='imu_pub',
-            name='imu_pub',
-            output='screen',
-            emulate_tty=True,
-        ),
-        Node(
-            package='percepcion',
-            executable='dar_vueltas',
-            name='dar_vueltas',
-            output='screen',
-            emulate_tty=True,
-        ),
+        # Node(
+        #     package='phoenyx_nodes',
+        #     executable='imu_pub',
+        #     name='imu_pub',
+        #     output='screen',
+        #     emulate_tty=True,
+        # ),
+        # Node(
+        #     package='percepcion',
+        #     executable='dar_vueltas',
+        #     name='dar_vueltas',
+        #     output='screen',
+        #     emulate_tty=True,
+        # ),
         Node(
             package='percepcion',
             executable='brain_percepcion',
