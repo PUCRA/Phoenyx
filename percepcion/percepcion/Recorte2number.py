@@ -6,8 +6,9 @@ import pytesseract
 
 class Recorte2number():
     def __init__(self):
-        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
-        self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
+        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(3).pkl")
+        # self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
+        # self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
         self.prev_num = 0
         # self.knn = joblib.load("/home/icehot03/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
 
@@ -15,24 +16,24 @@ class Recorte2number():
     def obtener_num(self, image, log_level=0):
         """Preprocesa la imagen y extrae un número usando OCR."""
         try:
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
-            _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)  # Binarización con inversión
-            resized = cv2.resize(thresh, (100, 100))  # Redimensionar
-            processed_image = cv2.morphologyEx(resized, cv2.MORPH_ERODE, np.ones((5, 5), np.uint8))  # Erosión
-
-            config = '--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'
-            number = pytesseract.image_to_string(processed_image, config=config).strip()
-            data_list = pytesseract.image_to_data(processed_image, config=config, output_type=pytesseract.Output.DICT)
+            # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
+            # _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)  # Binarización con inversión
+            # resized = cv2.resize(thresh, (100, 100))  # Redimensionar
+            # processed_image = cv2.morphologyEx(image, cv2.MORPH_ERODE, np.ones((5, 5), np.uint8))  # Erosión
+            image = cv2.bitwise_not(image)
+            config = '--psm 10 -c tessedit_char_whitelist=12346789' # Pol: He quitado el 5 y el 0 de la whitelist
+            number = pytesseract.image_to_string(image, config=config).strip()
+            data_list = pytesseract.image_to_data(image, config=config, output_type=pytesseract.Output.DICT)
             confidences = data_list['conf']
             average_confidence = sum(confidences) / len(confidences) if len(confidences) > 0 else 0
 
             if not number or average_confidence < 1:
-                return None, 0
+                return None #, 0
 
-            return int(number[0]), average_confidence
+            return int(number[0]) #, average_confidence
         except Exception as e:
             print(f"Ocurrió un error: {e}")
-            return None, 0
+            return None #, 0
         
     def detectar_color_bgr(self, numero_cuadrado):
         """Detecta la probabilidad de ser rojo o azul basándose en la proporción de los canales BGR."""
@@ -59,13 +60,16 @@ class Recorte2number():
         print(white_pixels)
         if white_pixels < 20 or white_pixels > 300:
             return 0
-        if self.prev_num == 2 or self.prev_num == 3:
-            img_resize = cv2.resize(img_thresh, (28, 28))
-            img_resize = img_resize.reshape(1, -1)
-            prediccion = self.knn2.predict(img_resize)[0]
-        else:
+        # if self.prev_num == 2 or self.prev_num == 3:
+        #     img_resize = cv2.resize(img_thresh, (28, 28))
+        #     img_resize = img_resize.reshape(1, -1)
+        #     prediccion = self.knn2.predict(img_resize)[0]
+        # else:
             
-            prediccion = self.knn.predict(img_flat)[0]
+        #     prediccion = self.knn.predict(img_flat)[0]
+        prediccion = self.knn.predict(img_flat)[0]
+        if prediccion != 5:
+            prediccion = self.obtener_num(img_thresh)
         self.prev_num = prediccion
         return prediccion
 
@@ -77,4 +81,4 @@ class Recorte2number():
         color = self.detectar_color_bgr(image)
         # numero = self.obtener_num(image)
         numero = self.obtener_knn_num(img_thresh)
-        return numero, color
+        return numero, color, img_thresh

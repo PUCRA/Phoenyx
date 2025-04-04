@@ -27,6 +27,7 @@ setup(
             'killer_node = phoenyx_nodes.KillerNode:main',
             'Vel_pub = phoenyx_nodes.Vel_pub:main',
             'camera_node = phoenyx_nodes.camera:main',
+            'lidar_front_distance=phoenyx_nodes.lidar_front_distance:main'
         ],
     },
 )
