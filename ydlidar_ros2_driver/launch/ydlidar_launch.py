@@ -35,8 +35,9 @@ def generate_launch_description():
                                 output='screen',
                                 emulate_tty=True,
                                 parameters=[parameter_file],
-                                namespace='/',
-                                qos_profile=lidar_qos_profile)  # Aplicar RELIABLE al LiDAR
+                                namespace='',
+                                qos_profile=lidar_qos_profile
+                                )  # Aplicar RELIABLE al LiDAR
 
     # Nodo para publicar la transformación estática
     tf2_node = Node(package='tf2_ros',
@@ -46,19 +47,19 @@ def generate_launch_description():
                     )
 
     # Incluir el nodo slam_toolbox y aplicar la misma política de QoS (RELIABLE)
-    slam_node = Node(package='slam_toolbox',
-                     executable='async_slam_toolbox_node',
-                     name='slam_toolbox_node',
-                     output='screen',
-                     parameters=[{'slam_params_file': '/path/to/your/slam_params.yaml'}],
-                     remappings=[('/scan', '/scan')],  # Asegúrate de que el topic coincida
-                     qos_profile=lidar_qos_profile)  # Aplicar RELIABLE a slam_toolbox
+    # slam_node = Node(package='slam_toolbox',
+    #                  executable='async_slam_toolbox_node',
+    #                  name='slam_toolbox_node',
+    #                  output='screen',
+    #                  parameters=[{'slam_params_file': '/path/to/your/slam_params.yaml'}],
+    #                  remappings=[('/scan', '/scan')],  # Asegúrate de que el topic coincida
+    #                  qos_profile=lidar_qos_profile)  # Aplicar RELIABLE a slam_toolbox
 
     return LaunchDescription([
         params_declare,
         driver_node,
         tf2_node,
-        slam_node,  # Incluir el nodo SLAM
+        # slam_node,  # Incluir el nodo SLAM
     ])
 
 

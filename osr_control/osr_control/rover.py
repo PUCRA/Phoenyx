@@ -1,3 +1,4 @@
+
 import math
 from functools import partial
 
@@ -12,6 +13,11 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from osr_interfaces.msg import CommandDrive, CommandCorner
 
+import board
+import busio
+from adafruit_bno055 import BNO055_I2C
+
+import json
 
 class Rover(Node):
     """Math and motor control algorithms to move the rover"""
@@ -55,7 +61,24 @@ class Rover(Node):
             self.odometry.header.stamp = self.get_clock().now().to_msg()
             self.odometry.header.frame_id = "odom"
             self.odometry.child_frame_id = "base_link"
-            self.odometry.pose.pose.orientation.w = 1.
+            self.get_logger().info("Initialazing IMU")
+            try:
+                i2c = busio.I2C(board.SCL, board.SDA)
+                self.bno = BNO055_I2C(i2c, address=0x28)
+            except Exception as e:
+                self.get_logger().error(f"Error initializing IMU: {e}")
+                return
+            
+            ##Aquí estan los métodos para calirar el IMU
+            #self.bno.offsets_magnetometer = (407,337, 407)
+            #self.bno.offsets_gyroscope = (-1, -1, 0)
+            #self.bno.offsets_accelerometer = (-26, -60, -22)
+            
+            self.odometry.pose.pose.orientation.x = self.bno.quaternion[0]
+            self.odometry.pose.pose.orientation.y = self.bno.quaternion[1]
+            self.odometry.pose.pose.orientation.z = self.bno.quaternion[2]
+            self.odometry.pose.pose.orientation.w = self.bno.quaternion[3]
+
         self.curr_positions = {}
         self.curr_velocities = {}
         self.curr_twist = TwistWithCovariance()
@@ -72,9 +95,13 @@ class Rover(Node):
         if self.should_calculate_odom:
             self.odometry_pub = self.create_publisher(Odometry, "/odom", 2)
             self.tf_pub = tf2_ros.TransformBroadcaster(self)
-
+            
         self.corner_cmd_pub = self.create_publisher(CommandCorner, "/cmd_corner", 1)
         self.drive_cmd_pub = self.create_publisher(CommandDrive, "/cmd_drive", 1)
+
+
+        self.new_angle = 0
+        self.get_logger().info("Rover initialized")
 
     def cmd_cb(self, twist_msg, intuitive=False):
         """
@@ -95,7 +122,8 @@ class Rover(Node):
         :param intuitive: determines the mode
         """
         # check if we're supposed to rotate in place
-        if twist_msg.angular.y and not twist_msg.linear.x:
+        # twist_msg.angular.z = -twist_msg.angular.z
+        if abs(twist_msg.angular.z) > 0.1 and not twist_msg.linear.x:
             # command corners to point to center
             corner_cmd_msg, drive_cmd_msg = self.calculate_rotate_in_place_cmd(twist_msg)
 
@@ -126,6 +154,7 @@ class Rover(Node):
         self.curr_positions = {**self.curr_positions, **dict(zip(msg.name, msg.position))}
         self.curr_velocities = {**self.curr_velocities, **dict(zip(msg.name, msg.velocity))}
         if self.should_calculate_odom and len(self.curr_positions) == 10:
+            # self.get_logger().info(json.dumps(self.curr_positions, indent=2))
             # measure how much time has elapsed since our last update
             now = self.get_clock().now()
             dt = float(now.nanoseconds - (self.odometry.header.stamp.sec*10**9 + self.odometry.header.stamp.nanosec)) / 10**9
@@ -134,14 +163,23 @@ class Rover(Node):
             dth = self.curr_twist.twist.angular.z * dt
             # angle is straightforward: in 2D it's additive
             # first calculate the current_angle in the fixed frame
-            current_angle = 2 * math.atan2(self.odometry.pose.pose.orientation.z, 
-                                           self.odometry.pose.pose.orientation.w)
-            new_angle = current_angle + dth
-            self.odometry.pose.pose.orientation.z = math.sin(new_angle/2.)
-            self.odometry.pose.pose.orientation.w = math.cos(new_angle/2.)
+            # current_angle = 2 * math.atan2(self.odometry.pose.pose.orientation.z, 
+            #                                self.odometry.pose.pose.orientation.w)
+            # new_angle = current_angle + dth
+            # # self.odometry.pose.pose.orientation.z = math.sin(new_angle/2.)
+            # # self.odometry.pose.pose.orientation.w = math.cos(new_angle/2.)
+            heading, roll, pitch = self.bno.euler
+            if self.bno.euler is not None:
+                self.new_angle = -(heading*math.pi/180.0-math.pi)
+                # self.get_logger().info(f"new angle: {self.new_angle}")
+            # self.get_logger().info(f"heading: {heading}")
+            # self.odometry.pose.pose.orientation.x = 0.0
+            # self.odometry.pose.pose.orientation.y = 0.0
+            self.odometry.pose.pose.orientation.z = math.sin(self.new_angle/2.)
+            self.odometry.pose.pose.orientation.w = math.cos(self.new_angle/2.)
             # the new pose in x and y depends on the current heading
-            self.odometry.pose.pose.position.x += math.cos(new_angle) * dx
-            self.odometry.pose.pose.position.y += math.sin(new_angle) * dx
+            self.odometry.pose.pose.position.x += math.cos(self.new_angle) * dx
+            self.odometry.pose.pose.position.y += math.sin(self.new_angle) * dx
             self.odometry.pose.covariance = 36 * [0.0,]
             # explanation for values at https://www.freedomrobotics.ai/blog/tuning-odometry-for-wheeled-robots
             self.odometry.twist.covariance[0] = 0.0225
@@ -282,7 +320,7 @@ class Rover(Node):
         corner_cmd.right_front_pos = -corner_cmd.right_back_pos
 
         drive_cmd = CommandDrive()
-        angular_vel = twist.angular.y
+        angular_vel = twist.angular.z
         # velocity of each wheel center = angular velocity of center of rover * distance to wheel center
         front_wheel_vel = math.hypot(self.d1, self.d3) * angular_vel / self.wheel_radius
         drive_cmd.left_front_vel = front_wheel_vel

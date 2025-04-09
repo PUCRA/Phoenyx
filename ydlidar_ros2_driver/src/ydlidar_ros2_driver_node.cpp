@@ -161,9 +161,10 @@ int main(int argc, char *argv[]) {
   } else {
     RCLCPP_ERROR(node->get_logger(), "%s\n", laser.DescribeError());
   }
-  
-  auto laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
-  auto pc_pub = node->create_publisher<sensor_msgs::msg::PointCloud>("point_cloud", rclcpp::SensorDataQoS());
+  rclcpp::QoS custom_qos(10);  // Profundidad 10
+  custom_qos.reliable();  // Confiable
+  auto laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", custom_qos);//rclcpp::SensorDataQoS());
+  auto pc_pub = node->create_publisher<sensor_msgs::msg::PointCloud>("point_cloud", custom_qos);//rclcpp::SensorDataQoS());
   
   auto stop_scan_service =
     [&laser](const std::shared_ptr<rmw_request_id_t> request_header,

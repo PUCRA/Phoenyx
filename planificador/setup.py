@@ -1,9 +1,8 @@
 from setuptools import find_packages, setup
-import os
 import glob
-
-package_name = 'phoenyx_nodes'
-
+import os
+package_name = 'planificador'
+package_name = 'planificador'
 # Usar glob para encontrar todos los archivos .yaml en config
 config_files = glob.glob(os.path.join('config', '*.yaml'))
 
@@ -20,24 +19,19 @@ setup(
         ('share/' + package_name, ['package.xml']),
         # Incluir todos los archivos de configuración (YAML)
         ('share/' + package_name + '/config', config_files),
-        # Incluir todos los archivos de lanzamiento (launch)
+        # #Incluir todos los archivos de lanzamiento (launch)
         ('share/' + package_name + '/launch', launch_files),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='pucra',
-    maintainer_email='german.bueno@estudiantat.upc.edu',
+    maintainer='icehot03',
+    maintainer_email='pol.p.c@hotmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'imu_pub = phoenyx_nodes.imu_pub:main',
-            'killer_node = phoenyx_nodes.KillerNode:main',
-            'Vel_pub = phoenyx_nodes.Vel_pub:main',
-            'camera_node = phoenyx_nodes.camera:main',
-            'front_distance = phoenyx_nodes.front_distance:main',
-            'middle_error = phoenyx_nodes.middle_error:main',
+            'planificador = planificador.planificador:main',
         ],
     },
 )
