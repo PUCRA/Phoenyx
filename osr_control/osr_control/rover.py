@@ -1,4 +1,3 @@
-
 import math
 from functools import partial
 
@@ -18,6 +17,10 @@ import busio
 from adafruit_bno055 import BNO055_I2C
 
 import json
+import collections
+
+from collections import deque
+from statistics import median
 
 class Rover(Node):
     """Math and motor control algorithms to move the rover"""
@@ -27,6 +30,8 @@ class Rover(Node):
         self.log = self.get_logger()
         # self.log.set_level(10)
         self.log.info("Initializing Rover")
+
+        self.heading_buffer = deque(maxlen=5)
 
         self.declare_parameters(
             namespace='',
@@ -65,6 +70,7 @@ class Rover(Node):
             try:
                 i2c = busio.I2C(board.SCL, board.SDA)
                 self.bno = BNO055_I2C(i2c, address=0x28)
+                self.bno.mode = 0x08
             except Exception as e:
                 self.get_logger().error(f"Error initializing IMU: {e}")
                 return
@@ -73,11 +79,12 @@ class Rover(Node):
             #self.bno.offsets_magnetometer = (407,337, 407)
             #self.bno.offsets_gyroscope = (-1, -1, 0)
             #self.bno.offsets_accelerometer = (-26, -60, -22)
-            
-            self.odometry.pose.pose.orientation.x = self.bno.quaternion[0]
-            self.odometry.pose.pose.orientation.y = self.bno.quaternion[1]
-            self.odometry.pose.pose.orientation.z = self.bno.quaternion[2]
-            self.odometry.pose.pose.orientation.w = self.bno.quaternion[3]
+            heading, roll, pitch = (None, None, None)
+            while heading is None:
+                heading, roll, pitch = self.bno.euler
+            self.new_angle = -(heading*math.pi/180.0-math.pi)
+            self.odometry.pose.pose.orientation.z = math.sin(self.new_angle/2.)
+            self.odometry.pose.pose.orientation.w = math.cos(self.new_angle/2.)
 
         self.curr_positions = {}
         self.curr_velocities = {}
@@ -100,8 +107,8 @@ class Rover(Node):
         self.drive_cmd_pub = self.create_publisher(CommandDrive, "/cmd_drive", 1)
 
 
-        self.new_angle = 0
         self.get_logger().info("Rover initialized")
+        self.buffer = collections.deque(maxlen=10)
 
     def cmd_cb(self, twist_msg, intuitive=False):
         """
@@ -154,7 +161,7 @@ class Rover(Node):
         self.curr_positions = {**self.curr_positions, **dict(zip(msg.name, msg.position))}
         self.curr_velocities = {**self.curr_velocities, **dict(zip(msg.name, msg.velocity))}
         if self.should_calculate_odom and len(self.curr_positions) == 10:
-            # self.get_logger().info(json.dumps(self.curr_positions, indent=2))
+            self.get_logger().info(json.dumps(self.curr_positions, indent=2))
             # measure how much time has elapsed since our last update
             now = self.get_clock().now()
             dt = float(now.nanoseconds - (self.odometry.header.stamp.sec*10**9 + self.odometry.header.stamp.nanosec)) / 10**9
@@ -169,9 +176,15 @@ class Rover(Node):
             # # self.odometry.pose.pose.orientation.z = math.sin(new_angle/2.)
             # # self.odometry.pose.pose.orientation.w = math.cos(new_angle/2.)
             heading, roll, pitch = self.bno.euler
-            if self.bno.euler is not None:
-                self.new_angle = -(heading*math.pi/180.0-math.pi)
-                # self.get_logger().info(f"new angle: {self.new_angle}")
+            if heading is not None:
+                self.heading_buffer.append(heading)
+                if len(self.heading_buffer) == self.heading_buffer.maxlen:
+                    filtered_heading = median(self.heading_buffer)
+                    self.new_angle = -(filtered_heading * math.pi / 180.0 - math.pi)
+                    self.get_logger().info(f"filtered heading: {filtered_heading}")
+                else:
+                    self.new_angle = -(heading * math.pi / 180.0 - math.pi)
+                    self.get_logger().info(f"raw heading (not enough data for filter): {heading}")
             # self.get_logger().info(f"heading: {heading}")
             # self.odometry.pose.pose.orientation.x = 0.0
             # self.odometry.pose.pose.orientation.y = 0.0
@@ -320,7 +333,7 @@ class Rover(Node):
         corner_cmd.right_front_pos = -corner_cmd.right_back_pos
 
         drive_cmd = CommandDrive()
-        angular_vel = twist.angular.z
+        angular_vel = -twist.angular.z
         # velocity of each wheel center = angular velocity of center of rover * distance to wheel center
         front_wheel_vel = math.hypot(self.d1, self.d3) * angular_vel / self.wheel_radius
         drive_cmd.left_front_vel = front_wheel_vel

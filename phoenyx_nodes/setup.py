@@ -38,6 +38,7 @@ setup(
             'camera_node = phoenyx_nodes.camera:main',
             'front_distance = phoenyx_nodes.front_distance:main',
             'middle_error = phoenyx_nodes.middle_error:main',
+            'avanzar_pasillo = phoenyx_nodes.avanzar_pasillo:main',
         ],
     },
 )

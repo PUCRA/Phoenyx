@@ -125,7 +125,7 @@ class RoboclawWrapper(Node):
         self.status_pub = self.create_publisher(Status, "/status", 1)
 
         self.status = Status()
-        fast_loop_rate = 0.125  # seconds
+        fast_loop_rate = 0.02  # seconds
         slow_loop_rate = 3  # seconds
         # true if we're idling and started ramping down velocity to bring the motors to full stop
         self.idle_ramp = False

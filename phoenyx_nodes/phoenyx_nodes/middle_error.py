@@ -5,7 +5,7 @@ from rclpy.qos import qos_profile_sensor_data
 
 class FrontDistanceNode(Node):
     def __init__(self):        
-        super().__init__('front_distance_node')
+        super().__init__('middle_error_node')
         self.get_logger().info("Nodo iniciado")
 
         self.subscription = self.create_subscription(
@@ -27,7 +27,7 @@ class FrontDistanceNode(Node):
         center_distance = msg.ranges[right_index]
 
         total_distance = left_distance + center_distance
-        error = left_distance - center_distance
+        error = (left_distance - center_distance)/2
 
 
         self.get_logger().info(f'Distancia total: {total_distance:.2f} m')
