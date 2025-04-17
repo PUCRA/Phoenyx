@@ -7,11 +7,13 @@ import cv2
 import os
 import yaml
 from geometry_msgs.msg import Twist
-from ament_index_python import get_package_share_directory
+from std_msgs.msg import Bool  # Se importa el mensaje Bool
 
 class ArucoDetector(Node):
     def __init__(self):
         super().__init__('aruco_detector')
+        
+        # Suscripción para las imágenes y la información de la cámara
         self.subscription_image = self.create_subscription(
             Image,
             '/camera/image_raw',
@@ -22,6 +24,15 @@ class ArucoDetector(Node):
             '/camera/camera_info',
             self.camera_info_callback,
             10)
+        
+        # Suscripción para activar el procesamiento mediante /aruco_scan
+        self.subscription_scan = self.create_subscription(
+            Bool,
+            '/aruco_scan',
+            self.scan_callback,
+            10)
+        
+        # Publicador para la posición resultante
         self.publisher_aruco_pos = self.create_publisher(
             Twist,
             '/aruco_pos',
@@ -30,45 +41,61 @@ class ArucoDetector(Node):
         self.bridge = CvBridge()
         self.camera_matrix = None
         self.dist_coeffs = None
-        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
         self.parameters = cv2.aruco.DetectorParameters()
-        self.aruco_marker_length = 0.268  # 0.268 m y 0.174 cm
+        self.aruco_marker_length = 0.268  # No se modifica la longitud del marcador
 
         # Cargar posiciones de ArUcos desde el archivo YAML
         self.aruco_positions = self.load_aruco_positions()
 
+        # Variables para controlar el disparo de la secuencia y almacenamiento de muestras
+        self.active = False
+        self.measurements = []  # Lista para almacenar tuples: (posXabs, posZabs, AngleRobot)
 
     def publish_aruco_position(self, x, y, theta):
         msg = Twist()
-        
         msg.linear.x = float(x)
         msg.linear.y = float(y)
         msg.angular.z = float(theta)
         self.publisher_aruco_pos.publish(msg)
+        self.get_logger().info(f"Publicando posición final: X={x:.3f}, Y={y:.3f}, Ángulo={theta:.3f}")
 
     def load_aruco_positions(self):
-
-        package_name = 'guiado' 
-        package_dir = get_package_share_directory(package_name)
-        yaml_path = os.path.join(package_dir, 'config', 'Aruco_pos.yaml')
-        # Cargar el archivo YAML
-        with open(yaml_path, 'r') as file:
+        with open(os.path.expanduser('./src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
-        # Extraer las posiciones de los ArUcos
         return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
 
-            
-        # with open(os.path.expanduser('~/Phoenyx/Phoenyx_Sim/src/guiado/config/Aruco_pos.yaml'), 'r') as file:
-        #     aruco_data = yaml.safe_load(file)
-        # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
-        # Ruta a los archivos de calibración
-        # calibration_path = os.path.expanduser("~/Phoenyx/src/")
-        # return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
+    def scan_callback(self, msg):
+        if msg.data:  # Si se recibe True (o 1)
+            self.get_logger().info("Activación recibida por /aruco_scan. Iniciando proceso de detección en 10 iteraciones.")
+            self.active = True
+            self.measurements = []  # Reinicia las mediciones
 
     def image_callback(self, msg):
-        frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-        frame_with_markers = self.detect_aruco_and_estimate_pose(frame)
-        # Aquí puedes publicar o mostrar el frame procesado si es necesario
+        if not self.active:
+            return  # No se procesa la imagen a menos que esté activado
+        try:
+            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        except Exception as e:
+            self.get_logger().error(f"Error al convertir la imagen: {e}")
+            return
+
+        # Procesa la imagen para detectar ArUco y estimar la pose.
+        result = self.detect_aruco_and_estimate_pose(frame)
+        if result is not None:
+            self.measurements.append(result)
+            self.get_logger().info(f"Medición {len(self.measurements)}/10 obtenida.")
+            if len(self.measurements) >= 10:
+                # Aplica filtro mediano a cada uno de los valores
+                posX_list, posZ_list, angle_list = zip(*self.measurements)
+                posX_med = np.median(posX_list)
+                posZ_med = np.median(posZ_list)
+                angle_med = np.median(angle_list)
+                # Publica el resultado único
+                self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                # Reinicia el proceso para futuras activaciones
+                self.active = False
+                self.measurements = []
 
     def camera_info_callback(self, msg):
         self.camera_matrix = np.array(msg.k).reshape((3, 3))
@@ -86,6 +113,7 @@ class ArucoDetector(Node):
 
         if ids is not None:
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            # Se utiliza el último marcador detectado (sin modificar la lógica de cálculo)
             for corner, marker_id in zip(corners, ids):
                 rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corner, self.aruco_marker_length, self.camera_matrix, self.dist_coeffs)
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.05)
@@ -93,42 +121,47 @@ class ArucoDetector(Node):
                 Xrel = tvec[0][0][0]
                 Zrel = tvec[0][0][2]
                 thetaArucoRel = rvec[0][0][2]
-            self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
-        return frame
+            # Se obtiene la medición sin modificar los cálculos internos
+            result = self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
+            return result
+        return None
 
     def print_pose(self, marker_id, tvec, rvec):
-        self.get_logger().info(f"\n=== ArUco Marker Detected ===\nMarker ID: {marker_id[0]}\nTranslation Vector (tvec):\n  X: {tvec[0][0][0]:.3f} m\n  Y: {tvec[0][0][1]:.3f} m\n  Z: {tvec[0][0][2]:.3f} m\nRotation Vector (rvec):\n  Rx: {rvec[0][0][0]:.3f} rad\n  Ry: {rvec[0][0][1]:.3f} rad\n  Rz: {rvec[0][0][2]:.3f} rad")
+        self.get_logger().info(
+            f"\n=== ArUco Marker Detected ===\nMarker ID: {marker_id[0]}\nTranslation Vector (tvec):\n  X: {tvec[0][0][0]:.3f} m\n  Y: {tvec[0][0][1]:.3f} m\n  Z: {tvec[0][0][2]:.3f} m\nRotation Vector (rvec):\n  Rx: {rvec[0][0][0]:.3f} rad\n  Ry: {rvec[0][0][1]:.3f} rad\n  Rz: {rvec[0][0][2]:.3f} rad")
 
     def calculate_robot_pos2(self, Xrel, Zrel, aruco_id, thetaArucoRel):
+        # Se conserva la misma lógica de cálculo sin modificaciones
         aruco_positions = self.aruco_positions
         thetaArucoAbs = 0
         posXabs = 0
         posZabs = 0
-        if aruco_positions[aruco_id][0] == 0:  # x minimo
+        if aruco_positions[aruco_id][0] == 0:  # x mínimo
             thetaArucoAbs = np.pi
             posXabs = Zrel
             posZabs = Xrel + aruco_positions[aruco_id][1]
-        elif aruco_positions[aruco_id][0] == 7:  # x maximo
+        elif aruco_positions[aruco_id][0] == 7:  # x máximo
             thetaArucoAbs = 0
             posXabs = aruco_positions[aruco_id][0] - Zrel
             posZabs = aruco_positions[aruco_id][1] - Xrel
-        elif aruco_positions[aruco_id][1] == 0:  # z minimo
+        elif aruco_positions[aruco_id][1] == 0:  # z mínimo
             thetaArucoAbs = -np.pi / 2
             posXabs = aruco_positions[aruco_id][0] - Xrel
             posZabs = Zrel
-        elif aruco_positions[aruco_id][1] == 7:  # z maximo
+        elif aruco_positions[aruco_id][1] == 7:  # z máximo
             thetaArucoAbs = np.pi / 2
             posXabs = aruco_positions[aruco_id][0] - Xrel
             posZabs = aruco_positions[aruco_id][1] - Zrel
 
         AngleRobot = thetaArucoAbs - thetaArucoRel
 
-        # Normalize AngleRobot to be within the range [-pi, pi]
+        # Normalización del ángulo a [-pi, pi]
         AngleRobot = (AngleRobot + np.pi) % (2 * np.pi) - np.pi
-        
-        self.publish_aruco_position(posXabs, posZabs, AngleRobot)
 
-        # self.get_logger().info(f"Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
+        self.get_logger().info(f"Medida individual: Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
+        
+        # En lugar de publicar directamente, retornamos la medición
+        return posXabs, posZabs, AngleRobot
 
 def main(args=None):
     rclpy.init(args=args)

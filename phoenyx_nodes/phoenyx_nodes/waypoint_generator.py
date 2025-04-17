@@ -9,6 +9,7 @@ from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
 from rclpy.action.client import GoalStatus
 from ament_index_python.packages import get_package_share_directory
+from geometry_msgs.msg import Twist
 
 class WaypointNavigator(Node):
 
@@ -20,6 +21,13 @@ class WaypointNavigator(Node):
         self.waypoints = self.load_waypoints_yaml()
         self.get_logger().info(f"Waypoints cargados: {self.waypoints}")
 
+        # Suscripción a /aruco_pos
+        self.create_subscription(Twist, '/aruco_pos', self.aruco_callback, 10)
+
+        # Estado de detección y navegación
+        self.aruco_detected = False
+        self.waypoint_reached = True  # Solo detectamos ArUco cuando un waypoint es alcanzado
+        
         # Convertir waypoints a PoseStamped
         self.pose_waypoints = []
         for pos in self.waypoints:
@@ -35,15 +43,29 @@ class WaypointNavigator(Node):
 
         self.current_waypoint_index = 0
 
-        # Enviar el primer waypoint si hay waypoints cargados
         if self.pose_waypoints:
-            self.send_next_waypoint()
+            self.get_logger().info("Esperando detección de ArUco para iniciar el movimiento.")
         else:
             self.get_logger().warn("No se han encontrado waypoints en el archivo YAML.")
 
+    def aruco_callback(self, msg):
+        """Callback para la detección de ArUco. Solo activa cuando hemos alcanzado un waypoint o al inicio."""
+        if not self.waypoint_reached:
+            return  # Ignorar detecciones durante la navegación
+
+        self.aruco_detected = True
+        self.waypoint_reached = False  # Marcamos que iniciamos navegación
+        
+        if self.current_waypoint_index == 0:
+            self.get_logger().info("¡Aruco detectado! Moviéndome al primer waypoint.")
+        else:
+            self.get_logger().info("¡Aruco detectado! Continuando con el siguiente waypoint.")
+        
+        self.send_next_waypoint()
+    
     def load_waypoints_yaml(self):
         """Carga los waypoints desde un archivo YAML."""
-        package_name = 'guiado'  # ⬅️ CAMBIA esto con el nombre de tu paquete ROS2
+        package_name = 'guiado'
         package_dir = get_package_share_directory(package_name)
         yaml_path = os.path.join(package_dir, 'config', 'waypoints.yaml')
 
@@ -56,7 +78,7 @@ class WaypointNavigator(Node):
             return []
 
     def send_next_waypoint(self):
-        """Envía el siguiente waypoint a Nav2."""
+        """Envía el siguiente waypoint."""
         if self.current_waypoint_index >= len(self.pose_waypoints):
             self.get_logger().info("Todos los waypoints han sido alcanzados.")
             return
@@ -91,15 +113,15 @@ class WaypointNavigator(Node):
         if status == GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().info(f"Waypoint {self.current_waypoint_index + 1} alcanzado.")
             self.current_waypoint_index += 1
-            self.send_next_waypoint()
+            self.waypoint_reached = True  # Permitimos la detección de ArUco de nuevo
         else:
             self.get_logger().warn(f"Fallo al alcanzar waypoint {self.current_waypoint_index + 1}")
-            self.send_next_waypoint()
-
+        
     def feedback_callback(self, feedback_msg):
         """Callback de feedback mientras el robot se mueve."""
         feedback = feedback_msg.feedback
         self.get_logger().info(f"Feedback recibido: {feedback}")
+
 
 def main(args=None):
     rclpy.init(args=args)
