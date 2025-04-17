@@ -30,6 +30,7 @@ install(DIRECTORY
   config
   urdf
   meshes
+  worlds
   simple_meshes
   rviz
   DESTINATION share/${PROJECT_NAME}/

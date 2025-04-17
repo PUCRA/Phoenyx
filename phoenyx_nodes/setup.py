@@ -35,7 +35,10 @@ setup(
             'waypoint_generator = phoenyx_nodes.waypoint_generator:main',
             'explorer_node = phoenyx_nodes.explorer_node:main',
             'explorer_node_rectas = phoenyx_nodes.explorer_node_rectas:main',
-            'map_processor = phoenyx_nodes.map_processor:main'
+            'map_processor = phoenyx_nodes.map_processor:main',
+            'lidar_subscriber = phoenyx_nodes.linea_media:main',
+            'linea_media = phoenyx_nodes.linea_media:main',
+            'linea_media2 = phoenyx_nodes.linea_media2:main',
         ],
     },
 )

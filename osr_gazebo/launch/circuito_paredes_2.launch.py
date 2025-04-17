@@ -10,12 +10,7 @@ import xacro
 
 def generate_launch_description():
     # Ruta al archivo de mundo directamente especificada
-    world_file = os.path.join(
-        get_package_share_directory('osr_gazebo'),
-        'worlds',
-        'circuito_paredes.world'
-    )
-    # world_file = './src/osr_gazebo/worlds/circuito_paredes.world'
+    world_file = './src/osr_gazebo/worlds/circuito_paredes2.world'
 
     # Verificar que la ruta al archivo del mundo sea correcta
     print("Ruta al archivo del mundo:", world_file)
