@@ -42,8 +42,8 @@ class ArucoDetector(Node):
         self.camera_matrix = None
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
-        self.parameters = cv2.aruco.DetectorParameters()
-        self.aruco_marker_length = 0.268  # No se modifica la longitud del marcador
+        self.parameters = cv2.aruco.DetectorParameters_create()
+        self.aruco_marker_length = 0.3  # No se modifica la longitud del marcador
 
         # Cargar posiciones de ArUcos desde el archivo YAML
         self.aruco_positions = self.load_aruco_positions()
@@ -67,7 +67,7 @@ class ArucoDetector(Node):
 
     def scan_callback(self, msg):
         if msg.data:  # Si se recibe True (o 1)
-            self.get_logger().info("Activación recibida por /aruco_scan. Iniciando proceso de detección en 10 iteraciones.")
+            self.get_logger().info("Activación recibida por /aruco_scan. Iniciando proceso de detección en 30 iteraciones.")
             self.active = True
             self.measurements = []  # Reinicia las mediciones
 
@@ -84,8 +84,8 @@ class ArucoDetector(Node):
         result = self.detect_aruco_and_estimate_pose(frame)
         if result is not None:
             self.measurements.append(result)
-            self.get_logger().info(f"Medición {len(self.measurements)}/10 obtenida.")
-            if len(self.measurements) >= 10:
+            self.get_logger().info(f"Medición {len(self.measurements)}/30 obtenida.")
+            if len(self.measurements) >= 30:
                 # Aplica filtro mediano a cada uno de los valores
                 posX_list, posZ_list, angle_list = zip(*self.measurements)
                 posX_med = np.median(posX_list)
@@ -109,59 +109,89 @@ class ArucoDetector(Node):
     def detect_aruco_and_estimate_pose(self, frame):
         frame = self.undistort_image(frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, rejected = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
+        corners, ids, _ = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
 
         if ids is not None:
+            for corner in corners:
+                cv2.cornerSubPix(
+                    gray, corner,
+                    winSize=(5, 5),
+                    zeroZone=(-1, -1),
+                    criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                )
+
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
-            # Se utiliza el último marcador detectado (sin modificar la lógica de cálculo)
+
             for corner, marker_id in zip(corners, ids):
-                rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corner, self.aruco_marker_length, self.camera_matrix, self.dist_coeffs)
+                rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
+                    corner, self.aruco_marker_length, self.camera_matrix, self.dist_coeffs)
+                
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.05)
                 self.print_pose(marker_id, tvec, rvec)
+
                 Xrel = tvec[0][0][0]
                 Zrel = tvec[0][0][2]
-                thetaArucoRel = rvec[0][0][2]
-            # Se obtiene la medición sin modificar los cálculos internos
-            result = self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
-            return result
+
+                # ✅ Convertimos el rvec a matriz de rotación y extraemos yaw desde la rotación
+                R_mat, _ = cv2.Rodrigues(rvec[0][0])
+                thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
+
+                result = self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
+                return result
+
         return None
+
 
     def print_pose(self, marker_id, tvec, rvec):
         self.get_logger().info(
             f"\n=== ArUco Marker Detected ===\nMarker ID: {marker_id[0]}\nTranslation Vector (tvec):\n  X: {tvec[0][0][0]:.3f} m\n  Y: {tvec[0][0][1]:.3f} m\n  Z: {tvec[0][0][2]:.3f} m\nRotation Vector (rvec):\n  Rx: {rvec[0][0][0]:.3f} rad\n  Ry: {rvec[0][0][1]:.3f} rad\n  Rz: {rvec[0][0][2]:.3f} rad")
 
     def calculate_robot_pos2(self, Xrel, Zrel, aruco_id, thetaArucoRel):
-        # Se conserva la misma lógica de cálculo sin modificaciones
+        r = np.hypot(Xrel, Zrel)
         aruco_positions = self.aruco_positions
-        thetaArucoAbs = 0
-        posXabs = 0
-        posZabs = 0
-        if aruco_positions[aruco_id][0] == 0:  # x mínimo
-            thetaArucoAbs = np.pi
-            posXabs = Zrel
-            posZabs = Xrel + aruco_positions[aruco_id][1]
-        elif aruco_positions[aruco_id][0] == 7:  # x máximo
+
+        # Posición y orientación del ArUco
+        xm, ym = aruco_positions[aruco_id]
+        thetaArucoAbs = 0.0
+
+        # R_z= [[np.cos(thetaArucoRel), -np.sin(thetaArucoRel), 0], 
+            #   [np.sin(thetaArucoRel), np.cos(thetaArucoRel), 0], 
+            #   [0, 0, 1]]
+
+        if xm == 0:  # x mínimo
             thetaArucoAbs = 0
-            posXabs = aruco_positions[aruco_id][0] - Zrel
-            posZabs = aruco_positions[aruco_id][1] - Xrel
-        elif aruco_positions[aruco_id][1] == 0:  # z mínimo
-            thetaArucoAbs = -np.pi / 2
-            posXabs = aruco_positions[aruco_id][0] - Xrel
-            posZabs = Zrel
-        elif aruco_positions[aruco_id][1] == 7:  # z máximo
+        elif xm == 7:  # x máximo
+            thetaArucoAbs = np.pi
+        elif ym == 0:  # y mínimo
             thetaArucoAbs = np.pi / 2
-            posXabs = aruco_positions[aruco_id][0] - Xrel
-            posZabs = aruco_positions[aruco_id][1] - Zrel
+        elif ym == 7:  # y máximo
+            thetaArucoAbs = -np.pi / 2
 
+        
+                
+        # # Dirección desde el ArUco hacia el robot en marco global
+        # phi = np.arctan2(Xrel, Zrel) + np.pi  # porque la cámara ve hacia el marcador
+        # alpha = thetaArucoAbs + phi
+        # alpha = (alpha + np.pi) % (2 * np.pi) - np.pi
+
+        # # Cálculo de posición absoluta con fórmula polar
+        # posXabs = xm + r * np.sin(alpha)
+        # posZabs = ym + r * np.cos(alpha)
+
+        # Ángulo del robot
         AngleRobot = thetaArucoAbs - thetaArucoRel
+        
+        thetaArucoRel = np.pi - thetaArucoRel 
 
-        # Normalización del ángulo a [-pi, pi]
+        Xabs = xm +  Xrel * np.cos(thetaArucoRel) - Zrel * np.sin(thetaArucoRel)
+        Yabs = ym +  Xrel * np.sin(thetaArucoRel) + Zrel * np.cos(thetaArucoRel)
+
         AngleRobot = (AngleRobot + np.pi) % (2 * np.pi) - np.pi
 
-        self.get_logger().info(f"Medida individual: Posición del robot: X={posXabs:.3f}, Y={posZabs:.3f}, Ángulo={AngleRobot:.3f}")
+        self.get_logger().info(f"Medida individual: Posición del robot: X={Xabs:.3f}, Y={Yabs:.3f}, Ángulo={AngleRobot:.3f}")
         
-        # En lugar de publicar directamente, retornamos la medición
-        return posXabs, posZabs, AngleRobot
+        return Xabs, Yabs, AngleRobot
+
 
 def main(args=None):
     rclpy.init(args=args)

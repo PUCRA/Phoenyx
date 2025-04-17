@@ -64,7 +64,9 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments= ['-topic', 'robot_description', '-entity', 'rover','-x', '3.5', '-y', '3.5', '-z', '0.0'], #['-topic', 'robot_description', '-entity', 'rover']
+        arguments=['-topic', 'robot_description', '-entity', 'rover',
+               '-x', '3.5', '-y', '3.5', '-z', '0.0',
+               '-Y', '-2.9'],
         output='screen',
         parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
     )

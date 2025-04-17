@@ -26,7 +26,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'localizacion_aruco = guiado.localizacion_aruco:main'
+            'localizacion_aruco = guiado.localizacion_aruco:main',
+            'brain_guiado = guiado.brain_guiado:main',
+            'test_localizacion = guiado.test_localizacion:main'
         ],
     },
 )

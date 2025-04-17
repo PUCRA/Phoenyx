@@ -132,9 +132,6 @@ public:
         dl = current_dl - pre_dl;
 
         pre_dl = current_dl;
-
-        x_position += dl * cos(theta);
-        y_position += dl * sin(theta);
         
         // Odometria rectificada por aruco
         if (aruco_detected) {

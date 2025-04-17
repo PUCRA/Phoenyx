@@ -67,7 +67,7 @@ def generate_launch_description():
         arguments=[
             '-topic', 'robot_description',
             '-entity', 'rover',
-            '-x', '1.0', '-y', '2.0', '-z', '0',  # Coordenadas de posición
+            '-x', '1.0', '-y', '1.0', '-z', '0',  # Coordenadas de posición
         ],
         output='screen',
         parameters=[{'use_sim_time': True}]  # use_sim_time agregado aquí también
