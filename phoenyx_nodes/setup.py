@@ -39,6 +39,7 @@ setup(
             'lidar_subscriber = phoenyx_nodes.linea_media:main',
             'linea_media = phoenyx_nodes.linea_media:main',
             'linea_media2 = phoenyx_nodes.linea_media2:main',
+            'tests_odom_aruco = phoenyx_nodes.tests_odom_aruco:main',
         ],
     },
 )
