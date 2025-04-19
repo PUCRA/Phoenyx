@@ -3,7 +3,7 @@ arucos:
     position:
       x: 7.0
       y: 3.5
-    orientation: 3.14159
+    orientation: 0.0
 
   - id: 31
     position:
@@ -15,10 +15,10 @@ arucos:
     position:
       x: 0.0
       y: 3.5
-    orientation: 0.0
+    orientation: 3.14
 
   - id: 33
     position:
       x: 3.5
       y: 0.0
-    orientation: -1.5708
+    orientation: +1.5708

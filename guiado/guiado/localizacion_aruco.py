@@ -63,7 +63,7 @@ class ArucoDetector(Node):
     def load_aruco_positions(self):
         with open(os.path.expanduser('./src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
-        return {aruco['id']: (aruco['position']['x'], aruco['position']['y']) for aruco in aruco_data['arucos']}
+        return {aruco['id']: (aruco['position']['x'], aruco['position']['y'], aruco['orientation']) for aruco in aruco_data['arucos']}
 
     def scan_callback(self, msg):
         if msg.data:  # Si se recibe True (o 1)
@@ -136,7 +136,7 @@ class ArucoDetector(Node):
                 R_mat, _ = cv2.Rodrigues(rvec[0][0])
                 thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
 
-                result = self.calculate_robot_pos2(Xrel, Zrel, marker_id[0], thetaArucoRel)
+                result = self.calculate_robot_pos2(tvec, R_mat, marker_id[0])
                 return result
 
         return None
@@ -146,50 +146,28 @@ class ArucoDetector(Node):
         self.get_logger().info(
             f"\n=== ArUco Marker Detected ===\nMarker ID: {marker_id[0]}\nTranslation Vector (tvec):\n  X: {tvec[0][0][0]:.3f} m\n  Y: {tvec[0][0][1]:.3f} m\n  Z: {tvec[0][0][2]:.3f} m\nRotation Vector (rvec):\n  Rx: {rvec[0][0][0]:.3f} rad\n  Ry: {rvec[0][0][1]:.3f} rad\n  Rz: {rvec[0][0][2]:.3f} rad")
 
-    def calculate_robot_pos2(self, Xrel, Zrel, aruco_id, thetaArucoRel):
-        r = np.hypot(Xrel, Zrel)
-        aruco_positions = self.aruco_positions
+    def calculate_robot_pos2(self, tvec, R_mat, aruco_id):
+        x_aruco_mapa, z_aruco_mapa, theta_aruco_mapa = self.aruco_positions[aruco_id]
+        self.get_logger().info(f"X_aruco: {x_aruco_mapa} Y_aruco: {z_aruco_mapa}, theta: {theta_aruco_mapa}")
+        T = tvec[0][0].reshape((3, 1))       # traslación del ArUco respecto a la cámara
+        R_inv = R_mat.T                         # Rotación inversa
+        T_inv = -np.dot(R_inv, T)          # Traslación inversa
+        # Posición del robot respecto al aruco
+        z_rel = T_inv[0, 0]
+        x_rel = T_inv[2, 0]
 
-        # Posición y orientación del ArUco
-        xm, ym = aruco_positions[aruco_id]
-        thetaArucoAbs = 0.0
+        # Rotamos e insertamos al sistema del mapa
+        cos_theta = np.cos(theta_aruco_mapa)
+        sin_theta = np.sin(theta_aruco_mapa)
 
-        # R_z= [[np.cos(thetaArucoRel), -np.sin(thetaArucoRel), 0], 
-            #   [np.sin(thetaArucoRel), np.cos(thetaArucoRel), 0], 
-            #   [0, 0, 1]]
+        xrel = (cos_theta * x_rel - sin_theta * z_rel)
+        yrel = (sin_theta * x_rel + cos_theta * z_rel)
+        self.get_logger().info(f"Xarcuo robot: {xrel} Yaruco robot: {yrel}")
+        Xabs = x_aruco_mapa - xrel
+        Yabs = z_aruco_mapa - yrel
+        yaw_rel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # orientación de la cámara en el marco del ArUco
+        AngleRobot = theta_aruco_mapa - yaw_rel
 
-        if xm == 0:  # x mínimo
-            thetaArucoAbs = 0
-        elif xm == 7:  # x máximo
-            thetaArucoAbs = np.pi
-        elif ym == 0:  # y mínimo
-            thetaArucoAbs = np.pi / 2
-        elif ym == 7:  # y máximo
-            thetaArucoAbs = -np.pi / 2
-
-        
-                
-        # # Dirección desde el ArUco hacia el robot en marco global
-        # phi = np.arctan2(Xrel, Zrel) + np.pi  # porque la cámara ve hacia el marcador
-        # alpha = thetaArucoAbs + phi
-        # alpha = (alpha + np.pi) % (2 * np.pi) - np.pi
-
-        # # Cálculo de posición absoluta con fórmula polar
-        # posXabs = xm + r * np.sin(alpha)
-        # posZabs = ym + r * np.cos(alpha)
-
-        # Ángulo del robot
-        AngleRobot = thetaArucoAbs - thetaArucoRel
-        
-        thetaArucoRel = np.pi - thetaArucoRel 
-
-        Xabs = xm +  Xrel * np.cos(thetaArucoRel) - Zrel * np.sin(thetaArucoRel)
-        Yabs = ym +  Xrel * np.sin(thetaArucoRel) + Zrel * np.cos(thetaArucoRel)
-
-        AngleRobot = (AngleRobot + np.pi) % (2 * np.pi) - np.pi
-
-        self.get_logger().info(f"Medida individual: Posición del robot: X={Xabs:.3f}, Y={Yabs:.3f}, Ángulo={AngleRobot:.3f}")
-        
         return Xabs, Yabs, AngleRobot
 
 
