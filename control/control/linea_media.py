@@ -23,7 +23,9 @@ class ContinuousLidarNavigator(Node):
 
         self.goal_distance = 1.0  # distancia hacia adelante
         self.goal_threshold = 2.0  # metros para anticipar siguiente goal
+        self.timeout = 5.0
         self.goal_active = False
+        self.prev_time = 0
         self.last_goal_pose = None
         # self.last_goal_angle = None
         self.lidar_msg = None
@@ -73,6 +75,8 @@ class ContinuousLidarNavigator(Node):
                 if distance != -1 and distance < self.goal_threshold:
                     self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
                     self.goal_active = False
+                if time.time() - self.prev_time > self.timeout:
+                    self.goal_active = False
 
     def callback_mando(self, msg):
         if (not self.start_node) and msg.buttons[0]:
@@ -87,6 +91,9 @@ class ContinuousLidarNavigator(Node):
             x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg)
             goal, error = self.create_and_send_goal(x_forward, y_lateral, yaw)
             self.goal_active = not error
+            # if self.goal_active:
+            #     time.sleep(5.0)
+            self.prev_time = time.time()
             if error:
                 self.get_logger().warning("Error al generar el goal")
             else:
@@ -155,10 +162,20 @@ class ContinuousLidarNavigator(Node):
         goal_x = np.mean(x_points)
         goal_y = np.mean(y_points)
 
+        best_angle = np.arctan2(goal_y, goal_x)
+        distance = np.sqrt(goal_x**2 + goal_y**2)
+        if distance < 0.5:
+            self.get_logger().warn("🚧 Goal demasiado cerca.")
+            distance = 1.0
+        elif distance > 3.0:
+            self.get_logger().warn("🚧 Goal demasiado lejos.")
+            distance = 2.0
+        
         mask = (np.isfinite(ranges)) & (np.radians(-5) <= angles) & (angles <= np.radians(5))
         front_distance = ranges[mask]
         front_distance = max(front_distance)
-        if front_distance < 1.5:
+        # Casos con pared frontal
+        if front_distance < 3.0:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
             mask_left = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(-10))
             mask_right = (np.isfinite(ranges)) & (np.radians(10) <= angles) & (angles <= np.radians(80))
@@ -167,41 +184,46 @@ class ContinuousLidarNavigator(Node):
             max_left = max(left_distance)
             max_right = max(right_distance)
             # front_distance -= 1
-            angle = np.radians(0)
-            if max_left > max_right:
-                angle -= np.radians(45)
+            best_angle = np.radians(0)
+            # Caso con pared frontal immediata
+            if front_distance < 1.5:
+                
+                if max_left > max_right:
+                    distance = max_left
+                    best_angle -= np.radians(80)
+                else:
+                    distance = max_right
+                    best_angle += np.radians(80)
+            # Caso con pared frontal cercana
             else:
-                angle += np.radians(45)
-            
-            goal_x = front_distance*np.cos(angle)
-            goal_y = front_distance*np.sin(angle)
-            # goal_y -= 0.5
-            # if max_left > max_right:
-            #     goal_x -= 1
-            # else:
-            #     goal_x += 1
-        else:
-            for i in range(len(x_points)):
-                error_x = goal_x - x_points[i]
-                error_y = goal_y - y_points[i]
-                error = math.sqrt(error_x**2 + error_y**2)
-                if error < 0.6:
-                    self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
-                    goal_x *= 0.5
-                    goal_y *= 0.5
-                    # goal_x += (goal_x - x_points[i]) * 0.5  # Ajuste proporcional
-                    # goal_y += (goal_y - y_points[i]) * 0.5
-                    break
+                distance = front_distance
+                if max_left > max_right:
+                    best_angle = np.radians(-40)
+                else:
+                    best_angle = np.radians(40)
+        # Verificacion de que el punto escogido este dentro del rango del lidar
+        mask = (np.isfinite(ranges)) & (best_angle-5 <= angles) & (best_angle+5 <= np.radians(5))
+        lidar_dist_verification = ranges[mask]
+        if lidar_dist_verification is not None and lidar_dist_verification != []:
+            lidar_dist_verification = max(lidar_dist_verification)
+            if lidar_dist_verification < distance:
+                distance = 0.8*lidar_dist_verification
+                self.get_logger().info("Punto fuera del rango")    
+        if distance > 3.0:
+            distance = 3.0
+        goal_y = distance*np.sin(best_angle)
+        goal_x = distance*np.cos(best_angle)
+        
 
         # Orientamos el goal hacia el ángulo calculado
-        best_angle = math.atan2(goal_y, goal_x)
+        # best_angle = math.atan2(goal_y, goal_x)
 
         # Aseguramos que el ángulo esté en un rango razonable
         if abs(best_angle) > math.radians(90):  # Evitar giros excesivos
             self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
             best_angle = np.sign(best_angle) * math.radians(90)
 
-        self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
+        self.get_logger().info(f"🎯 Nuevo goal: ({distance:.2f}, {best_angle*180.0/np.pi:.2f}), yaw: {math.degrees(best_angle):.1f}°")
 
         return goal_x, goal_y, best_angle
 
