@@ -134,7 +134,7 @@ class ArucoDetector(Node):
 
                 # ✅ Convertimos el rvec a matriz de rotación y extraemos yaw desde la rotación
                 R_mat, _ = cv2.Rodrigues(rvec[0][0])
-                thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
+                # thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
 
                 result = self.calculate_robot_pos2(tvec, R_mat, marker_id[0])
                 return result
@@ -167,7 +167,8 @@ class ArucoDetector(Node):
         Yabs = z_aruco_mapa - yrel
         yaw_rel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # orientación de la cámara en el marco del ArUco
         AngleRobot = theta_aruco_mapa - yaw_rel
-
+        AngleRobot=(AngleRobot + np.pi) % (2 * np.pi) - np.pi #aqui normalizamos el angulo 
+        
         return Xabs, Yabs, AngleRobot
 
 
@@ -179,3 +180,4 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
+
