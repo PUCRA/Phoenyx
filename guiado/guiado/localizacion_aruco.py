@@ -12,18 +12,44 @@ from std_msgs.msg import Bool  # Se importa el mensaje Bool
 class ArucoDetector(Node):
     def __init__(self):
         super().__init__('aruco_detector')
-        
-        # Suscripción para las imágenes y la información de la cámara
-        self.subscription_image = self.create_subscription(
-            Image,
-            '/camera/image_raw',
-            self.image_callback,
-            10)
-        self.subscription_camera_info = self.create_subscription(
-            CameraInfo,
-            '/camera/camera_info',
-            self.camera_info_callback,
-            10)
+
+        self.simulation = True
+        self.bridge = CvBridge()
+        self.camera_matrix = None
+        self.dist_coeffs = None
+        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
+        self.parameters = cv2.aruco.DetectorParameters()
+        self.aruco_marker_length = 0.3  # No se modifica la longitud del marcador
+
+        if self.simulation:
+            # Modo simulación
+            # Suscripción para las imágenes y la información de la cámara
+            self.subscription_image = self.create_subscription(
+                Image,
+                '/camera/image_raw',
+                self.image_callback,
+                10)
+            self.subscription_camera_info = self.create_subscription(
+                CameraInfo,
+                '/camera/camera_info',
+                self.camera_info_callback,
+                10)
+            
+        else:
+            # Modo real: abrimos la cámara y cargamos calibración de ficheros
+            calib_dir = os.path.expanduser('~/src/phoenyx_nodes/scripts_malosh/aruco/calib_params')
+            self.res = "720p"
+            cam_mat_file = os.path.join(calib_dir, f'camera_matrix_{self.res}.npy')
+            dist_file    = os.path.join(calib_dir, f'dist_coeffs_{self.res}.npy')
+            self.camera_matrix = np.load(cam_mat_file)
+            self.dist_coeffs   = np.load(dist_file)
+            
+            self.cap = None
+
+            # Timer para leer frame a frame (ej. 30 Hz)
+            fps = 30.0
+            self.create_timer(1.0/fps, self.timer_callback)
+
         
         # Suscripción para activar el procesamiento mediante /aruco_scan
         self.subscription_scan = self.create_subscription(
@@ -38,12 +64,6 @@ class ArucoDetector(Node):
             '/aruco_pos',
             10)
         
-        self.bridge = CvBridge()
-        self.camera_matrix = None
-        self.dist_coeffs = None
-        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
-        self.parameters = cv2.aruco.DetectorParameters_create()
-        self.aruco_marker_length = 0.3  # No se modifica la longitud del marcador
 
         # Cargar posiciones de ArUcos desde el archivo YAML
         self.aruco_positions = self.load_aruco_positions()
@@ -171,6 +191,42 @@ class ArucoDetector(Node):
         
         return Xabs, Yabs, AngleRobot
 
+    def timer_callback(self):
+        if self.simulation:
+            return
+
+        # Si no estamos activos, cierra la cámara si está abierta
+        if not self.active:
+            if self.cap is not None:
+                self.cap.release()
+                self.cap = None
+                self.get_logger().info("Cámara real cerrada.")
+            return
+        
+        if self.cap is None:
+            self.cap = cv2.VideoCapture(0)   # o el índice que necesites
+            w, h = (1280, 720) if self.res=="720p" else (640,480)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  w)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+            self.get_logger().info("Cámara real abierta.")
+        
+        ret, frame = self.cap.read()
+        if not ret:
+            self.get_logger().error("No se pudo leer frame de la cámara real")
+            return
+
+        result = self.detect_aruco_and_estimate_pose(frame)
+        if result is not None:
+            self.measurements.append(result)
+            self.get_logger().info(f"Medición {len(self.measurements)}/30 obtenida.")
+            if len(self.measurements) >= 30:
+                posX_list, posZ_list, angle_list = zip(*self.measurements)
+                posX_med = np.median(posX_list)
+                posZ_med = np.median(posZ_list)
+                angle_med = np.median(angle_list)
+                self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                self.active = False
+                self.measurements = []
 
 def main(args=None):
     rclpy.init(args=args)
