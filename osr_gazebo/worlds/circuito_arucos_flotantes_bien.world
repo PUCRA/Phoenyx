@@ -1,0 +1,185 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="circuito_cuadrado">
+
+    <!-- Configuración del entorno -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Pared ARUCO izquierda -->
+    <model name="wall_left">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 3.5 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared ARUCO derecha -->
+    <model name="wall_right">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>7 3.5 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared ARUCO superior -->
+    <model name="wall_top">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.5 7 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Pared ARUCO inferior -->
+    <model name="wall_bottom">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.5 0 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Obstaculo -->
+    <model name="Obsatacle">
+      <static>false</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose> 2 5 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Obstaculo2 -->
+    <model name="Obsatacle_2">
+      <static>false</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose> 5 2 0.5 0 0 0</pose>
+    </model>
+
+    <include>
+      <uri>model://5x5_1000-30</uri>
+      <pose>6.995 3.5 0.35 0 0 3.14159</pose>
+    </include>
+    
+    <include>
+      <uri>model://5x5_1000-31</uri>
+      <pose>3.5 6.995 0.35 0 0 -1.5708</pose>
+    </include>
+            
+    <include>
+      <uri>model://5x5_1000-32</uri>
+      <pose>0.005 3.5 0.35 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-33</uri>
+      <pose>3.5 0.005 0.35 0 0 1.5708</pose>
+    </include>
+
+          
+  </world>
+</sdf>

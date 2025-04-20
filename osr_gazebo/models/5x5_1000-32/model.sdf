@@ -6,7 +6,7 @@
         <geometry>
           <mesh>
             <uri>model://5x5_1000-32/meshes/5x5_1000-32.dae</uri>
-          <scale>4.0 4.0 4.0</scale></mesh>
+          <scale>0.6 0.6 0.6</scale></mesh>
         </geometry>
       </visual>
     </link>

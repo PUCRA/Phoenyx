@@ -1,0 +1,589 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="circuito_cuadrado">
+
+    <!-- Configuración del entorno -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Pared ARUCO izquierda -->
+    <model name="wall_left">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 2.5 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared ARUCO derecha -->
+    <model name="wall_right">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>5 2.5 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pared ARUCO superior -->
+    <model name="wall_top">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>2.5 5 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Pared ARUCO inferior -->
+    <model name="wall_bottom">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>2.5 0 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Inicio pasillo izq (corto) -->
+    <model name="wall_passillo_ini_i">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>1.5 -1.75 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Inicio pasillo der (largo) -->
+    <model name="wall_passillo_ini_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 -2.5 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pasillo 2 izq -->
+    <model name="wall_pasillo_2_i">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.25 -3.5 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Pasillo 2 der -->
+    <model name="wall_pasillo_2_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>1.75 -5 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Pasillo 3 izq -->
+    <model name="wall_passillo_3_i">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>5 -5.25 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Pasillo 3 der -->
+    <model name="wall_passillo_3_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.5 -6 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Isla izquierda -->
+    <model name="wall_island_i">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>2 -9.25 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Isla derecha -->
+    <model name="wall_island_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>6.5 -9.25 0.35 0 0 1.5708</pose>
+    </model>
+
+    <!-- Isla superior -->
+    <model name="wall_island_sup">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>4.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>4.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.25 -8.5 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Isla inferior -->
+    <model name="wall_island_inf">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>4.5 0.01 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>4.5 0.01 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.25 -10 0.35 0 0 0</pose>
+    </model>
+
+    <!-- isla superior fuera izq-->
+    <model name="wall_island_fuera_sup_i">
+        <static>true</static>
+        <link name="link">
+        <visual name="visual">
+            <geometry>
+            <box>
+                <size>1.5 0.01 0.7</size>
+            </box>
+            </geometry>
+            <material>
+            <ambient>1 1 1 1</ambient>
+            </material>
+        </visual>
+        <collision name="collision">
+            <geometry>
+            <box>
+                <size>1.5 0.01 0.7</size>
+            </box>
+            </geometry>
+        </collision>
+        </link>
+        <pose>5.75 -7 0.35 0 0 0</pose>
+    </model>
+    
+    <!-- isla superior fuera der-->
+    <model name="wall_island_fuera_sup_d">
+        <static>true</static>
+        <link name="link">
+        <visual name="visual">
+            <geometry>
+            <box>
+                <size>3 0.01 0.7</size>
+            </box>
+            </geometry>
+            <material>
+            <ambient>1 1 1 1</ambient>
+            </material>
+        </visual>
+        <collision name="collision">
+            <geometry>
+            <box>
+                <size>3 0.01 0.7</size>
+            </box>
+            </geometry>
+        </collision>
+        </link>
+        <pose>2 -7 0.35 0 0 0</pose>
+    </model>
+
+    <!-- Isla fuera izquierda -->
+    <model name="wall_island_fuera_i">
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>4.5 0.01 0.7</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>1 1 1 1</ambient>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>4.5 0.01 0.7</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+        <pose>0.5 -9.25 0.35 0 0 1.5708</pose>
+    </model>
+
+     <!-- Isla fuera inferior -->
+    <model name="wall_island_fuera_inf">
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>7.5 0.01 0.7</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>1 1 1 1</ambient>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>7.5 0.01 0.7</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+        <pose>4.25 -11.5 0.35 0 0 0</pose>
+    </model>
+
+      <!-- pasillo final derecha -->
+    <model name="wall_pasillo_final_d">
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>10 0.01 0.7</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>1 1 1 1</ambient>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>10 0.01 0.7</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+        <pose>8 -6.5 0.35 0 0 1.5708</pose>
+    </model>
+
+        <!-- pasillo final derecha -->
+    <model name="wall_pasillo_final_i">
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>5.5 0.01 0.7</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>1 1 1 1</ambient>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>5.5 0.01 0.7</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+        <pose>6.5 -4.25 0.35 0 0 1.5708</pose>
+    </model>
+
+      <!-- Pared ARUCO final -->
+    <model name="wall_final">
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>1.5 0.01 0.7</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>1 1 1 1</ambient>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>1.5 0.01 0.7</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+        <pose>7.25 5 0.35 0 0 0</pose>
+    </model>
+
+    <include>
+      <uri>model://5x5_1000-32</uri>
+      <pose>4.995 2.5 0.35 0 0 3.14159</pose>
+    </include>
+    
+    <include>
+      <uri>model://5x5_1000-31</uri>
+      <pose>2.5 4.995 0.35 0 0 -1.5708</pose>
+    </include>
+            
+    <include>
+      <uri>model://5x5_1000-30</uri>
+      <pose>0.005 2.5 0.35 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-33</uri>
+      <pose>2.5 0.005 0.35 0 0 1.5708</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-5</uri>
+      <pose>0.75 -4.995 0.35 0 0 1.5708</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-73</uri>
+      <pose>4.995 -4.25 0.35 0 0 3.14159</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-10</uri>
+      <name>aruco_10_1</name>
+      <pose>4.25 -8.495 0.35 0 0 1.5708</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-10</uri>
+      <name>aruco_10_2</name>
+      <pose>7.995 -7.75 0.35 0 0 3.14159</pose>
+    </include>
+
+    <include>
+      <uri>model://5x5_1000-15</uri>
+      <pose>7.25 4.995 0.35 0 0 -1.5708</pose>
+    </include>
+      
+  </world>
+</sdf>
+
+
+        

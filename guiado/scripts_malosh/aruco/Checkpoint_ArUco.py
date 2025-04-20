@@ -4,7 +4,7 @@ import os
 
 # === CONFIGURACIÓN ===
 # Selecciona el diccionario de ArUco 5x5 (50, 100, 250, 1000)
-aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
 
 # Selección de resolución
 resolution = "720p"  # Cambiar entre "720p" y "480p" para seleccionar la resolución deseada
@@ -16,7 +16,7 @@ resolutions = {
 }
 
 # Ruta a los archivos de calibración
-calibration_path = os.path.expanduser("~/Phoenyx/src/phoenyx_nodes/scripts_malosh/aruco/calib_params")
+calibration_path = os.path.expanduser("~./src/phoenyx_nodes/scripts_malosh/aruco/calib_params")
 camera_matrix_file = os.path.join(calibration_path, f"camera_matrix_{resolution}.npy") # ajusta el nombre del archivo de la matriz de la camara
 dist_coeffs_file = os.path.join(calibration_path, f"dist_coeffs_{resolution}.npy")
 

@@ -69,6 +69,10 @@ class FSM(Node):
                 msg = Bool()
                 msg.data = True
                 self.publisher_.publish(msg)
+                time.sleep(0.01)
+                msg.data = False
+                self.publisher_.publish(msg)
+
                 self.published_once = True  # Marca que ya se ha publicado
 
             elif self.aruco_pos_state:
