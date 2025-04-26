@@ -3,10 +3,11 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_link
     odom_topic: /odom
-    enable_groot_monitoring: True
-    groot_zmq_publisher_port: 1666
-    groot_zmq_server_port: 1667
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    enable_groot_monitoring: False
+    # groot_zmq_publisher_port: 1666
+    # groot_zmq_server_port: 1667
+    # default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    default_bt_xml_filename: "/home/pucra/Phoenyx/src/planificador/config/bt.xml"
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
     - nav2_follow_path_action_bt_node
@@ -52,31 +53,30 @@ local_costmap:
       height: 3
       resolution: 0.05
       robot_radius: 0.11 #0.22
-      plugins: ["voxel_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.55
-      voxel_layer:
-        plugin: "nav2_costmap_2d::VoxelLayer"
+        cost_scaling_factor: 5.0
+        inflation_radius: 0.4
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
-        publish_voxel_map: True
-        origin_z: 0.0
-        z_resolution: 0.05
-        z_voxels: 16
-        max_obstacle_height: 2.0
-        mark_threshold: 0
         observation_sources: scan
+        footprint_clearing_enabled: true
+        max_obstacle_height: 2.0
+        combination_method: 1
         scan:
           topic: /scan
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
           max_obstacle_height: 2.0
+          min_obstacle_height: 0.0
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 3.0
-          raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
-          obstacle_min_range: 0.0
+          inf_is_valid: false
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
@@ -93,28 +93,14 @@ global_costmap:
       robot_radius: 0.22 #0.11
       resolution: 0.05
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
-      obstacle_layer:
-        plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: True
-        observation_sources: scan
-        scan:
-          topic: /scan
-          max_obstacle_height: 2.0
-          clearing: True
-          marking: True
-          data_type: "LaserScan"
-          raytrace_max_range: 3.0
-          raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
-          obstacle_min_range: 0.0
+      plugins: ["static_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        inflation_radius: 0.4
       always_send_full_costmap: True
 
 
@@ -122,7 +108,7 @@ global_costmap:
 controller_server:
   ros__parameters:
     # controller server parameters (see Controller Server for more info)
-    controller_frequency: 20.0
+    controller_frequency: 10.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -132,7 +118,7 @@ controller_server:
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
-      movement_time_allowance: 20.0
+      movement_time_allowance: 20 .0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.4
@@ -142,7 +128,8 @@ controller_server:
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      allow_rotate_in_place: true
+      # allow_rotate_in_place: true
+      use_rotate_to_heading: True
       min_vel_x: 0.2
       min_vel_y: 0.0
       max_vel_x: 0.5
@@ -192,31 +179,31 @@ planner_server:
       allow_unknown: true
 
 
-behavior_server:
-  ros__parameters:
-    costmap_topic: local_costmap/costmap_raw
-    footprint_topic: local_costmap/published_footprint
-    cycle_frequency: 10.0
-    behavior_plugins: ["spin", "backup", "drive_on_heading","wait"]
-    spin:
-      plugin: "nav2_behaviors/Spin"
-      max_rotational_vel: 1.0
-      min_rotational_vel: 0.6
-      spin_duration: 5.0
-    backup:
-      plugin: "nav2_behaviors/BackUp"
-    drive_on_heading:
-      plugin: "nav2_behaviors/DriveOnHeading"
-      heading_tolerance: 0.3
-    wait:
-      plugin: "nav2_behaviors/Wait"
-    global_frame: map
-    robot_base_frame: base_link
-    transform_tolerance: 0.1
-    simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
-    min_rotational_vel: 0.6
-    rotational_acc_lim: 3.2
+# behavior_server:
+#   ros__parameters:
+#     costmap_topic: local_costmap/costmap_raw
+#     footprint_topic: local_costmap/published_footprint
+#     cycle_frequency: 10.0
+#     behavior_plugins: ["spin", "backup", "drive_on_heading","wait"]
+#     spin:
+#       plugin: "nav2_behaviors/Spin"
+#       max_rotational_vel: 1.0
+#       min_rotational_vel: 0.6
+#       spin_duration: 5.0
+#     backup:
+#       plugin: "nav2_behaviors/BackUp"
+#     drive_on_heading:
+#       plugin: "nav2_behaviors/DriveOnHeading"
+#       heading_tolerance: 0.3
+#     wait:
+#       plugin: "nav2_behaviors/Wait"
+#     global_frame: map
+#     robot_base_frame: base_link
+#     transform_tolerance: 0.1
+#     simulate_ahead_time: 2.0
+#     max_rotational_vel: 1.0
+#     min_rotational_vel: 0.6
+#     rotational_acc_lim: 3.2
 
 # robot_state_publisher:
 #   ros__parameters:

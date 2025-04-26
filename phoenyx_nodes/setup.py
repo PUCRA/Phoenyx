@@ -39,6 +39,8 @@ setup(
             'front_distance = phoenyx_nodes.front_distance:main',
             'middle_error = phoenyx_nodes.middle_error:main',
             'avanzar_pasillo = phoenyx_nodes.avanzar_pasillo:main',
+            'guiado = phoenyx_nodes.guiado:main',
+            'leds = phoenyx_nodes.leds:main'
         ],
     },
 )

@@ -60,6 +60,14 @@ def generate_launch_description():
                         {'enable_odometry': LaunchConfiguration('enable_odometry')}]
         )
     )
+
+    ld.add_action(
+        Node(
+            package='phoenyx_nodes',
+            executable='leds',
+            name='leds'
+        )
+    )
     # ld.add_action(
     #     Node(
     #         package='teleop_twist_joy',

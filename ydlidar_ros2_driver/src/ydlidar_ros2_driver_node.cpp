@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
   } else {
     RCLCPP_ERROR(node->get_logger(), "%s\n", laser.DescribeError());
   }
-  rclcpp::QoS custom_qos(10);  // Profundidad 10
+  rclcpp::QoS custom_qos(100);  // Profundidad 10
   custom_qos.reliable();  // Confiable
   auto laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", custom_qos);//rclcpp::SensorDataQoS());
   auto pc_pub = node->create_publisher<sensor_msgs::msg::PointCloud>("point_cloud", custom_qos);//rclcpp::SensorDataQoS());

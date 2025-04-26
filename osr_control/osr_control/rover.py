@@ -82,7 +82,7 @@ class Rover(Node):
             heading, roll, pitch = (None, None, None)
             while heading is None:
                 heading, roll, pitch = self.bno.euler
-            self.new_angle = -(heading*math.pi/180.0-math.pi)
+            self.new_angle = -(heading*math.pi/180.0)
             self.odometry.pose.pose.orientation.z = math.sin(self.new_angle/2.)
             self.odometry.pose.pose.orientation.w = math.cos(self.new_angle/2.)
 
@@ -101,7 +101,10 @@ class Rover(Node):
         self.turning_radius_pub = self.create_publisher(Float64, "/turning_radius", 1)
         if self.should_calculate_odom:
             self.odometry_pub = self.create_publisher(Odometry, "/odom", 2)
+            self.aruco_sub = self.create_subscription(Twist, "/aruco_pos", self.aruco_callback,1)
             self.tf_pub = tf2_ros.TransformBroadcaster(self)
+            self.angle_offset = 0.0
+
             
         self.corner_cmd_pub = self.create_publisher(CommandCorner, "/cmd_corner", 1)
         self.drive_cmd_pub = self.create_publisher(CommandDrive, "/cmd_drive", 1)
@@ -161,7 +164,7 @@ class Rover(Node):
         self.curr_positions = {**self.curr_positions, **dict(zip(msg.name, msg.position))}
         self.curr_velocities = {**self.curr_velocities, **dict(zip(msg.name, msg.velocity))}
         if self.should_calculate_odom and len(self.curr_positions) == 10:
-            self.get_logger().info(json.dumps(self.curr_positions, indent=2))
+            # self.get_logger().info(json.dumps(self.curr_positions, indent=2))
             # measure how much time has elapsed since our last update
             now = self.get_clock().now()
             dt = float(now.nanoseconds - (self.odometry.header.stamp.sec*10**9 + self.odometry.header.stamp.nanosec)) / 10**9
@@ -180,11 +183,12 @@ class Rover(Node):
                 self.heading_buffer.append(heading)
                 if len(self.heading_buffer) == self.heading_buffer.maxlen:
                     filtered_heading = median(self.heading_buffer)
-                    self.new_angle = -(filtered_heading * math.pi / 180.0 - math.pi)
-                    self.get_logger().info(f"filtered heading: {filtered_heading}")
+                    self.new_angle = -(filtered_heading * math.pi / 180.0)
+                    # self.get_logger().info(f"filtered heading: {filtered_heading}")
                 else:
-                    self.new_angle = -(heading * math.pi / 180.0 - math.pi)
-                    self.get_logger().info(f"raw heading (not enough data for filter): {heading}")
+                    self.new_angle = -(heading * math.pi / 180.0)
+                    # self.get_logger().info(f"raw heading (not enough data for filter): {heading}")
+            self.new_angle += self.angle_offset # offset angulo aruco
             # self.get_logger().info(f"heading: {heading}")
             # self.odometry.pose.pose.orientation.x = 0.0
             # self.odometry.pose.pose.orientation.y = 0.0
@@ -445,6 +449,11 @@ class Rover(Node):
                                    "is an illegal value. Check your wheel calibration.")
             self.curr_twist.twist.angular.z = 0.  # turning in place is currently unsupported
 
+    def aruco_callback(self, msg):
+        # self.get_logger().info("kaka")
+        self.odometry.pose.pose.position.x = msg.linear.x
+        self.odometry.pose.pose.position.y = msg.linear.y
+        self.angle_offset = msg.angular.z - self.new_angle
 
 def main(args=None):
     rclpy.init(args=args)
