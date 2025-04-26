@@ -133,7 +133,7 @@ class Rover(Node):
         """
         # check if we're supposed to rotate in place
         # twist_msg.angular.z = -twist_msg.angular.z
-        if abs(twist_msg.angular.z) > 0.1 and not twist_msg.linear.x:
+        if abs(twist_msg.angular.z) > 0.1 and twist_msg.linear.x == 0.0:
             # command corners to point to center
             corner_cmd_msg, drive_cmd_msg = self.calculate_rotate_in_place_cmd(twist_msg)
 
@@ -337,6 +337,8 @@ class Rover(Node):
         corner_cmd.right_front_pos = -corner_cmd.right_back_pos
 
         drive_cmd = CommandDrive()
+        if abs(twist.angular.z) < 1.0:
+            twist.angular.z = abs(twist.angular.z)/twist.angular.z*1.0
         angular_vel = -twist.angular.z
         # velocity of each wheel center = angular velocity of center of rover * distance to wheel center
         front_wheel_vel = math.hypot(self.d1, self.d3) * angular_vel / self.wheel_radius

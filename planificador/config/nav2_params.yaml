@@ -40,7 +40,7 @@ bt_navigator:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 5.0
+      update_frequency: 3.0
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
@@ -104,7 +104,7 @@ global_costmap:
 controller_server:
   ros__parameters:
     # controller server parameters (see Controller Server for more info)
-    controller_frequency: 10.0
+    controller_frequency: 2.5
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -179,7 +179,7 @@ controller_server:
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 20.0
+    expected_planner_frequency: 2.0
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
@@ -192,7 +192,7 @@ behavior_server:
   ros__parameters:
     costmap_topic: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
-    cycle_frequency: 10.0
+    cycle_frequency: 4.0
     behavior_plugins: ["spin", "backup", "drive_on_heading","wait"]
     spin:
       plugin: "nav2_behaviors/Spin"
