@@ -29,7 +29,8 @@ def generate_launch_description():
     lifecycle_nodes = ['controller_server',
                        'planner_server',
                        'recoveries_server',
-                       'bt_navigator']
+                       'bt_navigator',]
+                       #'waypoint_follower']
     remappings = []
 
     configured_params = os.path.join(
@@ -72,13 +73,13 @@ def generate_launch_description():
             remappings=remappings,
             respawn = True),
 
-        # Node(
-        #     package='nav2_waypoint_follower',
-        #     executable='waypoint_follower',
-        #     name='waypoint_follower',
-        #     output='screen',
-        #     parameters=[configured_params],
-        #     remappings=remappings),
+        Node(
+            package='nav2_waypoint_follower',
+            executable='waypoint_follower',
+            name='waypoint_follower',
+            output='screen',
+            parameters=[configured_params],
+            remappings=remappings),
 
         Node(
             package='nav2_lifecycle_manager',
