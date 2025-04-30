@@ -5,7 +5,7 @@ import glob
 package_name = 'phoenyx_nodes'
 
 # Usar glob para encontrar todos los archivos .yaml en config
-config_files = glob.glob(os.path.join('config', '*.yaml'))
+config_files = glob.glob(os.path.join('conf', '*.yaml'))
 
 # Usar glob para encontrar todos los archivos .py en launch
 launch_files = glob.glob(os.path.join('launch', '*.py'))
@@ -19,7 +19,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         # Incluir todos los archivos de configuración (YAML)
-        ('share/' + package_name + '/config', config_files),
+        ('share/' + package_name + '/conf', config_files),
         # Incluir todos los archivos de lanzamiento (launch)
         ('share/' + package_name + '/launch', launch_files),
     ],
