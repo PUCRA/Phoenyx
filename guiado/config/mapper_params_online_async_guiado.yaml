@@ -22,7 +22,7 @@ slam_toolbox:
     # will use pose
     map_file_name: ./src/guiado/map/map5_guiado_s
     map_start_pose: [0.0, 0.0, 0.0]
-    map_start_at_dock: false
+    map_start_at_dock: true
 
     debug_logging: false
     throttle_scans: 5

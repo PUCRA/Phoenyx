@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CameraInfo
-from cv_bridge import CvBridge
+# from cv_bridge import CvBridge        
 import numpy as np
 import cv2
 import os
@@ -13,13 +13,13 @@ class ArucoDetector(Node):
     def __init__(self):
         super().__init__('aruco_detector')
 
-        self.simulation = True
-        self.bridge = CvBridge()
+        self.simulation = False
+        # self.bridge = CvBridge()
         self.camera_matrix = None
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
-        self.parameters = cv2.aruco.DetectorParameters()
-        self.aruco_marker_length = 0.3  # No se modifica la longitud del marcador
+        self.parameters = cv2.aruco.DetectorParameters_create()
+        self.aruco_marker_length = 0.243  # No se modifica la longitud del marcador
 
         if self.simulation:
             # Modo simulación
@@ -76,14 +76,14 @@ class ArucoDetector(Node):
 
     def publish_aruco_position(self, x, y, theta):
         msg = Twist()
-        msg.linear.x = float(x)
-        msg.linear.y = float(y)
+        msg.linear.x = float(x-1)
+        msg.linear.y = float(y-1)
         msg.angular.z = float(theta)
         self.publisher_aruco_pos.publish(msg)
-        self.get_logger().info(f"Publicando posición final: X={x:.3f}, Y={y:.3f}, Ángulo={theta:.3f}")
+        self.get_logger().info(f"Publicando posición final msg: X={msg.linear.x:.3f}, Y={msg.linear.y:.3f}, Ángulo={msg.angular.z:.3f}")
 
     def load_aruco_positions(self):
-        with open(os.path.expanduser('./src/final/config/posiciones_arucos.yaml'), 'r') as file:
+        with open(os.path.expanduser('./src/guiado/config/Aruco_pos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
         return {aruco['id']: (aruco['position']['x'], aruco['position']['y'], aruco['orientation']) for aruco in aruco_data['arucos']}
 
@@ -175,7 +175,7 @@ class ArucoDetector(Node):
         R_inv = R_mat.T                         # Rotación inversa
         T_inv = -np.dot(R_inv, T)          # Traslación inversa
         # Posición del robot respecto al aruco
-        z_rel = T_inv[0, 0]
+        z_rel = T_inv[0, 0] + 0.15 # sumamos offset posicion camara
         x_rel = T_inv[2, 0]
 
         # Rotamos e insertamos al sistema del mapa
@@ -190,6 +190,7 @@ class ArucoDetector(Node):
         yaw_rel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # orientación de la cámara en el marco del ArUco
         AngleRobot = theta_aruco_mapa - yaw_rel
         AngleRobot=(AngleRobot + np.pi) % (2 * np.pi) - np.pi #aqui normalizamos el angulo 
+
         
         return Xabs, Yabs, AngleRobot
 
@@ -217,6 +218,8 @@ class ArucoDetector(Node):
                 self.active = False
                 self.measurements = []
 
+
+
 def main(args=None):
     rclpy.init(args=args)
     node = ArucoDetector()
@@ -225,4 +228,3 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-

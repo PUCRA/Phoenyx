@@ -1,3 +1,4 @@
+#!usr/bin/python3
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 import yaml
@@ -6,31 +7,27 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from slam_toolbox.srv import DeserializePoseGraph
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
-from math import sin, cos
-from geometry_msgs.msg import Pose2D
 import subprocess
 import time
-
-
+import math
+# import tf_transformations
+from geometry_msgs.msg import PoseWithCovarianceStamped
+import tf2_ros
 
 class FSM(Node):
     def __init__(self):
         super().__init__('brain_guiado')
-        #creamos publicadores en aruco_scan, se encarga de dar un trigger para escanear arucos
-        self.publisher_ = self.create_publisher(Bool, '/aruco_scan', 10)
-        self.goal_pose_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
-        #creamos subscripciones
-        self.create_subscription(Odometry, '/odom', self.odom_callback,10)
-        self.create_subscription(Twist, '/aruco_pos', self.aruco_pos_callback, 10)
-        self.client = self.create_client(DeserializePoseGraph, '/slam_toolbox/deserialize_map')
-        self.waypoints = self.load_waypoints_yaml()
 
-        # while not self.client.wait_for_service(timeout_sec=1.0):
-        #     self.get_logger().info('Esperando al servicio /slam_toolbox/deserialize_map...')
+        #creamos publicadores en aruco_scan, se encarga de dar un trigger para escanear arucos
+        self.publisher_ = self.create_publisher(Bool, '/aruco_scan', 1)
+        self.publisher_initialpose = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 1)
+        #creamos subscripciones
+        self.create_subscription(Odometry, '/odom', self.odom_callback,1)
+        self.create_subscription(Twist, '/aruco_pos', self.aruco_pos_callback, 1)
+        self.waypoints = self.load_waypoints_yaml()
         
         self.state = 0  # Estado inicial 
         self.timer = self.create_timer(0.1, self.FSM)  # 0.1 segundos
@@ -44,24 +41,38 @@ class FSM(Node):
 
         self.nav_to_pose_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 
-        # while not self.nav_to_pose_client.wait_for_server(timeout_sec=1.0):
-        #     self.get_logger().info('Esperando al servidor de la acción navigate_to_pose...')
+        # self.lidar_launched = False
+        
+        self.goal_accepted = False
+        self.goal_sent = False
+        self.tf_buffer = tf2_ros.Buffer()                
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.first = True
+        self.distance = None
+        
 
 
 
     def FSM(self):
         #S0: cuando recibe odometria ejecuta callback que activa un flag indicando que puede empezar la FSM
         if self.state == 0:
-            self.get_logger().info('Estado 0: controlando...')
-            # Si recibe de /odom
+            if self.first:
+                self.get_logger().info('Estado 0: controlando...')
+                self.first = False
+            
             if self.odometry_recived:
-                self.state = 1  # Cambia al siguiente estado, aqui va un 1
+                time.sleep(5)
+                self.launch_planner()
+                time.sleep(5)
+                self.state = 3 # Cambia al siguiente estado 1
+                self.first = True
 
         
         #S1: resetea la odometria dando un trigger en el topic aruco_scan 
         elif self.state == 1:
-            self.get_logger().info('Estado 1: publicando True en /aruco_scan y reseteando odometria')
-            
+            if self.first:
+                self.get_logger().info('Estado 1: publicando True en /aruco_scan y reseteando odometria')
+                self.first = False
             if not hasattr(self, 'published_once'):
                 self.published_once = False
 
@@ -69,53 +80,67 @@ class FSM(Node):
                 msg = Bool()
                 msg.data = True
                 self.publisher_.publish(msg)
-                time.sleep(0.01)
+                time.sleep(0.5)
                 msg.data = False
                 self.publisher_.publish(msg)
 
                 self.published_once = True  # Marca que ya se ha publicado
 
             elif self.aruco_pos_state:
-                self.state = 2  # Ir al estado final
+                self.state = 3   # Ir al estado final
+                self.first = True
 
 
         #S2: Resetea el mapa con la nueva odometria
         elif self.state == 2:
-            self.get_logger().info('Estado 2: Reset del mapa')
-            
-            self.launch_SLAM(self.initial_x, self.initial_y, self.initial_yaw)
-
-            time.sleep(5)
-            
-            self.state = 3  # Ir al estado final
+            if self.first:
+                self.get_logger().info('Estado 2: Lanzando el Lidar')
+                self.first = False
+            if not self.lidar_launched:
+                self.launch_Lidar()
+                time.sleep(20)            
+                self.state = 3  # Ir al estado final
+                self.first = True
 
 
         #S3: Navegar a travès de los waypoints
         elif self.state == 3:
+            if self.first:
+                self.get_logger().info("Estado 3: enviando waypoint")
+                self.first = False
+            
             total_wp = len(self.waypoints)
 
             if self.waypoint_index < total_wp:
-                # Si ya se alcanzó el goal, esperar 5 segundos antes de avanzar
+                wp = self.waypoints[self.waypoint_index]
+                
+                # Si no hemos enviado un goal válido todavía, lo intentamos
+                 
+                if not self.goal_sent:
+                    print("GOAL SENT = FALSE")
+                    self.send_goal(wp['x'], wp['y'])
+                    # Marcamos que hemos intentado el envío, pero no que esté aceptado
+                    self.goal_sent = True
+                    self.goal_reached = False
+                # Si ya está aceptado y luego completado, pasamos al siguiente
                 if self.goal_reached:
-                    if self.arrival_time and (self.get_clock().now() - self.arrival_time).nanoseconds > 5e9:
-                        self.get_logger().info(f"Waypoint {self.waypoint_index + 1} completado.")
-                        self.waypoint_index += 1
-                        self.goal_reached = False  # Reinicia para el siguiente waypoint
-                        self.arrival_time = None
-                else:
-                    # Si todavía no se ha enviado el goal, envíalo.
-                    # Asegurarse de que no se envíe repetidamente:
-                    if not hasattr(self, 'goal_sent') or not self.goal_sent:
-                        wp = self.waypoints[self.waypoint_index]
-                        # Suponiendo que cada waypoint es [x, y]
-                        self.send_goal(wp['x'], wp['y'])
-                        self.goal_sent = True
+                    print("GOAL_REACHED = TRUE")
+                    # self.create_timer(5.0, self.timer_callback)
+                    # if (self.get_clock().now() - self.arrival_time).nanoseconds > 5e9:
+                    self.get_logger().info(f"Waypoint {self.waypoint_index + 1} completado.")
+                    self.waypoint_index += 1
+                    self.goal_sent = False
+                    self.goal_accepted = False
+                    self.goal_reached = False
+                    self.arrival_time = None
+                    # time.sleep(6)
             else:
                 self.get_logger().info("Todos los waypoints alcanzados.")
                 self.state = 4
+             
+                
 
-            
-        #S4: Estado final de reposo 
+        #S5: Estado final de reposo 
         elif self.state == 4:
             self.get_logger().info('Estado 4: estado final alcanzado. Nada más que hacer.')
             self.timer.cancel()  # Detiene la máquina de estados
@@ -130,7 +155,7 @@ class FSM(Node):
         self.initial_x = msg.linear.x
         self.initial_y = msg.linear.y
         self.initial_yaw = msg.angular.z  # Suponiendo que angular.z es el yaw
-
+        self.publish_pose(0.0, 0.0, 0.0)
         self.get_logger().info(
             f"Aruco pos: x={self.initial_x}, y={self.initial_y}, yaw={self.initial_yaw}"
         )
@@ -141,7 +166,7 @@ class FSM(Node):
        package_dir = get_package_share_directory(package_name)
        yaml_path = os.path.join(package_dir, 'config', 'waypoints.yaml')
        try:
-           with open(yaml_path, 'r') as file:
+           with open(yaml_path ,'r') as file:
                data = yaml.safe_load(file)
                return data.get('waypoints', [])
        except Exception as e:
@@ -155,13 +180,9 @@ class FSM(Node):
         goal_msg.pose.pose.position.x = x
         goal_msg.pose.pose.position.y = y
         goal_msg.pose.pose.orientation.z = 0.0
-
-        pose_msg = PoseStamped()
-        pose_msg.header = goal_msg.pose.header
-        pose_msg.pose = goal_msg.pose.pose
-        self.goal_pose_pub.publish(pose_msg)
-
+        
         self.get_logger().info(f"Enviando goal de navegación: x={x}, y={y}")
+
         self._send_goal_future = self.nav_to_pose_client.send_goal_async(
             goal_msg,
             feedback_callback=self.nav_feedback_callback
@@ -170,52 +191,90 @@ class FSM(Node):
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
+
         if not goal_handle.accepted:
             self.get_logger().warn('Goal rechazado.')
-            # Puedes definir alguna lógica de reintento o marcar el goal como alcanzado para continuar.
-            self.goal_reached = True
+            self.goal_sent = False
             return
-
+        
+                                                      # Se ha cmabiado esto
         self.get_logger().info('Goal aceptado, esperando resultado...')
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
+ 
     def get_result_callback(self, future):
-        result = future.result().result
+        
+        self.get_logger().warn("📋SE HA EJECUTADO CALLBACK RESPONSE📋")
+
+        # result = future.result().result
         status = future.result().status
         if status == 4:
+            # self.goal_sent = False
+            self.goal_reached = True
             self.get_logger().info('Goal alcanzado correctamente.')
+            # time.sleep(1)
         else:
             self.get_logger().warn(f'La navegación terminó con estado: {status}')
-        self.goal_reached = True
         self.arrival_time = self.get_clock().now()
-        self.goal_sent = False  # Permite enviar el siguiente goal
 
-
+    
     def nav_feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info(f'Feedback: Distancia restante {feedback.distance_remaining:.2f}')
-
-    def callback_response(self, future):
-        try:
-            result = future.result()
-            if result.result:
-                self.get_logger().info("Mapa cargado correctamente.")
-            else:
-                self.get_logger().error("La carga del mapa falló.")
-        except Exception as e:
-            self.get_logger().error(f"Error al cargar el mapa: {e}")
-    
-    def launch_SLAM(self, x, y, yaw):
-        pose_param = f"[{x-1.0}, {y-1.0}, {yaw}]"
+        self.distance = feedback.distance_remaining
+            
+    def launch_Lidar(self):
         subprocess.Popen(([
-            'ros2', 'launch', 'guiado', 'online_async_launch.py',
-            'use_sim_time:=false',
-            'map_start_pose:='+ pose_param
+            'ros2', 'launch', 'ydlidar_ros2_driver', 'ydlidar_launch_view.py',
         ]))
-        self.get_logger().info(pose_param)
+            
+    def publish_pose(self, x, y, theta):
+            msg = PoseWithCovarianceStamped()
+            msg.header.frame_id = "odom"
+            msg.header.stamp = self.get_clock().now().to_msg()
 
+            msg.pose.pose.position.x = x
+            msg.pose.pose.position.y = y
+            msg.pose.pose.position.z = 0.0
 
+            # Convert theta (yaw) to quaternion
+            qx, qy, qz, qw = self.euler_to_quaternion(0.0 ,0.0, theta)
+            msg.pose.pose.orientation.x = qx #q[0]
+            msg.pose.pose.orientation.y = qy #q[1]
+            msg.pose.pose.orientation.z = qz #q[2]
+            msg.pose.pose.orientation.w = qw #q[3]
+
+            # Covariance: usually set to low values for high confidence
+            msg.pose.covariance = [0.0] * 36
+
+            self.publisher_initialpose.publish(msg)
+            self.get_logger().info(f"Published initial pose: x={x}, y={y}, theta={theta}")
+
+    def launch_planner(self):
+        subprocess.Popen(
+            ['ros2', 'launch', 'planificador', 'planificador.launch.py'] # Falta añadir el yaml de guiado
+        )
+    
+    def euler_to_quaternion(self, roll, pitch, yaw):
+        # semicírculos
+        cy = math.cos(yaw * 0.5)
+        sy = math.sin(yaw * 0.5)
+        cp = math.cos(pitch * 0.5)
+        sp = math.sin(pitch * 0.5)
+        cr = math.cos(roll * 0.5)
+        sr = math.sin(roll * 0.5)
+    
+        qw = cr * cp * cy + sr * sp * sy
+        qx = sr * cp * cy - cr * sp * sy
+        qy = cr * sp * cy + sr * cp * sy
+        qz = cr * cp * sy - sr * sp * cy
+    
+        return qx, qy, qz, qw
+
+    # def timer_callback():
+        # return
+        
 def main(args=None):
     rclpy.init(args=args)
     node = FSM()
@@ -226,7 +285,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-
-
 
