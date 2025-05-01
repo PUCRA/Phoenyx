@@ -24,7 +24,7 @@ class ContinuousLidarNavigator(Node):
 
         self.goal_distance = 2.0  # distancia hacia adelante
         self.goal_threshold = 1.0  # metros para anticipar siguiente goal
-        self.timeout = 5.0
+        self.timeout = 1.5
         self.goal_active = False
         self.prev_time = 0
         self.last_goal_pose = None
@@ -193,7 +193,7 @@ class ContinuousLidarNavigator(Node):
         front_distance = ranges[mask]
         front_distance = max(front_distance)
         # Casos con pared frontal
-        if front_distance < 3.0:
+        if front_distance < 2.0:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
             mask_left = (np.isfinite(ranges)) & (np.radians(-80+offset) <= angles) & (angles <= np.radians(-10+offset))
             mask_right = (np.isfinite(ranges)) & (np.radians(10+offset) <= angles) & (angles <= np.radians(80+offset))
@@ -213,11 +213,11 @@ class ContinuousLidarNavigator(Node):
             # if front_distance < 1.2:
             #     angle = 45
             if max_left > max_right:
-                best_angle -= np.radians(80-abs(self.last_angle))
+                best_angle -= np.radians(45)
 
                 distance = front_distance*0.7
             else:
-                best_angle += np.radians(80-abs(self.last_angle))
+                best_angle += np.radians(45)
                 distance = front_distance*0.7
             
             
