@@ -15,6 +15,7 @@ import math
 import tf_transformations
 from geometry_msgs.msg import PoseWithCovarianceStamped
 import tf2_ros
+from bond.msg import Status 
 
 class FSM(Node):
     def __init__(self):
@@ -26,6 +27,12 @@ class FSM(Node):
         #creamos subscripciones
         self.create_subscription(Odometry, '/odom', self.odom_callback,1)
         self.create_subscription(Twist, '/aruco_pos', self.aruco_pos_callback, 1)
+        self.subscription = self.create_subscription(
+            Status,
+            '/bond',
+            self.bond_callback,
+            10
+        )
         self.waypoints = self.load_waypoints_yaml()
         
         self.state = 0  # Estado inicial 
@@ -48,6 +55,7 @@ class FSM(Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         self.first = True
         self.distance = None
+        self.nav2_ready = False
 
 
 
@@ -60,8 +68,6 @@ class FSM(Node):
             
             if self.odometry_recived:
                 time.sleep(5)
-                self.launch_planner()
-                time.sleep(20)  
                 self.state = 1  # Cambia al siguiente estado 1
                 self.first = True
 
@@ -75,13 +81,14 @@ class FSM(Node):
                 self.published_once = False
 
             if not self.published_once:
+                time.sleep(5)
                 msg = Bool()
                 msg.data = True
                 self.publisher_.publish(msg)
                 time.sleep(0.5)
                 msg.data = False
                 self.publisher_.publish(msg)
-
+                self.get_logger().info('Estado 1: Publicado!')
                 self.published_once = True  # Marca que ya se ha publicado
 
             elif self.aruco_pos_state:
@@ -96,15 +103,24 @@ class FSM(Node):
                 self.first = False
             if not self.lidar_launched:
                 self.launch_Lidar()
-                time.sleep(10)            
+                time.sleep(8)
+                self.launch_planner()
                 self.state = 3  # Ir al estado final
                 self.first = True
 
-
-        #S3: Navegar a travès de los waypoints
         elif self.state == 3:
             if self.first:
-                self.get_logger().info("Estado 3: enviando waypoints")
+                self.get_logger().info('Estado 3: Esperando a que NAV2 esté listo')
+                self.first = False
+            if self.nav2_ready:
+                self.first = True
+                time.sleep(5)
+                self.state = 4
+
+        #S3: Navegar a travès de los waypoints
+        elif self.state == 4:
+            if self.first:
+                self.get_logger().info("Estado 4: enviando waypoints")
                 self.first = False
             
             total_wp = len(self.waypoints)
@@ -133,7 +149,7 @@ class FSM(Node):
                 
             else:
                 self.get_logger().info("Todos los waypoints alcanzados.")
-                self.state = 4
+                self.state = 5
         
         #S5: Estado final de reposo 
         elif self.state == 5:
@@ -204,11 +220,15 @@ class FSM(Node):
 
         # result = future.result().result
         status = future.result().status
-        if status == 4 or self.distance < 0.26:
+        if status == 4 or self.distance < 0.5:
             # self.goal_sent = False
-            self.goal_reached = True
             self.get_logger().info('Goal alcanzado correctamente.')
+            time.sleep(5.1)
+            self.goal_reached = True
             # time.sleep(1)
+        elif status == 6:
+            self.get_logger().info('Goal abortado.')
+            self.goal_sent = False
         else:
             self.get_logger().warn(f'La navegación terminó con estado: {status}')
         self.arrival_time = self.get_clock().now()
@@ -218,6 +238,7 @@ class FSM(Node):
         feedback = feedback_msg.feedback
         # self.get_logger().info(f'Feedback: Distancia restante {feedback.distance_remaining:.2f}')
         self.distance = feedback.distance_remaining
+
 
 
         
@@ -252,6 +273,11 @@ class FSM(Node):
         subprocess.Popen(
             ['ros2', 'launch', 'guiado', 'planificador.launch.py']  # Falta añadir el yaml de guiado
         )
+
+    def bond_callback(self, msg):
+        if not self.nav2_ready:
+            self.nav2_ready = True
+            self.get_logger().info("¡bt_navigator está activo y publicando estado!")
         
 def main(args=None):
     rclpy.init(args=args)

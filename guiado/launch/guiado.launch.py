@@ -63,14 +63,12 @@ def generate_launch_description():
           
     return LaunchDescription([
     launch_SLAM,
+    localizacion_node,
 
     TimerAction(period=4.0, actions=[
         launch_bringup
     ]),
 
-    TimerAction(period=4.0, actions=[
-        localizacion_node
-    ]),
 
     # TimerAction(period=30.0, actions=[
         # launch_planificador

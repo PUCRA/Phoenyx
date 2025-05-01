@@ -131,9 +131,41 @@ class Rover(Node):
 
         :param intuitive: determines the mode
         """
+        MAX_ANGULAR_SPEED = 1.4
+        MAX_LINEAR_SPEED = 0.6
+        MIN_LINEAR_SPEED = 0.2
+        MIN_ANGULAR_SPEED = 0.8
+        MIN_SPEED = 0.3
+        v = twist_msg.linear.x
+        w = twist_msg.angular.z
+        magnitude = math.sqrt(v**2 + w**2)
+        # Caso: nada de movimiento
+        if magnitude < 1e-3:
+            v = 0.0
+            w = 0.0
+        # Caso: giro in place detectado (v pequeña y w suficientemente grande)
+        elif (abs(v) < 0.08 and abs(w) > 0.3) or (abs(v) == 0.0 and abs(w) > 0.0):
+            v = 0.0 # Fuerza giro in place
+            if abs(w) < MIN_ANGULAR_SPEED and w != 0.0:
+                w = abs(w)/w*MIN_ANGULAR_SPEED
+            w = max(min(w, MAX_ANGULAR_SPEED), -MAX_ANGULAR_SPEED)
+
+        # Caso: vector pequeño -> escalar al mínimo
+        elif magnitude < MIN_SPEED and magnitude != 0.0:
+            norm_v = v / magnitude
+            norm_w = w / magnitude
+            scaled_v = norm_v * MIN_LINEAR_SPEED
+            scaled_w = norm_w * MIN_ANGULAR_SPEED
+
+        # Caso: velocidad normal -> respetar dirección, limitar a máximos
+        scaled_v = max(min(v, MAX_LINEAR_SPEED), -MAX_LINEAR_SPEED)
+        scaled_w = max(min(w, MAX_ANGULAR_SPEED), -MAX_ANGULAR_SPEED)
+        twist_msg.angular.z = scaled_w
+        twist_msg.angular.x = scaled_v
+        self.get_logger().info(f"v: {scaled_v}, w: {scaled_w}")
         # check if we're supposed to rotate in place
         # twist_msg.angular.z = -twist_msg.angular.z
-        if abs(twist_msg.angular.z) > 0.1 and twist_msg.linear.x == 0.0:
+        if twist_msg.angular.x == 0.0 and abs(twist_msg.angular.z) > 0.05:
             # command corners to point to center
             corner_cmd_msg, drive_cmd_msg = self.calculate_rotate_in_place_cmd(twist_msg)
 
@@ -242,7 +274,7 @@ class Rover(Node):
         cmd_msg = CommandDrive()
         if speed == 0:
             return cmd_msg
-
+       
         elif abs(current_radius) >= self.max_radius:  # Very large turning radius, all wheels same speed
             angular_vel = speed / self.wheel_radius
             cmd_msg.left_front_vel = angular_vel
@@ -337,8 +369,8 @@ class Rover(Node):
         corner_cmd.right_front_pos = -corner_cmd.right_back_pos
 
         drive_cmd = CommandDrive()
-        if abs(twist.angular.z) < 1.0:
-            twist.angular.z = abs(twist.angular.z)/twist.angular.z*1.0
+        if abs(twist.angular.z) < 0.6:
+            twist.angular.z = abs(twist.angular.z)/twist.angular.z*0.6
         angular_vel = -twist.angular.z
         # velocity of each wheel center = angular velocity of center of rover * distance to wheel center
         front_wheel_vel = math.hypot(self.d1, self.d3) * angular_vel / self.wheel_radius

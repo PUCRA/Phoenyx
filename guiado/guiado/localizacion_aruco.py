@@ -12,7 +12,7 @@ from std_msgs.msg import Bool  # Se importa el mensaje Bool
 class ArucoDetector(Node):
     def __init__(self):
         super().__init__('aruco_detector')
-
+        self.get_logger().info("Iniciando nodo ArucoDetector...")
         self.simulation = False
         # self.bridge = CvBridge()
         self.camera_matrix = None
@@ -20,7 +20,7 @@ class ArucoDetector(Node):
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
         self.parameters = cv2.aruco.DetectorParameters_create()
         self.aruco_marker_length = 0.243  # No se modifica la longitud del marcador
-
+        self.get_logger().info("ArucoDetector inicializando...")
         if self.simulation:
             # Modo simulación
             # Suscripción para las imágenes y la información de la cámara
@@ -44,13 +44,15 @@ class ArucoDetector(Node):
             self.camera_matrix = np.load(cam_mat_file)
             self.dist_coeffs   = np.load(dist_file)
             # Inicializa VideoCapture
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture("/dev/camara_color")
+            self.get_logger().info("Cámara abierta correctamente.")
             w, h = (1280, 720) if res=="720p" else (640,480)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  w)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
             # Timer para leer frame a frame (ej. 30 Hz)
             fps = 10.0
             self.create_timer(1.0/fps, self.timer_callback)
+            self.get_logger().info("Timer creado para lectura de cámara.")
 
         
         # Suscripción para activar el procesamiento mediante /aruco_scan
@@ -66,13 +68,14 @@ class ArucoDetector(Node):
             '/aruco_pos',
             10)
         
-
+        self.get_logger().info("Topics creados!.")
         # Cargar posiciones de ArUcos desde el archivo YAML
         self.aruco_positions = self.load_aruco_positions()
 
         # Variables para controlar el disparo de la secuencia y almacenamiento de muestras
         self.active = False
         self.measurements = []  # Lista para almacenar tuples: (posXabs, posZabs, AngleRobot)
+        self.get_logger().info("ArucoDetector inicializado y listo para recibir activaciones.")
 
     def publish_aruco_position(self, x, y, theta):
         msg = Twist()
@@ -221,10 +224,13 @@ class ArucoDetector(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = ArucoDetector()
-    rclpy.spin(node)
-    rclpy.shutdown()
+    try:
+        rclpy.init(args=args)
+        node = ArucoDetector()
+        rclpy.spin(node)
+    finally:
+        node.cap.release()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
