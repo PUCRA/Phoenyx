@@ -18,7 +18,7 @@ class ArucoDetector(Node):
         self.camera_matrix = None
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
-        self.parameters = cv2.aruco.DetectorParameters()
+        self.parameters = cv2.aruco.DetectorParameters_create()
         self.aruco_marker_length = 0.3  # No se modifica la longitud del marcador
 
         if self.simulation:
