@@ -162,7 +162,7 @@ class Rover(Node):
         scaled_w = max(min(w, MAX_ANGULAR_SPEED), -MAX_ANGULAR_SPEED)
         twist_msg.angular.z = scaled_w
         twist_msg.angular.x = scaled_v
-        self.get_logger().info(f"v: {scaled_v}, w: {scaled_w}")
+        # self.get_logger().info(f"v: {scaled_v}, w: {scaled_w}")
         # check if we're supposed to rotate in place
         # twist_msg.angular.z = -twist_msg.angular.z
         if twist_msg.angular.x == 0.0 and abs(twist_msg.angular.z) > 0.05:

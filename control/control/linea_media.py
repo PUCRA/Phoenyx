@@ -24,7 +24,7 @@ class ContinuousLidarNavigator(Node):
 
         self.goal_distance = 2.0  # distancia hacia adelante
         self.goal_threshold = 1.0  # metros para anticipar siguiente goal
-        self.timeout = 1.5
+        self.timeout = 2.0
         self.goal_active = False
         self.prev_time = 0
         self.last_goal_pose = None
@@ -130,29 +130,16 @@ class ContinuousLidarNavigator(Node):
         msg = self.rotate_laserscan(msg, np.radians(-90))
         ranges = np.array(msg.ranges)
         angles = np.linspace(msg.angle_min, msg.angle_max, len(ranges))
-        offset = 0
+
         # Usamos un rango frontal de -80° a 80° (más sensible a giros)
-        mask = (np.isfinite(ranges)) & (np.radians(-80+offset) <= angles) & (angles <= np.radians(80+offset))
+        mask = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(80))
         valid_ranges = ranges[mask]
         valid_angles = angles[mask]
-        # lidar_points = PointStamped()
-        # points = []
-        # for r, a  in zip(valid_ranges, valid_angles):
-        #     x = r*math.cos(a)
-        #     y = r*math.sin(a)
-        #     z = 0.0
-        #     points.append([x, y, z])
-        # for point in points:
-        #     msg = PointStamped()
-        #     msg.header.frame_id = "lase_frame"
-        #     msg.header.stamp = self.get_clock().now().to_msg()
-        #     msg.point.x = point[0]
-        #     msg.point.y = point[1]
-        #     self.pub_points.publish(msg)
-        # if len(valid_ranges) == 0:
-        #     self.get_logger().warn("🚧 No hay datos válidos en -80° a 80°.")
-        #     return
-        
+
+        if len(valid_ranges) == 0:
+            self.get_logger().warn("🚧 No hay datos válidos en -80° a 80°.")
+            return
+
         # Suavizamos para quitar ruido
         smooth_ranges = np.convolve(valid_ranges, np.ones(3)/3, mode='same')
         new_ranges = []
@@ -180,83 +167,57 @@ class ContinuousLidarNavigator(Node):
         goal_x = np.mean(x_points)
         goal_y = np.mean(y_points)
 
-        best_angle = np.arctan2(goal_y, goal_x)
-        distance = np.sqrt(goal_x**2 + goal_y**2)
-        if distance < 0.5:
-            self.get_logger().warn("🚧 Goal demasiado cerca.")
-            distance = 1.0
-        elif distance > 3.0:
-            self.get_logger().warn("🚧 Goal demasiado lejos.")
-            distance = 2.0
-        
-        mask = (np.isfinite(ranges)) & (np.radians(-5+offset) <= angles) & (angles <= np.radians(5+offset))
+        mask = (np.isfinite(ranges)) & (np.radians(-5) <= angles) & (angles <= np.radians(5))
         front_distance = ranges[mask]
         front_distance = max(front_distance)
-        # Casos con pared frontal
-        if front_distance < 2.0:
+        if front_distance < 3.0:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
-            mask_left = (np.isfinite(ranges)) & (np.radians(-80+offset) <= angles) & (angles <= np.radians(-10+offset))
-            mask_right = (np.isfinite(ranges)) & (np.radians(10+offset) <= angles) & (angles <= np.radians(80+offset))
+            mask_left = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(-10))
+            mask_right = (np.isfinite(ranges)) & (np.radians(10) <= angles) & (angles <= np.radians(80))
             left_distance = ranges[mask_left]
             right_distance = ranges[mask_right]
             max_left = max(left_distance)
             max_right = max(right_distance)
             # front_distance -= 1
-            best_angle = np.radians(0)
-            # distance = front_distance - 1.3
-            # Caso con pared frontal immediata
-            # if front_distance < 1.5:
-                # best_angle = np.arctan2(3.5, (front_distance-0.75))
-                # distance = 1.5
-                # distance = np.sqrt((front_distance-0.75)**2+3.5**2)
-            # angle = 30
-            # if front_distance < 1.2:
-            #     angle = 45
+            angle = np.radians(0)
             if max_left > max_right:
-                best_angle -= np.radians(45)
-
-                distance = front_distance*0.7
+                angle -= np.radians(30)
+                if front_distance < 1.0:
+                    angle -= np.radians(30)
             else:
-                best_angle += np.radians(45)
-                distance = front_distance*0.7
-            
-            
-            # Caso con pared frontal cercana
+                angle += np.radians(30)
+                if front_distance < 1.0:
+                    angle += np.radians(30)
+            front_distance = abs((front_distance-0.75)/np.cos(angle))
+            goal_x = front_distance*np.cos(angle)
+            goal_y = front_distance*np.sin(angle)
+            # goal_y -= 0.5
+            # if max_left > max_right:
+            #     goal_x -= 1
             # else:
-            #     distance = front_distance*0.7
-            #     if max_left > max_right:
-            #         best_angle = np.radians(-25)
-            #     else:
-            #         best_angle = np.radians(25)
-        # Verificacion de que el punto escogido este dentro del rango del lidar
-        # mask = (np.isfinite(ranges)) & (best_angle-5 <= angles) & (angles <= best_angle+5 )
-        # lidar_dist_verification = ranges[mask]
-        # if lidar_dist_verification is not None and lidar_dist_verification != []:
-        #     lidar_dist_verification = max(lidar_dist_verification)
-        #     if lidar_dist_verification < distance:
-        #         distance = 0.8*lidar_dist_verification
-        #         self.get_logger().info("Punto fuera del rango")    
-        if distance > self.goal_distance:
-            distance = self.goal_distance
-        if self.last_angle > 80:
-            best_angle = best_angle/abs(best_angle)*np.radians(10)
-            self.get_logger().warning("Avoiding extra rotating!!")
-        goal_y = distance*np.sin(best_angle)
-        goal_x = distance*np.cos(best_angle)
-        if abs(self.last_angle) >= 15:
-            self.last_angle += best_angle
-        
+            #     goal_x += 1
+        else:
+            for i in range(len(x_points)):
+                error_x = goal_x - x_points[i]
+                error_y = goal_y - y_points[i]
+                error = math.sqrt(error_x**2 + error_y**2)
+                if error < 0.6:
+                    self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
+                    goal_x *= 0.5
+                    goal_y *= 0.5
+                    # goal_x += (goal_x - x_points[i]) * 0.5  # Ajuste proporcional
+                    # goal_y += (goal_y - y_points[i]) * 0.5
+                    break
 
         # Orientamos el goal hacia el ángulo calculado
-        # best_angle = math.atan2(goal_y, goal_x)
+        best_angle = math.atan2(goal_y, goal_x)
 
         # Aseguramos que el ángulo esté en un rango razonable
         if abs(best_angle) > math.radians(90):  # Evitar giros excesivos
             self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
             best_angle = np.sign(best_angle) * math.radians(90)
 
-        self.get_logger().info(f"🎯 Nuevo goal: ({distance:.2f}, {best_angle*180.0/np.pi:.2f}), yaw: {math.degrees(best_angle):.1f}°")
-
+        self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
         return goal_x, goal_y, best_angle
 
     def rotate_laserscan(self, scan_msg: LaserScan, angle_shift_rad: float) -> LaserScan:
