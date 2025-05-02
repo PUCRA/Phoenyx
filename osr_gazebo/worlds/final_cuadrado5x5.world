@@ -16,7 +16,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>8 0.01 1</size>
+              <size>5 0.01 1</size>
             </box>
           </geometry>
           <material>
@@ -26,12 +26,12 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>8 0.01 1</size>
+              <size>5 0.01 1</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>0 1 0.5 0 0 1.5708</pose>
+      <pose>0 2.5 0.5 0 0 1.5708</pose>
     </model>
 
     <!-- Pared derecha -->
@@ -59,14 +59,14 @@
       <pose>5 2.5 0.5 0 0 1.5708</pose>
     </model>
 
-    <!-- Pared superior -->
-    <model name="wall_top">
+    <!-- Pared superior izq-->
+    <model name="wall_top_i">
       <static>true</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>5 0.01 1</size>
+              <size>1.75 0.01 1</size>
             </box>
           </geometry>
           <material>
@@ -76,12 +76,37 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>5 0.01 1</size>
+              <size>1.75 0.01 1</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>2.5 5 0.5 0 0 0</pose>
+      <pose>0.875 5.0 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Pared superior -->
+    <model name="wall_top_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.75 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.75 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>4.125 5.0 0.5 0 0 0</pose>
     </model>
 
     <!-- Pared inferior -->
@@ -91,7 +116,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>3.5 0.01 1</size>
+              <size>5 0.01 1</size>
             </box>
           </geometry>
           <material>
@@ -101,22 +126,22 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>3.5 0.01 1</size>
+              <size>5 0.01 1</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>3.25 0 0.5 0 0 0</pose>
+      <pose>2.5 0 0.5 0 0 0</pose>
     </model>
 
     <!-- Inicio pasillo -->
-    <model name="wall_passillo">
+    <model name="wall_passillo_i">
       <static>true</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>3 0.01 1</size>
+              <size>2 0.01 1</size>
             </box>
           </geometry>
           <material>
@@ -126,12 +151,38 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>3 0.01 1</size>
+              <size>2 0.01 1</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>1.5 -1.5 0.5 0 0 1.5708</pose>
+      <pose>1.75 6 0.5 0 0 1.5708</pose>
     </model>
+
+    <!-- Inicio pasillo -->
+    <model name="wall_passillo_d">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 0.01 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 0.01 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <pose>3.25 6 0.5 0 0 1.5708</pose>
+    </model>
+
   </world>
 </sdf>
