@@ -43,7 +43,7 @@ class FSM_final(Node):
         self.publisher_ = self.create_publisher(Bool, '/aruco_scan', 1)
         self.publisher_initialpose = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 1)
         #creamos subscripciones
-        self.create_subscription(Odometry, '/odom', self.odom_callback,1)
+        # self.create_subscription(Odometry, '/odom', self.odom_callback,1)
         self.create_subscription(Twist, '/aruco_pos', self.aruco_pos_callback, 1)
         self.subscription = self.create_subscription(
             Status,
@@ -78,46 +78,46 @@ class FSM_final(Node):
 
         #### ================= CONTROL ================= ####
 
-        # self.goal_distance = 2.0  # distancia hacia adelante
-        # self.goal_threshold = 1.0  # metros para anticipar siguiente goal
-        # self.timeout = 2.0
-        # self.goal_active = False
-        # self.prev_time = 0
-        # self.last_goal_pose = None
-        # # self.last_goal_angle = None
-        # self.lidar_msg = None
-        # # self.clock = self.get_clock()
-        # self.frame_id = 'base_link'
-        # self.map_frame = 'map'
+        self.goal_distance = 2.0  # distancia hacia adelante
+        self.goal_threshold = 1.0  # metros para anticipar siguiente goal
+        self.timeout = 2.0
+        self.goal_active = False
+        self.prev_time = 0
+        self.last_goal_pose = None
+        # self.last_goal_angle = None
+        self.lidar_msg = None
+        # self.clock = self.get_clock()
+        self.frame_id = 'base_link'
+        self.map_frame = 'map'
 
-        # self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose', callback_group=ReentrantCallbackGroup())
-        # self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
-        # self.scan_pub = self.create_publisher(LaserScan, '/scan_filtered', 10)
-        # self.pub_goal = self.create_publisher(PoseStamped, '/goal_pose', 10)
-        # self.pub_points = self.create_publisher(PointStamped, '/points', 10)
-        # self.joystick = self.create_subscription(
-        #     Joy,
-        #     '/joy',
-        #     self.callback_mando,
-        #     10
-        # )
-        # self.subscription = self.create_subscription(
-        #     Odometry,
-        #     '/odom',
-        #     self.odom_callback,
-        #     10  # tamaño del buffer
-        # )
-        # self.x = 0
-        # self.y = 0
-        # self.orientation_q = None
+        self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose', callback_group=ReentrantCallbackGroup())
+        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
+        self.scan_pub = self.create_publisher(LaserScan, '/scan_filtered', 10)
+        self.pub_goal = self.create_publisher(PoseStamped, '/goal_pose', 10)
+        self.pub_points = self.create_publisher(PointStamped, '/points', 10)
+        self.joystick = self.create_subscription(
+            Joy,
+            '/joy',
+            self.callback_mando,
+            10
+        )
+        self.subscription = self.create_subscription(
+            Odometry,
+            '/odom',
+            self.odom_callback,
+            10  # tamaño del buffer
+        )
+        self.x = 0
+        self.y = 0
+        self.orientation_q = None
 
-        # self.tf_buffer = tf2_ros.Buffer()                
-        # self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.tf_buffer = tf2_ros.Buffer()                
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
-        # # self.FSM = self.create_timer(0.1, self.brain)
-        # self.start_node = False
-        # self.last_angle = 0.0
-        # # self.get_logger().info("⏩ Navegación continua con LiDAR iniciada")
+        # self.FSM = self.create_timer(0.1, self.brain)
+        self.start_node = False
+        self.last_angle = 0.0
+        # self.get_logger().info("⏩ Navegación continua con LiDAR iniciada")
 
 
 
@@ -195,53 +195,50 @@ class FSM_final(Node):
                 self.get_logger().info("Estado 4: enviando waypoints")
                 self.first = False
             
-            total_wp = len(self.waypoints)
-
-
-            if self.waypoint_index < total_wp:
-                wp = self.waypoints[self.waypoint_index]
+            if not self.goal_reached:
+                wp = self.waypoints[0]
                 
                 # Si no hemos enviado un goal válido todavía, lo intentamos
                 if not self.goal_sent:
                     self.send_goal(wp['x'], wp['y'])
-                    self.get_logger().info(f"Waypoint {self.waypoint_index + 1} enviado.")
+                    self.get_logger().info("Waypoint pasillo enviado.")
                     # Marcamos que hemos intentado el envío, pero no que esté aceptado
                     self.goal_sent = True
                     self.goal_reached = False
                 
-                # Si ya está aceptado y luego completado, pasamos al siguiente
-                if self.goal_reached:
-                    self.get_logger().info(f"Waypoint {self.waypoint_index + 1} completado.")
-                    self.waypoint_index += 1
-                    self.goal_sent = False
-                    self.goal_accepted = False
-                    self.goal_reached = False
-                    self.arrival_time = None
-                    # time.sleep(5)
-                
             else:
                 self.get_logger().info("Todos los waypoints alcanzados.")
                 self.state = 5
+                self.first = True
 
 
         #### ================= CONTROL ================= ####
 
-        # if self.lidar_msg != None and self.start_node:
-        #     if self.goal_active:
-        #         distance = self.check_progress()
-        #         self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
-        #         if distance != -1 and distance < self.goal_threshold:
-        #             self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
-        #             self.goal_active = False
-        #         if time.time() - self.prev_time > self.timeout:
-        #             self.goal_active = False
+        elif self.state == 5:
+            if self.first:
+                self.get_logger().info("Estado 5: Navegando el pasillo")
+                self.first = False
+
+            debug = True
+            if debug:
+                if self.lidar_msg != None and self.start_node:
+                    if self.goal_active:
+                        distance = self.check_progress()
+                        self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
+                        if distance != -1 and distance < self.goal_threshold:
+                            self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
+                            self.goal_active = False
+                        if time.time() - self.prev_time > self.timeout:
+                            self.goal_active = False
+            else:
+                self.state = 6
 
 
         #### ================= FINAL ================= ####
         
-        #S5: Estado final de reposo 
-        elif self.state == 5:
-            self.get_logger().info('Estado 5: estado final alcanzado. Nada más que hacer.')
+        #S6: Estado final de reposo 
+        elif self.state == 6:
+            self.get_logger().info('Estado 6: estado final alcanzado. Nada más que hacer.')
             self.timer.cancel()  # Detiene la máquina de estados
 
 
@@ -294,9 +291,9 @@ class FSM_final(Node):
             goal_msg,
             feedback_callback=self.nav_feedback_callback
         )
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
+        self._send_goal_future.add_done_callback(self.goal_response_callback_1)
 
-    def goal_response_callback(self, future):
+    def goal_response_callback_1(self, future):
         goal_handle = future.result()
 
         if not goal_handle.accepted:
@@ -446,7 +443,7 @@ class FSM_final(Node):
 
 
     def generate_goal_from_lidar(self, msg):
-        msg = self.rotate_laserscan(msg, np.radians(-90))
+        # msg = self.rotate_laserscan(msg, np.radians(-90))
         ranges = np.array(msg.ranges)
         angles = np.linspace(msg.angle_min, msg.angle_max, len(ranges))
 
