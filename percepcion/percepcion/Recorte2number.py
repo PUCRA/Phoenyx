@@ -6,7 +6,7 @@ import pytesseract
 
 class Recorte2number():
     def __init__(self):
-        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(3).pkl")
+        self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/final_knn.pkl")
         # self.knn = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(2).pkl")
         # self.knn2 = joblib.load("/home/pucra/Phoenyx/src/percepcion/percepcion/modelo_knn(1).pkl")
         self.prev_num = 0
@@ -58,20 +58,14 @@ class Recorte2number():
     def obtener_knn_num(self, img_thresh):
         img_flat = img_thresh.reshape(1, -1)
         white_pixels = np.count_nonzero(img_thresh > 100)
-        print(white_pixels)
-        if white_pixels < 20 or white_pixels > 300:
+        print(f"white_pixels: {white_pixels}")
+        # print(white_pixels)
+        if white_pixels < 20 or white_pixels > 1200:
             return 0
-        # if self.prev_num == 2 or self.prev_num == 3:
-        #     img_resize = cv2.resize(img_thresh, (28, 28))
-        #     img_resize = img_resize.reshape(1, -1)
-        #     prediccion = self.knn2.predict(img_resize)[0]
-        # else:
-            
-        #     prediccion = self.knn.predict(img_flat)[0]
         prediccion = self.knn.predict(img_flat)[0]
-        if prediccion != 5:
-            prediccion = self.obtener_num(img_thresh)
-        self.prev_num = prediccion
+        # if prediccion != 5:
+        #     prediccion = self.obtener_num(img_thresh)
+        # self.prev_num = prediccion
         return prediccion
 
     def obtener_colorYnum(self, image):
@@ -94,7 +88,7 @@ class Recorte2number():
         img_thresh[:frame_thickness, :] = 0  # Borde superior
         img_thresh[:, -frame_thickness:] = 0  # Borde derecho
 
-
+        img_thresh = self.bounding_box(img_thresh)
         contornos, jerarquia = cv2.findContours(img_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
         # Crear una imagen vacía para dibujar los contornos suavizados
@@ -117,15 +111,6 @@ class Recorte2number():
         
         for contorno in contornos_vacios:
             new_image = cv2.drawContours(new_image, [contorno], -1, (0), thickness=cv2.FILLED)
-
-        
-        # Mostrar la imagen binaria resultante con los contornos suavizados
-        # cv2.imshow('Contornos Suavizados', img_smooth)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        
-        # Guardar la imagen suavizada
-        # img_thresh = cv2.resize(img_thresh, (50, 50))
         img_thresh = cv2.resize(new_image, (50, 50))
         cv2.imwrite('imagen_suavizada.png', img_thresh)
         
@@ -133,3 +118,75 @@ class Recorte2number():
         # numero = self.obtener_num(image)
         numero = self.obtener_knn_num(img_thresh)
         return numero, color, img_thresh
+
+    def ordenar_puntos_bounding_box(self, puntos):
+        suma = puntos.sum(axis=1)
+        dif = np.diff(puntos, axis=1)
+
+        ordenados = np.zeros((4, 2), dtype="float32")
+        ordenados[0] = puntos[np.argmin(suma)]  # Top-left
+        ordenados[2] = puntos[np.argmax(suma)]  # Bottom-right
+        ordenados[1] = puntos[np.argmin(dif)]   # Top-right
+        ordenados[3] = puntos[np.argmax(dif)]   # Bottom-left
+        return ordenados
+
+    def bounding_box(self, binaria):
+        # Contornos
+        contornos, _ = cv2.findContours(binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contornos:
+            contorno_mas_grande = max(contornos, key=cv2.contourArea)
+            rect = cv2.minAreaRect(contorno_mas_grande)
+            centro, size, angulo = rect
+            ancho_rect, alto_rect = size
+            # Aseguramos que alto_rect sea el mayor (definimos orientación vertical)
+            if ancho_rect > alto_rect:
+                alto_rect, ancho_rect = ancho_rect, alto_rect
+                angulo += 90
+            # Nuevo tamaño cuadrado centrado
+            lado_cuadrado = alto_rect
+            # Crear el nuevo rectángulo cuadrado centrado, misma orientación
+            rect_cuadrado = (centro, (lado_cuadrado, lado_cuadrado), angulo)
+            box_cuadrado = cv2.boxPoints(rect_cuadrado)
+            box_cuadrado = np.intp(box_cuadrado)
+            # Warping
+            destino = np.array([
+                [0, 0],
+                [lado_cuadrado - 1, 0],
+                [lado_cuadrado - 1, lado_cuadrado - 1],
+                [0, lado_cuadrado - 1]
+            ], dtype="float32")
+            puntos_origen = self.ordenar_puntos_bounding_box(np.float32(box_cuadrado))
+            M = cv2.getPerspectiveTransform(puntos_origen, destino)
+            imagen_enderezada = cv2.warpPerspective(binaria, M, (int(lado_cuadrado), int(lado_cuadrado)))
+
+            # Redimensionar a tamaño uniforme
+            tamaño_final = 50
+            imagen_final = cv2.resize(imagen_enderezada, (tamaño_final, tamaño_final))
+            imagen_final = self.suavizar_numero(imagen_final)
+            return imagen_final
+        return -1
+
+    def suavizar_numero(self, img_thresh):
+        contornos, jerarquia = cv2.findContours(img_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Crear una imagen vacía para dibujar los contornos suavizados
+        img_smooth = np.zeros_like(img_thresh)  # Inicializa la imagen con ceros (negro)
+        contornos_vacios = []
+        # Suavizar y dibujar contornos
+        for i, contorno in enumerate(contornos):
+            # Comprobar si el contorno es exterior (nivel 0 en la jerarquía)
+            epsilon = 0.01 * cv2.arcLength(contorno, True)  # Ajustar epsilon para más suavizado
+            contorno_suavizado = cv2.approxPolyDP(contorno, epsilon, True)
+            if jerarquia[0][i][3] == -1:  # Contorno exterior
+
+
+                # Dibujar el contorno suavizado en la nueva imagen binaria, relleno de blanco
+                new_image = cv2.drawContours(img_smooth, [contorno_suavizado], -1, (255), thickness=cv2.FILLED)
+            else:
+                contornos_vacios.append(contorno_suavizado)
+            # elif cv2.contourArea(contorno) < 10:
+            #     new_image = cv2.drawContours(new_image, [contorno_suavizado], -1, (0), thickness=cv2.FILLED)
+
+        for contorno in contornos_vacios:
+            new_image = cv2.drawContours(new_image, [contorno], -1, (0), thickness=cv2.FILLED)
+        return new_image

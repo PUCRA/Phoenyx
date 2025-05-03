@@ -123,8 +123,11 @@ class brain_percepcion(Node):
 
                 # cv2.waitKey(0)
                 # self.get_logger().info("Obteniendo recorte...")
-                
-                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image)
+                depth_mask = mask.astype(np.uint8) * 255 
+                cv2.imwrite("depth.jpg", depth_mask)
+                cv2.imwrite("filtered.jpg", filtered_color_image)
+                # time.sleep(5)
+                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image, depth_mask)
                 # if img_bin is not None:
                 #     self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
                 if recorte is not None:
