@@ -136,17 +136,16 @@ class image2recorte():
                 cv2.imshow('Combined Mask', combined_mask)
 
             # # Tratamiento morfológico
+            combined_mask = cv2.bitwise_not(combined_mask)
             combined_mask = cv2.bitwise_and(combined_mask, depth)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
             close_img = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
             cleaned_mask = cv2.morphologyEx(close_img, cv2.MORPH_OPEN, kernel)
-            cleaned_mask = close_img
-            cleaned_mask = cv2.bitwise_not(cleaned_mask)
+            # cleaned_mask = close_imgk
+            # cleaned_mask = cv2.bitwise_not(cleaned_mask)
             if log_level == 1:
                 cv2.imshow('Cleaned Mask', cleaned_mask)
-            cv2.imwrite("Mask.jpg", cleaned_mask)
-
             vertices = self.detectar_contornos(cleaned_mask)
             # print(vertices)
             if len(vertices) == 0:
