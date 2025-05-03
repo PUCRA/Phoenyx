@@ -12,7 +12,7 @@ from rclpy.action import ActionClient
 import subprocess
 import time
 import math
-# import tf_transformations
+# import tf_transformations     # raspi
 from geometry_msgs.msg import PoseWithCovarianceStamped
 import tf2_ros
 import rclpy.duration
@@ -27,138 +27,221 @@ from builtin_interfaces.msg import Time
 from sensor_msgs.msg import Joy, PointCloud2
 from std_msgs.msg import Header
 from bond.msg import Status
+from sensor_msgs.msg import Image, CameraInfo
+import cv2
+from cv_bridge import CvBridge      # simulacion
 
 class FSM_final(Node):
     def __init__(self):
         super().__init__('brain_final')
+        
+        #### ================= VARIABLES NODO ============= ####
+        self.state = 0  # Estado inicial
+        self.timer = self.create_timer(0.1, self.FSM)  # 0.1 segundos
+        self.first = True
+        self.tf_buffer = tf2_ros.Buffer()                
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.start_node = False
+        self.simulation = True
+        
+        #### ================= LOCALIZACIÓN ARUCO ================= ####
+        
+        # Publicador para la posición resultante
+        self.publisher_aruco_pos = self.create_publisher(
+            Twist,
+            '/aruco_pos',
+            10)
+        
+        if self.simulation:
+            # Modo simulación
+            self.subscription_image = self.create_subscription(
+                Image,
+                '/camera/image_raw',
+                self.image_callback,
+                10
+            )
+            
+            self.subscription_camera_info = self.create_subscription(
+                CameraInfo,
+                '/camera/camera_info',
+                self.camera_info_callback,
+                10
+            )
+            
+        else:
+            # Modo real: abrimos la cámara y cargamos calibración de ficheros
+            calib_dir = os.path.expanduser('./src/phoenyx_nodes/scripts_malosh/aruco/calib_params')
+            self.res = "720p"
+            cam_mat_file = os.path.join(calib_dir, f'camera_matrix_{self.res}.npy')
+            dist_file    = os.path.join(calib_dir, f'dist_coeffs_{self.res}.npy')
+            self.camera_matrix = np.load(cam_mat_file)
+            self.dist_coeffs   = np.load(dist_file)
+        
+        # Cargar posiciones de ArUcos desde el archivo YAML
+        self.aruco_positions = self.load_aruco_positions()
+
+        # Variables para controlar el disparo de la secuencia y almacenamiento de muestras
+        self.odom_reset = False 
+        self.active = False
+        self.measurements = []  # Lista para almacenar tuples: (posXabs, posZabs, AngleRobot)
+        self.get_logger().info("ArucoDetector inicializado y listo para recibir activaciones.")
+
+        
+        self.bridge = CvBridge()
+        self.camera_matrix = None
+        self.dist_coeffs = None
+        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
+        # self.parameters = cv2.aruco.DetectorParameters_create()       # raspi
+        self.parameters = cv2.aruco.DetectorParameters()          # simulacion
+        self.aruco_marker_length = 0.243  # modificable
+
         #### ================= PERCEPCION ================= ####
 
-
+        self.number = None
 
 
 
         #### ================= GUIADO ================= ####
 
-        #creamos publicadores en aruco_scan, se encarga de dar un trigger para escanear arucos
-        self.publisher_ = self.create_publisher(Bool, '/aruco_scan', 1)
-        self.publisher_initialpose = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 1)
-        #creamos subscripciones
-        # self.create_subscription(Odometry, '/odom', self.odom_callback,1)
-        self.create_subscription(Twist, '/aruco_pos', self.aruco_pos_callback, 1)
-        self.subscription = self.create_subscription(
+        self.publisher_initialpose = self.create_publisher(
+            PoseWithCovarianceStamped, 
+            '/initialpose', 
+            1
+        )
+        
+        self.create_subscription(
             Status,
             '/bond',
             self.bond_callback,
             10
         )
-        self.waypoints = self.load_waypoints_yaml()
-        
-        self.state = 0  # Estado inicial 
-        self.timer = self.create_timer(0.1, self.FSM)  # 0.1 segundos
-        self.odometry_recived = False 
-        self.aruco_pos_state = False
-        
-        self.waypoint_index = 0
-        self.goal_reached = False
-        self.arrival_time = None
-        self.position = None  # Se actualizará con /odom
 
         self.nav_to_pose_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-
-        self.lidar_launched = False
         
-        self.goal_accepted = False
+        #variable donde guardamos waypoints
+        self.waypoints = self.load_waypoints_yaml()
+        
+        self.odometry_recived = False 
+        self.aruco_pos_state = False
+        self.goal_reached = False 
+        self.lidar_launched = False
         self.goal_sent = False
-        self.tf_buffer = tf2_ros.Buffer()                
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
-        self.first = True
         self.distance = None
         self.nav2_ready = False
 
 
         #### ================= CONTROL ================= ####
 
-        self.goal_distance = 2.0  # distancia hacia adelante
-        self.goal_threshold = 1.0  # metros para anticipar siguiente goal
-        self.timeout = 2.0
-        self.goal_active = False
-        self.prev_time = 0
-        self.last_goal_pose = None
-        # self.last_goal_angle = None
-        self.lidar_msg = None
-        # self.clock = self.get_clock()
-        self.frame_id = 'base_link'
-        self.map_frame = 'map'
-
         self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose', callback_group=ReentrantCallbackGroup())
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
-        self.scan_pub = self.create_publisher(LaserScan, '/scan_filtered', 10)
-        self.pub_goal = self.create_publisher(PoseStamped, '/goal_pose', 10)
-        self.pub_points = self.create_publisher(PointStamped, '/points', 10)
+        
+        self.scan_sub = self.create_subscription(
+            LaserScan, 
+            '/scan', 
+            self.lidar_callback, 
+            10
+        )
+        
+        self.scan_pub = self.create_publisher(
+            LaserScan, 
+            '/scan_filtered', 
+            10
+        )
+        
+        self.pub_goal = self.create_publisher(
+            PoseStamped, 
+            '/goal_pose', 
+            10
+        )
+        
+        self.pub_points = self.create_publisher(
+            PointStamped, 
+            '/points', 
+            10
+        )
+
         self.joystick = self.create_subscription(
             Joy,
             '/joy',
             self.callback_mando,
             10
         )
-        self.subscription = self.create_subscription(
+        
+        self.create_subscription(
             Odometry,
             '/odom',
             self.odom_callback,
             10  # tamaño del buffer
         )
-        self.x = 0
-        self.y = 0
+        
+        self.x = 0.0
+        self.y = 0.0
         self.orientation_q = None
-
-        self.tf_buffer = tf2_ros.Buffer()                
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
-
-        # self.FSM = self.create_timer(0.1, self.brain)
-        self.start_node = False
-        self.last_angle = 0.0
-        # self.get_logger().info("⏩ Navegación continua con LiDAR iniciada")
-
-
+        self.goal_threshold = 1.0  # metros para anticipar siguiente goal
+        self.timeout = 2.0
+        self.goal_active = False
+        self.prev_time = 0
+        self.last_goal_pose = None
+        self.lidar_msg = None
+        self.frame_id = 'base_link'
+        self.map_frame = 'map'
+        
+        
+        #### ================= ESCANEO DE ARUCOS ================= ####
+        
 
     def FSM(self):
+
+        
+                
         #### ================= PERCEPCION ================= ####
-        
+        if self.state == -2:
+           self.number = 9 
         
 
 
+            
         #### ================= LOCALIZACION ================= ####
         
-        #S0: cuando recibe odometria ejecuta callback que activa un flag indicando que puede empezar la FSM
-        
-        if self.state == 0:
+        elif self.state == 0:
             if self.first:
                 self.get_logger().info('Estado 0: controlando...')
                 self.first = False
             
-            if self.odometry_recived:
-                time.sleep(1)
+            if self.odometry_recived and self.start_node:
                 self.state = 3  # Cambia al siguiente estado 1
                 self.first = True
         
         elif self.state == 1:
             if self.first:
-                self.get_logger().info('Estado 1: publicando True en /aruco_scan y reseteando odometria')
+                if not self.simulation:
+                    # Inicializa VideoCapture
+                    self.cap = cv2.VideoCapture("/dev/camara_color")
+                    self.get_logger().info("Cámara abierta correctamente.")
+                    w, h = (1280, 720) if self.res=="720p" else (640,480)
+                    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  w)
+                    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+                    # Timer para leer frame a frame (ej. 30 Hz)
+                    fps = 5.0
+                    self.create_timer(1.0/fps, self.timer_callback)
+                else:
+                    self.active = True
+
                 self.first = False
-            if not hasattr(self, 'published_once'):
-                self.published_once = False
 
-            if not self.published_once:
-                time.sleep(5)
-                msg = Bool()
-                msg.data = True
-                self.publisher_.publish(msg)
-                time.sleep(0.5)
-                msg.data = False
-                self.publisher_.publish(msg)
-                self.get_logger().info('Estado 1: Publicado!')
-                self.published_once = True  # Marca que ya se ha publicado
-
+            elif self.odom_reset:
+                self.state = 2
+                self.first = True
+        
+        #S0: cuando recibe odometria ejecuta callback que activa un flag indicando que puede empezar la FSM
+        
+        
+        
+        elif self.state == -1:
+            if self.first:
+                self.get_logger().info('Estado 1: ')
+                self.first = False
+        
+                
             elif self.aruco_pos_state:
                 self.state = 2   # Ir al estado final
                 self.first = True
@@ -175,7 +258,7 @@ class FSM_final(Node):
                 self.launch_planner()
                 self.state = 3  # Ir al estado final
                 self.first = True
-
+        
 
         #### ================= WAYPOINTS ================= ####
 
@@ -185,9 +268,9 @@ class FSM_final(Node):
                 self.get_logger().info('Estado 3: Esperando a que NAV2 esté listo')
                 self.first = False
             if self.nav2_ready:
-                self.first = True
                 time.sleep(0.5)
                 self.state = 4
+                self.first = True
 
         #S4: Navegar a travès de los waypoints
         elif self.state == 4:
@@ -216,12 +299,13 @@ class FSM_final(Node):
 
         elif self.state == 5:
             if self.first:
-                self.get_logger().info("Estado 5: Navegando el pasillo")
+                self.get_logger().info("Estado 5:⏩ Navegación continua con LiDAR iniciada")
                 self.first = False
 
-            debug = True
-            if debug:
-                if self.lidar_msg != None and self.start_node:
+            
+
+            if True:       # Añadir cuando vea el aruco ID 15
+                if self.lidar_msg != None: 
                     if self.goal_active:
                         distance = self.check_progress()
                         self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
@@ -232,6 +316,7 @@ class FSM_final(Node):
                             self.goal_active = False
             else:
                 self.state = 6
+                self.first = True
 
 
         #### ================= FINAL ================= ####
@@ -245,13 +330,171 @@ class FSM_final(Node):
 
     #### ================= FUNCIONES PERCEPCION ================= ####
     
+    def publish_aruco_position(self, x, y, theta):
+        msg = Twist()
+        msg.linear.x = float(x-1)
+        msg.linear.y = float(y-1)
+        msg.angular.z = float(theta)
+        self.publisher_aruco_pos.publish(msg)
+        self.get_logger().info(f"Publicando posición final msg: X={msg.linear.x:.3f}, Y={msg.linear.y:.3f}, Ángulo={msg.angular.z:.3f}")
+        self.odom_reset = True
+
     
-    
-    
+    def load_aruco_positions(self):
+        with open(os.path.expanduser('./src/final/config/posiciones_arucos.yaml'), 'r') as file:
+            aruco_data = yaml.safe_load(file)
+        return {aruco['id']: (aruco['position']['x'], aruco['position']['y'], aruco['orientation']) for aruco in aruco_data['arucos']}
+
+
+    # Simulacion 
+    def image_callback(self, msg):
+        if self.state == -1:
+            if not self.active:
+                return  # No se procesa la imagen a menos que esté activado
+            try:
+                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            except Exception as e:
+                self.get_logger().error(f"Error al convertir la imagen: {e}")
+                return
+
+            # Procesa la imagen para detectar ArUco y estimar la pose.
+            result = self.detect_aruco_and_estimate_pose(frame)
+
+            if result is not None:
+                self.measurements.append(result)
+                self.get_logger().info(f"Medición {len(self.measurements)}/30 obtenida.")
+                if len(self.measurements) >= 30:
+                    # Aplica filtro mediano a cada uno de los valores
+                    posX_list, posZ_list, angle_list = zip(*self.measurements)
+                    posX_med = np.median(posX_list)
+                    posZ_med = np.median(posZ_list)
+                    angle_med = np.median(angle_list)
+                    # Publica el resultado único
+                    self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                    # Reinicia el proceso para futuras activaciones
+                    self.active = False
+                    self.measurements = []
+
+    def camera_info_callback(self, msg):
+        if self.state == -1:
+            self.camera_matrix = np.array(msg.k).reshape((3, 3))
+            self.dist_coeffs = np.array(msg.d)
+
+    # Real
+    def timer_callback(self):         
+        
+        #si el estado es el 3 el callback de la camara gestiona reset odom
+        if self.state == 3:
+            ret, frame = self.cap.read()
+            if not ret:
+                self.get_logger().error("No se pudo leer frame de la cámara real")
+                return
+
+            result = self.detect_aruco_and_estimate_pose(frame)
+            if result is not None:
+                self.measurements.append(result)
+                self.get_logger().info(f"Medición {len(self.measurements)}/10 obtenida.")
+                if len(self.measurements) >= 10:
+                    posX_list, posZ_list, angle_list = zip(*self.measurements)
+                    posX_med = np.median(posX_list)
+                    posZ_med = np.median(posZ_list)
+                    angle_med = np.median(angle_list)
+                    self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                    self.active = False
+                    self.measurements = []
+                    
+        #si el estado es el 5 entonces la funcionalidad es distinta           
+        elif self.state == 5:
+            ret, frame = self.cap.read()
+            if not ret:
+                self.get_logger().error("No se pudo leer frame de la cámara real")
+                return
+
+            result = self.detect_aruco_and_estimate_pose(frame)
+            if result is not None:
+                self.measurements.append(result)
+                self.get_logger().info(f"Medición {len(self.measurements)}/10 obtenida.")
+                if len(self.measurements) >= 10:
+                    posX_list, posZ_list, angle_list = zip(*self.measurements)
+                    posX_med = np.median(posX_list)
+                    posZ_med = np.median(posZ_list)
+                    angle_med = np.median(angle_list)
+                    self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                    self.active = False
+                    self.measurements = []
+
+    def undistort_image(self, frame):
+        h, w = frame.shape[:2]
+        new_camera_matrix, _ = cv2.getOptimalNewCameraMatrix(self.camera_matrix, self.dist_coeffs, (w, h), 1, (w, h))
+        return cv2.undistort(frame, self.camera_matrix, self.dist_coeffs, None, new_camera_matrix)
+
+    def detect_aruco_and_estimate_pose(self, frame):
+        frame = self.undistort_image(frame)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        corners, ids, _ = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
+
+        if ids is not None:
+            for corner in corners:
+                cv2.cornerSubPix(
+                    gray, corner,
+                    winSize=(5, 5),
+                    zeroZone=(-1, -1),
+                    criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                )
+
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+
+            for corner, marker_id in zip(corners, ids):
+                rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
+                    corner, self.aruco_marker_length, self.camera_matrix, self.dist_coeffs)
+                
+                cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.05)
+                self.print_pose(marker_id, tvec, rvec)
+
+
+                # ✅ Convertimos el rvec a matriz de rotación y extraemos yaw desde la rotación
+                R_mat, _ = cv2.Rodrigues(rvec[0][0])
+                # thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
+
+                result = self.calculate_robot_pos2(tvec, R_mat, marker_id[0])
+                return result
+
+        return None
+
+
+    def print_pose(self, marker_id, tvec, rvec):
+        self.get_logger().info(
+            f"\n=== ArUco Marker Detected ===\nMarker ID: {marker_id[0]}\nTranslation Vector (tvec):\n  X: {tvec[0][0][0]:.3f} m\n  Y: {tvec[0][0][1]:.3f} m\n  Z: {tvec[0][0][2]:.3f} m\nRotation Vector (rvec):\n  Rx: {rvec[0][0][0]:.3f} rad\n  Ry: {rvec[0][0][1]:.3f} rad\n  Rz: {rvec[0][0][2]:.3f} rad")
+
+    def calculate_robot_pos2(self, tvec, R_mat, aruco_id):
+        x_aruco_mapa, z_aruco_mapa, theta_aruco_mapa = self.aruco_positions[aruco_id]
+        self.get_logger().info(f"X_aruco: {x_aruco_mapa} Y_aruco: {z_aruco_mapa}, theta: {theta_aruco_mapa}")
+        T = tvec[0][0].reshape((3, 1))       # traslación del ArUco respecto a la cámara
+        R_inv = R_mat.T                         # Rotación inversa
+        T_inv = -np.dot(R_inv, T)          # Traslación inversa
+        # Posición del robot respecto al aruco
+        z_rel = T_inv[0, 0] + 0.15 # sumamos offset posicion camara
+        x_rel = T_inv[2, 0]
+
+        # Rotamos e insertamos al sistema del mapa
+        cos_theta = np.cos(theta_aruco_mapa)
+        sin_theta = np.sin(theta_aruco_mapa)
+
+        xrel = (cos_theta * x_rel - sin_theta * z_rel)
+        yrel = (sin_theta * x_rel + cos_theta * z_rel)
+        self.get_logger().info(f"Xarcuo robot: {xrel} Yaruco robot: {yrel}")
+        Xabs = x_aruco_mapa - xrel
+        Yabs = z_aruco_mapa - yrel
+        yaw_rel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # orientación de la cámara en el marco del ArUco
+        AngleRobot = theta_aruco_mapa - yaw_rel
+        AngleRobot=(AngleRobot + np.pi) % (2 * np.pi) - np.pi #aqui normalizamos el angulo 
+
+        
+        return Xabs, Yabs, AngleRobot
+
+
     
     #### ================= FUNCIONES GUIADO ================= ####     
-    def odom_callback(self, msg):    
-        self.odometry_recived = True    # Se ha recibido un msg por /odom
     
     def aruco_pos_callback(self, msg):
         self.aruco_pos_state = True     # Se ha recibido un mgs por /aruco_pos
@@ -291,9 +534,9 @@ class FSM_final(Node):
             goal_msg,
             feedback_callback=self.nav_feedback_callback
         )
-        self._send_goal_future.add_done_callback(self.goal_response_callback_1)
+        self._send_goal_future.add_done_callback(self.goal_response_callback_guiado)
 
-    def goal_response_callback_1(self, future):
+    def goal_response_callback_guiado(self, future):
         goal_handle = future.result()
 
         if not goal_handle.accepted:
@@ -306,7 +549,6 @@ class FSM_final(Node):
             self._get_result_future = goal_handle.get_result_async()
             self._get_result_future.add_done_callback(self.get_result_callback)
 
- 
     def get_result_callback(self, future):
 
         self.get_logger().warn("📋SE HA EJECUTADO CALLBACK RESPONSE📋")
@@ -316,7 +558,6 @@ class FSM_final(Node):
         if status == 4 or self.distance < 0.5:
             # self.goal_sent = False
             self.get_logger().info('Goal alcanzado correctamente.')
-            time.sleep(5.1)
             self.goal_reached = True
             # time.sleep(1)
         elif status == 6:
@@ -324,16 +565,12 @@ class FSM_final(Node):
             self.goal_sent = False
         else:
             self.get_logger().warn(f'La navegación terminó con estado: {status}')
-        self.arrival_time = self.get_clock().now()
 
-    
     def nav_feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         # self.get_logger().info(f'Feedback: Distancia restante {feedback.distance_remaining:.2f}')
         self.distance = feedback.distance_remaining
-        
-            
-    
+             
     def launch_Lidar(self):
         subprocess.Popen(([
             'ros2', 'launch', 'ydlidar_ros2_driver', 'ydlidar_launch_view.py',
@@ -349,11 +586,12 @@ class FSM_final(Node):
             msg.pose.pose.position.z = 0.0
 
             # Convert theta (yaw) to quaternion
-            qx, qy, qz, qw = self.euler_to_quaternion(0.0 ,0.0, theta)
-            msg.pose.pose.orientation.x = qx #q[0]
-            msg.pose.pose.orientation.y = qy #q[1]
-            msg.pose.pose.orientation.z = qz #q[2]
-            msg.pose.pose.orientation.w = qw #q[3]
+            # q = tf_transformations.quaternion_from_euler(0, 0, theta)   # raspi
+            q = self.euler_to_quaternion(0.0 ,0.0, theta)               # simulacion
+            msg.pose.pose.orientation.x = q[0]
+            msg.pose.pose.orientation.y = q[1]
+            msg.pose.pose.orientation.z = q[2]
+            msg.pose.pose.orientation.w = q[3]
 
             # Covariance: usually set to low values for high confidence
             msg.pose.covariance = [0.0] * 36
@@ -366,26 +604,6 @@ class FSM_final(Node):
             ['ros2', 'launch', 'planificador', 'planificador.launch.py'] # Falta añadir el yaml de guiado
         )
     
-    def euler_to_quaternion(self, roll, pitch, yaw):
-        # semicírculos
-        cy = math.cos(yaw * 0.5)
-        sy = math.sin(yaw * 0.5)
-        cp = math.cos(pitch * 0.5)
-        sp = math.sin(pitch * 0.5)
-        cr = math.cos(roll * 0.5)
-        sr = math.sin(roll * 0.5)
-    
-        qw = cr * cp * cy + sr * sp * sy
-        qx = sr * cp * cy - cr * sp * sy
-        qy = cr * sp * cy + sr * cp * sy
-        qz = cr * cp * sy - sr * sp * cy
-    
-        return qx, qy, qz, qw
-
-    def timer_callback():
-        return
-    
-
     def bond_callback(self, msg):
         if not self.nav2_ready:
             self.nav2_ready = True
@@ -394,32 +612,26 @@ class FSM_final(Node):
 
 
     #### ================= FUNCIONES CONTROL ================= ####
-
-
-    def callback_mando(self, msg):
-        if (not self.start_node) and msg.buttons[0]:
-            self.get_logger().info("Iniciando nodo")
-            self.start_node = msg.buttons[0] # Boton A
-                
+               
     # Actualiza el mensaje del lidar
     def lidar_callback(self, msg):
-        if (not self.goal_active) and self.start_node:
-            self.lidar_msg = msg
-            self.get_logger().info("Generando siguiente goal...")
-            x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg)
-            if x_forward is None:
-                return
-            goal, error = self.create_and_send_goal(x_forward, y_lateral, yaw)
-            self.goal_active = not error
-            # if self.goal_active:
-            #     time.sleep(5.0)
-            self.prev_time = time.time()
-            if error:
-                self.get_logger().warning("Error al generar el goal")
-            else:
-                self.last_goal_pose = goal
+        if self.state == 5:
+            if (not self.goal_active) and self.start_node:
+                self.lidar_msg = msg
+                self.get_logger().info("Generando siguiente goal...")
+                x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg)
+                if x_forward is None:
+                    return
+                goal, error = self.create_and_send_goal(x_forward, y_lateral, yaw)
+                self.goal_active = not error
+                # if self.goal_active:
+                #     time.sleep(5.0)
+                self.prev_time = time.time()
+                if error:
+                    self.get_logger().warning("Error al generar el goal")
+                else:
+                    self.last_goal_pose = goal
             
-
     # Checkea cuanta distancia queda para llegar al goal
     def check_progress(self):
         if not self.goal_active or self.last_goal_pose is None:
@@ -441,9 +653,8 @@ class FSM_final(Node):
             self.get_logger().warn(f"[TF Error] al verificar progreso: {e}")
             return -1
 
-
     def generate_goal_from_lidar(self, msg):
-        # msg = self.rotate_laserscan(msg, np.radians(-90))
+        # msg = self.rotate_laserscan(msg, np.radians(-90))     # raspi
         ranges = np.array(msg.ranges)
         angles = np.linspace(msg.angle_min, msg.angle_max, len(ranges))
 
@@ -561,8 +772,6 @@ class FSM_final(Node):
 
         return corrected_scan
 
-
-
     def average_lidar_in_blocks(self, ranges, angles, block_size=10):
         # Nos aseguramos de que sean arrays de numpy
         ranges = np.array(ranges)
@@ -630,17 +839,6 @@ class FSM_final(Node):
 
         self.goal_active = False
 
-    # Transforma de euler a quaternion
-    def euler_to_quaternion(self, roll, pitch, yaw):
-
-        # Convertimos Euler (roll, pitch, yaw) a cuaternión
-        qx = math.sin(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) - math.cos(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
-        qy = math.cos(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2)
-        qz = math.cos(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2) - math.sin(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2)
-        qw = math.cos(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
-
-        return [qx, qy, qz, qw]
-    
     def get_yaw_from_quaternion(self, x, y, z, w):
         siny_cosp = 2 * (w * z + x * y)
         cosy_cosp = 1 - 2 * (y * y + z * z)
@@ -673,6 +871,32 @@ class FSM_final(Node):
         except Exception as e:
             self.get_logger().warn(f"No se pudo transformar: {e}")
             return None, None, None
+        
+
+    #### ================= FUNCIONES FUSIONADAS ================= ####
+
+    def odom_callback(self, msg):    
+        self.odometry_recived = True    # Se ha recibido un msg por /odom
+        if self.state == 5:
+            self.x = msg.pose.pose.position.x
+            self.y = msg.pose.pose.position.y
+            self.orientation_q = msg.pose.pose.orientation
+
+    # Transforma de euler a quaternion
+    def euler_to_quaternion(self, roll, pitch, yaw):
+
+        # Convertimos Euler (roll, pitch, yaw) a cuaternión
+        qx = math.sin(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) - math.cos(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
+        qy = math.cos(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2)
+        qz = math.cos(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2) - math.sin(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2)
+        qw = math.cos(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
+
+        return [qx, qy, qz, qw]
+    
+    def callback_mando(self, msg):
+        if (not self.start_node) and msg.buttons[0]:
+            self.get_logger().info("Iniciando nodo")
+            self.start_node = msg.buttons[0] # Boton A
         
 def main(args=None):
     rclpy.init(args=args)
