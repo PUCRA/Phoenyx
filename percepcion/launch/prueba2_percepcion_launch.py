@@ -26,13 +26,20 @@ def generate_launch_description():
         'lectura_cam.yaml'
     )
     orbbec_params = load_yaml(percepcion_config, "orbbec_camera_launch")
-    
+    bringup = os.path.join(
+        get_package_share_directory('osr_bringup'),
+        'launch',
+        'osr_mod_launch.py'
+    )
     return LaunchDescription([
         # Incluir el launch de osr_mod_launch
         # IncludeLaunchDescription(
         #     PythonLaunchDescriptionSource(osr_mod_launch)
         # ),
         # Nodos adicionales no incluidos en osr_mod_launch
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(bringup)
+        ),
         Node(
             package="orbbec_camera",
             executable="orbbec_camera_node",
@@ -48,13 +55,13 @@ def generate_launch_description():
         #     output='screen',
         #     emulate_tty=True,
         # ),
-        # Node(
-        #     package='percepcion',
-        #     executable='dar_vueltas',
-        #     name='dar_vueltas',
-        #     output='screen',
-        #     emulate_tty=True,
-        # ),
+        Node(
+            package='percepcion',
+            executable='dar_vueltas',
+            name='dar_vueltas',
+            output='screen',
+            emulate_tty=True,
+        ),
         Node(
             package='percepcion',
             executable='brain_percepcion',

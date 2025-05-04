@@ -79,9 +79,9 @@ class Recorte2number():
             umbral = 150
         else:
             umbral = 120
-        _, img_thresh = cv2.threshold(gray, umbral, 255, cv2.THRESH_BINARY)
+        _, img_thresh = cv2.threshold(gray, umbral, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         frame_thickness = 10  # Ajusta este valor según el grosor del marco que quieras
-
+        cv2.imwrite('imagen_umbralizada.png', img_thresh)
         # Poner en negro los píxeles del marco exterior (bordes)
         img_thresh[-frame_thickness:, :] = 0  # Borde inferior
         img_thresh[:, :frame_thickness] = 0  # Borde izquierdo

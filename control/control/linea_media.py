@@ -24,7 +24,7 @@ class ContinuousLidarNavigator(Node):
 
         self.goal_distance = 2.0  # distancia hacia adelante
         self.goal_threshold = 1.0  # metros para anticipar siguiente goal
-        self.timeout = 2.0
+        self.timeout = 1.5
         self.goal_active = False
         self.prev_time = 0
         self.last_goal_pose = None
@@ -62,6 +62,7 @@ class ContinuousLidarNavigator(Node):
         self.start_node = False
         self.last_angle = 0.0
         self.get_logger().info("⏩ Navegación continua con LiDAR iniciada")
+        self.prev_is_turning = False
 
     def odom_callback(self, msg):
         self.x = msg.pose.pose.position.x
@@ -170,7 +171,7 @@ class ContinuousLidarNavigator(Node):
         mask = (np.isfinite(ranges)) & (np.radians(-5) <= angles) & (angles <= np.radians(5))
         front_distance = ranges[mask]
         front_distance = max(front_distance)
-        if front_distance < 3.0:
+        if front_distance < 2.2:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
             mask_left = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(-10))
             mask_right = (np.isfinite(ranges)) & (np.radians(10) <= angles) & (angles <= np.radians(80))
@@ -181,16 +182,23 @@ class ContinuousLidarNavigator(Node):
             # front_distance -= 1
             angle = np.radians(0)
             if max_left > max_right:
-                angle -= np.radians(30)
+                angle -= np.radians(45)
                 if front_distance < 1.0:
-                    angle -= np.radians(30)
+                    angle -= np.radians(15)
+                    front_distance = 1.0
             else:
-                angle += np.radians(30)
+                angle += np.radians(45)
                 if front_distance < 1.0:
-                    angle += np.radians(30)
+                    angle += np.radians(15)
+                    front_distance = 1.0
+            if self.prev_is_turning:
+                angle = abs(angle)/angle*np.radians(30)
+            if abs(front_distance) < 1.5:
+                front_distance = 1.5
             front_distance = abs((front_distance-0.75)/np.cos(angle))
             goal_x = front_distance*np.cos(angle)
             goal_y = front_distance*np.sin(angle)
+            
             # goal_y -= 0.5
             # if max_left > max_right:
             #     goal_x -= 1
@@ -211,7 +219,12 @@ class ContinuousLidarNavigator(Node):
 
         # Orientamos el goal hacia el ángulo calculado
         best_angle = math.atan2(goal_y, goal_x)
-
+        if abs(best_angle) >= 15.0:
+            self.prev_is_turning = True
+            self.timemout = 4.0
+        else:
+            self.prev_is_turning = False
+            self.timeout = 1.5
         # Aseguramos que el ángulo esté en un rango razonable
         if abs(best_angle) > math.radians(90):  # Evitar giros excesivos
             self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")

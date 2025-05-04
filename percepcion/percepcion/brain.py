@@ -127,7 +127,7 @@ class brain_percepcion(Node):
                 cv2.imwrite("depth.jpg", depth_mask)
                 cv2.imwrite("filtered.jpg", filtered_color_image)
                 # time.sleep(5)
-                recorte, img_bin = self.converter.obtener_recorte(filtered_color_image, depth_mask)
+                recorte, _ = self.converter.obtener_recorte(filtered_color_image, depth_mask)
                 # if img_bin is not None:
                 #     self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
                 if recorte is not None:
@@ -265,9 +265,9 @@ class brain_percepcion(Node):
             self.get_logger().info("Numero: "+numero_print+" Color: "+str(self.color_final))
             msg = Int32()
             if self.color_final == "Azul":
-                msg.data = -self.numero_final
-            elif self.color_final == "Rojo":
                 msg.data = self.numero_final
+            elif self.color_final == "Rojo":
+                msg.data = -self.numero_final
             else:
                 msg.data = 0
             self.pub_vueltas.publish(msg)
