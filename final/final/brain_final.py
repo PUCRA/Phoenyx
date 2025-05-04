@@ -93,13 +93,13 @@ class FSM_final(Node):
         self.camera_matrix = None
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
-        # self.parameters = cv2.aruco.DetectorParameters_create()       # raspi
-        self.parameters = cv2.aruco.DetectorParameters()          # simulacion
+        self.parameters = cv2.aruco.DetectorParameters_create()       # raspi
+        # self.parameters = cv2.aruco.DetectorParameters()          # simulacion
         self.aruco_marker_length = 0.243  # modificable
 
         #### ================= PERCEPCION ================= ####
 
-        self.number = 5
+        self.number = 5 #por el culo te la inco
         
 
 
@@ -186,6 +186,9 @@ class FSM_final(Node):
         self.lidar_msg = None
         self.frame_id = 'base_link'
         self.map_frame = 'map'
+        self.prev_is_turning = False
+        self.giro_forzado = False
+        self.indice_giro_aruco = 0
         
         
         #### ================= ESCANEO DE ARUCOS ================= ####
@@ -309,12 +312,12 @@ class FSM_final(Node):
             
 
                    # Añadir cuando vea el aruco ID 15
-            if self.lidar_msg != None: 
-                if self.goal_active:
+            if self.lidar_msg != None: #si el mensaje del lidar existe
+                if self.goal_active: 
                     distance = self.check_progress()
-                    self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
+                    # self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
                     if distance != -1 and distance < self.goal_threshold:
-                        self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
+                        # self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
                         self.goal_active = False
                     if time.time() - self.prev_time > self.timeout:
                         self.goal_active = False
@@ -329,7 +332,7 @@ class FSM_final(Node):
         #### ================= FINAL ================= ####
         elif self.state == 6:
             if self.first:
-                self.get_logger().info("Estado 6: Parando a 5m")
+                # self.get_logger().info("Estado 6: Parando a 5m")
                 self.active_sim = True
                 self.first = False
     
@@ -340,7 +343,7 @@ class FSM_final(Node):
                 
                 self.get_logger().info(f"{self.pose_aruco_final}")
 
-                r_forward = self.dist_aruco_15 - 5.0
+                r_forward = self.dist_aruco_15 - 5.0 # cambiar a 1.5m
                 x_forward = r_forward * np.sin(self.theta)
                 y_forward = r_forward * np.cos(self.theta)
                 self.get_logger().info(f"{x_forward, y_forward}")
@@ -388,6 +391,8 @@ class FSM_final(Node):
             self.get_logger().info(f"{self.final_laps}")
             self.get_logger().info('Estado 7: estado final alcanzado. Nada más que hacer.')
             self.timer.cancel()  # Detiene la máquina de estados
+
+        
 
     #### ================= FUNCIONES PERCEPCION ================= ####
     
@@ -718,7 +723,12 @@ class FSM_final(Node):
             if (not self.goal_active) and self.start_node:
                 self.lidar_msg = msg
                 self.get_logger().info("Generando siguiente goal...")
-                x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg, 0)
+                self.indice_giro_aruco = 0
+                if self.id == 10 and not self.giro_forzado: #Aruco girar izquierda
+                    self.indice_giro_aruco = 1 # izquierda
+                elif self.id == 11 and not self.giro_forzado: #Aruco girar derecha
+                    self.indice_giro_aruco = 2 # derecha
+                x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg, self.indice_giro_aruco)
                 if x_forward is None:
                     return
                 goal, error = self.create_and_send_goal(x_forward, y_lateral, yaw)
@@ -753,7 +763,7 @@ class FSM_final(Node):
             return -1
 
     def generate_goal_from_lidar(self, msg, giro = 0):
-        # msg = self.rotate_laserscan(msg, np.radians(-90))     # raspi
+        # msg = self.rotate_laserscan(msg, np.radians(-90))
         ranges = np.array(msg.ranges)
         angles = np.linspace(msg.angle_min, msg.angle_max, len(ranges))
 
@@ -796,39 +806,50 @@ class FSM_final(Node):
         mask = (np.isfinite(ranges)) & (np.radians(-5) <= angles) & (angles <= np.radians(5))
         front_distance = ranges[mask]
         front_distance = max(front_distance)
-        if front_distance < 3.0:
+        if front_distance < 2.2:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
-            mask_left = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(-10))
-            mask_right = (np.isfinite(ranges)) & (np.radians(10) <= angles) & (angles <= np.radians(80))
-            left_distance = ranges[mask_left]
-            right_distance = ranges[mask_right]
-            max_left = max(left_distance)
-            max_right = max(right_distance)
-            # front_distance -= 1
             angle = np.radians(0)
-            if max_left > max_right or giro == 2:
-                angle -= np.radians(30)
-                if front_distance < 1.0:
-                    angle -= np.radians(30)
-            elif max_left < max_right or giro == 1:
-                angle += np.radians(30)
-                if front_distance < 1.0:
-                    angle += np.radians(30)
+            sentido = 1
+            if giro == 0: # Lidar
+                mask_left = (np.isfinite(ranges)) & (np.radians(-80) <= angles) & (angles <= np.radians(-10))
+                mask_right = (np.isfinite(ranges)) & (np.radians(10) <= angles) & (angles <= np.radians(80))
+                left_distance = ranges[mask_left]
+                right_distance = ranges[mask_right]
+                max_left = max(left_distance)
+                max_right = max(right_distance)
+                if max_left > max_right:
+                    sentido = -1
+                else:
+                    sentido = 1
+                self.giro_forzado = False
+            elif giro == 1: # Izquierda si o si
+                sentido = -1
+                self.giro_forzado = True
+                self.get_logger().info("=========================FORZANDO GIRO IZQUIERAD ================================")
+            elif giro == 2: # Derecha si o si
+                sentido = 1
+                self.giro_forzado = True
+                self.get_logger().info("=========================FORZANDO GIRO DERECHA ================================")
+            angle = sentido*np.radians(45)
+            if front_distance < 1.0:
+                front_distance = 1.0
+                angle += sentido*np.radians(15)
+            if self.prev_is_turning:
+                angle = abs(angle)/angle*np.radians(30)
+            if abs(front_distance) < 1.5:
+                front_distance = 1.5
             front_distance = abs((front_distance-0.75)/np.cos(angle))
             goal_x = front_distance*np.cos(angle)
             goal_y = front_distance*np.sin(angle)
-            # goal_y -= 0.5
-            # if max_left > max_right:
-            #     goal_x -= 1
-            # else:
-            #     goal_x += 1
+            
         else:
+            self.giro_forzado = False
             for i in range(len(x_points)):
                 error_x = goal_x - x_points[i]
                 error_y = goal_y - y_points[i]
                 error = math.sqrt(error_x**2 + error_y**2)
                 if error < 0.6:
-                    # self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
+                    self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
                     goal_x *= 0.5
                     goal_y *= 0.5
                     # goal_x += (goal_x - x_points[i]) * 0.5  # Ajuste proporcional
@@ -837,13 +858,18 @@ class FSM_final(Node):
 
         # Orientamos el goal hacia el ángulo calculado
         best_angle = math.atan2(goal_y, goal_x)
-
+        if abs(best_angle) >= 15.0:
+            self.prev_is_turning = True
+            self.timemout = 4.0
+        else:
+            self.prev_is_turning = False
+            self.timeout = 1.5
         # Aseguramos que el ángulo esté en un rango razonable
         if abs(best_angle) > math.radians(90):  # Evitar giros excesivos
-            # self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
+            self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
             best_angle = np.sign(best_angle) * math.radians(90)
 
-        # self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
+        self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
         return goal_x, goal_y, best_angle
 
     def rotate_laserscan(self, scan_msg: LaserScan, angle_shift_rad: float) -> LaserScan:
