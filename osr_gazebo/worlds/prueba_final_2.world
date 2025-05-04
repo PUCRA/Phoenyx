@@ -342,7 +342,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>2 0.01 0.7</size>
+              <size>3 0.01 0.7</size>
             </box>
           </geometry>
           <material>
@@ -352,12 +352,12 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>2 0.01 0.7</size>
+              <size>3 0.01 0.7</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>5.25 11 0.35 0 0 1.5708</pose>
+      <pose>5.25 11.5 0.35 0 0 1.5708</pose>
     </model>
 
     <!-- Isla izquierda -->
@@ -417,7 +417,7 @@
         <visual name="visual">
           <geometry>
             <box>
-              <size>4.5 0.01 0.7</size>
+              <size>5.5 0.01 0.7</size>
             </box>
           </geometry>
           <material>
@@ -427,12 +427,12 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>4.5 0.01 0.7</size>
+              <size>5.5 0.01 0.7</size>
             </box>
           </geometry>
         </collision>
       </link>
-      <pose>6 13.5 0.35 0 0 0</pose>
+      <pose>6.5 13.5 0.35 0 0 0</pose>
     </model>
 
     <!-- Isla superior -->
@@ -642,7 +642,7 @@
     
     <include>
       <uri>model://5x5_1000-31</uri>
-      <pose>1.5 4.995 0.35 0 0 -1.5708</pose>
+      <pose>1.0 4.995 0.35 0 0 -1.5708</pose>
     </include>
             
     <include>
@@ -657,17 +657,19 @@
 
     <include>
       <uri>model://5x5_1000-5</uri>
+      <name>aruco_5_1</name>
       <pose>2.5 9.995 0.35 0 0 1.5708</pose>
     </include>
 
     <include>
-      <uri>model://5x5_1000-73</uri>
+      <uri>model://5x5_1000-5</uri>
+      <name>aruco_5_2</name>
       <pose>6.745 9.25 0.35 0 0 3.14159</pose>
     </include>
 
     <include>
-      <uri>model://5x5_1000-10</uri>
-      <name>aruco_10_1</name>
+      <uri>model://5x5_1000-5</uri>
+      <name>aruco_5_3</name>
       <pose>6 13.495 0.35 0 0 1.5708</pose>
     </include>
 

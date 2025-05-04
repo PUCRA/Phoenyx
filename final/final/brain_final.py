@@ -30,6 +30,8 @@ from bond.msg import Status
 from sensor_msgs.msg import Image, CameraInfo
 import cv2
 from cv_bridge import CvBridge      # simulacion
+from sklearn.cluster import DBSCAN
+import pandas as pd
 
 class FSM_final(Node):
     def __init__(self):
@@ -82,7 +84,7 @@ class FSM_final(Node):
 
         # Variables para controlar el disparo de la secuencia y almacenamiento de muestras
         self.odom_reset = False 
-        self.active = False
+        self.active_sim = False
         self.measurements = []  # Lista para almacenar tuples: (posXabs, posZabs, AngleRobot)
         self.get_logger().info("ArucoDetector inicializado y listo para recibir activaciones.")
 
@@ -97,8 +99,8 @@ class FSM_final(Node):
 
         #### ================= PERCEPCION ================= ####
 
-        self.number = None
-
+        self.number = 5
+        
 
 
         #### ================= GUIADO ================= ####
@@ -187,15 +189,27 @@ class FSM_final(Node):
         
         
         #### ================= ESCANEO DE ARUCOS ================= ####
+        self.arucos = []
+        self.final_poses = []
+        self.id = None
+        self.final_laps = None
+        self.final_mean_counter = 0
+        self.pose_aruco_final = None, None, None
+        self.dist_aruco_15 = None
+        self.theta = None
         
-
-    def FSM(self):
-
-        
-                
+    def FSM(self):     
         #### ================= PERCEPCION ================= ####
         if self.state == -2:
-           self.number = 9 
+            if self.first:
+                self.get_logger().info('Estado 1: ')
+                self.first = False
+
+                
+            elif self.aruco_pos_state:
+                self.state = 2   # Ir al estado final
+                self.first = True
+
         
 
 
@@ -224,7 +238,7 @@ class FSM_final(Node):
                     fps = 5.0
                     self.create_timer(1.0/fps, self.timer_callback)
                 else:
-                    self.active = True
+                    self.active_sim = True
 
                 self.first = False
 
@@ -234,18 +248,6 @@ class FSM_final(Node):
         
         #S0: cuando recibe odometria ejecuta callback que activa un flag indicando que puede empezar la FSM
         
-        
-        
-        elif self.state == -1:
-            if self.first:
-                self.get_logger().info('Estado 1: ')
-                self.first = False
-        
-                
-            elif self.aruco_pos_state:
-                self.state = 2   # Ir al estado final
-                self.first = True
-
 
         #S2: Resetea el mapa con la nueva odometria
         elif self.state == 2:
@@ -292,6 +294,7 @@ class FSM_final(Node):
             else:
                 self.get_logger().info("Todos los waypoints alcanzados.")
                 self.state = 5
+                self.goal_reached = False
                 self.first = True
 
 
@@ -299,34 +302,92 @@ class FSM_final(Node):
 
         elif self.state == 5:
             if self.first:
+                self.active_sim = True
                 self.get_logger().info("Estado 5:⏩ Navegación continua con LiDAR iniciada")
                 self.first = False
 
             
 
-            if True:       # Añadir cuando vea el aruco ID 15
-                if self.lidar_msg != None: 
-                    if self.goal_active:
-                        distance = self.check_progress()
-                        self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
-                        if distance != -1 and distance < self.goal_threshold:
-                            self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
-                            self.goal_active = False
-                        if time.time() - self.prev_time > self.timeout:
-                            self.goal_active = False
-            else:
+                   # Añadir cuando vea el aruco ID 15
+            if self.lidar_msg != None: 
+                if self.goal_active:
+                    distance = self.check_progress()
+                    self.get_logger().info(f"Distancia al goal: {distance:.2f} m")
+                    if distance != -1 and distance < self.goal_threshold:
+                        self.get_logger().info(f"📍 Cerca del goal ({distance:.2f} m)")
+                        self.goal_active = False
+                    if time.time() - self.prev_time > self.timeout:
+                        self.goal_active = False
+
+            # self.get_logger().info(f"{self.arucos}")
+
+            if self.id == 15:    
                 self.state = 6
                 self.first = True
 
 
         #### ================= FINAL ================= ####
+        elif self.state == 6:
+            if self.first:
+                self.get_logger().info("Estado 6: Parando a 5m")
+                self.active_sim = True
+                self.first = False
+    
+                
+            elif self.final_mean_counter == 10:
+                self.get_logger().info(f"{self.pose_aruco_final}")
+                time.sleep(0.5)
+                
+                self.get_logger().info(f"{self.pose_aruco_final}")
+
+                r_forward = self.dist_aruco_15 - 5.0
+                x_forward = r_forward * np.sin(self.theta)
+                y_forward = r_forward * np.cos(self.theta)
+                self.get_logger().info(f"{x_forward, y_forward}")
+                self.create_and_send_goal(x_forward, y_forward, 0.0)
+                
+                # self.send_goal(self.pose_aruco_final[0],self.pose_aruco_final[1] + 5.0)
+                # self.get_logger().info("Waypoint final enviado.")
+                # # Marcamos que hemos intentado el envío, pero no que esté aceptado
+                # self.goal_sent = True
+                # self.goal_reached = False
+                # goal_map_stamped = PoseStamped()
+                # goal_map_stamped.header.frame_id = self.map_frame
+                # goal_map_stamped.header.stamp = self.get_clock().now().to_msg()
+                # goal_map_stamped.pose.position.x = float(self.pose_aruco_final[0])
+                # goal_map_stamped.pose.position.y = float(self.pose_aruco_final[1] + 5.0)
+                # goal_map_stamped.pose.orientation.z = math.sin(self.pose_aruco_final[2]/2.0)
+                # goal_map_stamped.pose.orientation.w = math.cos(self.pose_aruco_final[2]/2.0)
+                # self.get_logger().info(f"➡️ Goal final: ({goal_map_stamped.pose.position.x:.2f}, {goal_map_stamped.pose.position.y:.2f})")
+                # self.pub_goal.publish(goal_map_stamped)
+            
+            if self.goal_reached:    
+                self.state = 7
+                self.first = True
         
         #S6: Estado final de reposo 
-        elif self.state == 6:
-            self.get_logger().info('Estado 6: estado final alcanzado. Nada más que hacer.')
+        elif self.state == 7:
+            self.arucos = [point for point in self.arucos if point[2] not in (10, 11)]
+            df = pd.DataFrame(self.arucos, columns=["x", "y", "ID"])
+
+            eps_distance = 1.5  # Distancia máxima entre puntos para considerarse en el mismo grupo
+            min_samples = 1     # Consideramos hasta detecciones individuales como un grupo
+            
+            id_especifico = self.number
+            puntos = df[df['ID'] == id_especifico][['x', 'y']].to_numpy()
+            
+            # Verifica que hay puntos
+            if len(puntos) == 0:
+                print(f"No hay puntos para ID {id_especifico}")
+            else:
+                clustering = DBSCAN(eps=eps_distance, min_samples=min_samples).fit(puntos)
+                etiquetas = clustering.labels_
+                self.final_laps = len(set(etiquetas)) - (1 if -1 in etiquetas else 0)
+                print(f"ID {id_especifico} tiene {self.final_laps} grupo(s)")
+
+            self.get_logger().info(f"{self.final_laps}")
+            self.get_logger().info('Estado 7: estado final alcanzado. Nada más que hacer.')
             self.timer.cancel()  # Detiene la máquina de estados
-
-
 
     #### ================= FUNCIONES PERCEPCION ================= ####
     
@@ -338,47 +399,69 @@ class FSM_final(Node):
         self.publisher_aruco_pos.publish(msg)
         self.get_logger().info(f"Publicando posición final msg: X={msg.linear.x:.3f}, Y={msg.linear.y:.3f}, Ángulo={msg.angular.z:.3f}")
         self.odom_reset = True
-
     
     def load_aruco_positions(self):
         with open(os.path.expanduser('./src/final/config/posiciones_arucos.yaml'), 'r') as file:
             aruco_data = yaml.safe_load(file)
         return {aruco['id']: (aruco['position']['x'], aruco['position']['y'], aruco['orientation']) for aruco in aruco_data['arucos']}
 
-
     # Simulacion 
     def image_callback(self, msg):
-        if self.state == -1:
-            if not self.active:
+        
+        # if self.state == -1:
+        if not self.active_sim:
                 return  # No se procesa la imagen a menos que esté activado
-            try:
-                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-            except Exception as e:
-                self.get_logger().error(f"Error al convertir la imagen: {e}")
-                return
+        try:
+            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        except Exception as e:
+            self.get_logger().error(f"Error al convertir la imagen: {e}")
+            return
 
-            # Procesa la imagen para detectar ArUco y estimar la pose.
-            result = self.detect_aruco_and_estimate_pose(frame)
+        # Procesa la imagen para detectar ArUco y estimar la pose.
+        result = self.detect_aruco_and_estimate_pose(frame)
+        if self.state == -1:
+            if not self.active_sim:
+                return  # No se procesa la imagen a menos que esté activado
+            else:
+                if result is not None:
+                    self.measurements.append(result)
+                    self.get_logger().info(f"Medición {len(self.measurements)}/30 obtenida.")
+                    if len(self.measurements) >= 30:
+                        # Aplica filtro mediano a cada uno de los valores
+                        posX_list, posZ_list, angle_list = zip(*self.measurements)
+                        posX_med = np.median(posX_list)
+                        posZ_med = np.median(posZ_list)
+                        angle_med = np.median(angle_list)
+                        # Publica el resultado único
+                        self.publish_aruco_position(posX_med, posZ_med, angle_med)
+                        # Reinicia el proceso para futuras activaciones
+                        self.active_sim = False
+                        self.measurements = []
 
-            if result is not None:
-                self.measurements.append(result)
-                self.get_logger().info(f"Medición {len(self.measurements)}/30 obtenida.")
-                if len(self.measurements) >= 30:
-                    # Aplica filtro mediano a cada uno de los valores
-                    posX_list, posZ_list, angle_list = zip(*self.measurements)
-                    posX_med = np.median(posX_list)
-                    posZ_med = np.median(posZ_list)
-                    angle_med = np.median(angle_list)
-                    # Publica el resultado único
-                    self.publish_aruco_position(posX_med, posZ_med, angle_med)
-                    # Reinicia el proceso para futuras activaciones
-                    self.active = False
-                    self.measurements = []
+
+
+        # if self.state == 5:
+        #     #self.arucos = self.extract id and global pose
+        #     #if self
+        #     self.get_logger().error("hola")
+        #     if not self.active_sim:
+        #         return  # No se procesa la imagen a menos que esté activado
+        #     try:
+        #         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        #     except Exception as e:
+        #         self.get_logger().error(f"Error al convertir la imagen: {e}")
+        #         return
+
+        #     # Procesa la imagen para detectar ArUco y estimar la pose.
+        #     result = self.detect_aruco_and_estimate_pose(frame)
+        #     self.get_logger().info(result)
+            
+        
 
     def camera_info_callback(self, msg):
-        if self.state == -1:
-            self.camera_matrix = np.array(msg.k).reshape((3, 3))
-            self.dist_coeffs = np.array(msg.d)
+        
+        self.camera_matrix = np.array(msg.k).reshape((3, 3))
+        self.dist_coeffs = np.array(msg.d)
 
     # Real
     def timer_callback(self):         
@@ -400,9 +483,9 @@ class FSM_final(Node):
                     posZ_med = np.median(posZ_list)
                     angle_med = np.median(angle_list)
                     self.publish_aruco_position(posX_med, posZ_med, angle_med)
-                    self.active = False
+                    self.active_sim = False
                     self.measurements = []
-                    
+
         #si el estado es el 5 entonces la funcionalidad es distinta           
         elif self.state == 5:
             ret, frame = self.cap.read()
@@ -420,7 +503,7 @@ class FSM_final(Node):
                     posZ_med = np.median(posZ_list)
                     angle_med = np.median(angle_list)
                     self.publish_aruco_position(posX_med, posZ_med, angle_med)
-                    self.active = False
+                    self.active_sim = False
                     self.measurements = []
 
     def undistort_image(self, frame):
@@ -431,9 +514,9 @@ class FSM_final(Node):
     def detect_aruco_and_estimate_pose(self, frame):
         frame = self.undistort_image(frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
+        corners, self.id, _ = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
 
-        if ids is not None:
+        if self.id is not None:
             for corner in corners:
                 cv2.cornerSubPix(
                     gray, corner,
@@ -442,25 +525,45 @@ class FSM_final(Node):
                     criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
                 )
 
-            cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            cv2.aruco.drawDetectedMarkers(frame, corners, self.id)
 
-            for corner, marker_id in zip(corners, ids):
+            for corner, marker_id in zip(corners, self.id):
                 rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
                     corner, self.aruco_marker_length, self.camera_matrix, self.dist_coeffs)
                 
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.05)
-                self.print_pose(marker_id, tvec, rvec)
+                # self.print_pose(marker_id, tvec, rvec)
 
 
                 # ✅ Convertimos el rvec a matriz de rotación y extraemos yaw desde la rotación
                 R_mat, _ = cv2.Rodrigues(rvec[0][0])
                 # thetaArucoRel = np.arctan2(R_mat[2, 0], R_mat[0, 0])  # Esto es yaw (ángulo del robot respecto al ArUco)
-
-                result = self.calculate_robot_pos2(tvec, R_mat, marker_id[0])
-                return result
+                if self.state == 1:
+                    result = self.calculate_robot_pos2(tvec, R_mat, marker_id[0])
+                    return result
+                elif self.state == 5:
+                    # self.get_logger().info(f"{self.id}")
+                    result = self.transform_point_base_to_map(tvec[0][0][2], tvec[0][0][0], math.atan2(tvec[0][0][2], tvec[0][0][0]))
+                    self.arucos.append([result[0], result[1], int(self.id[0][0])])
+                    return result
+                
+                elif self.state == 6:
+                    
+                    self.final_mean_counter += 1 
+                    # self.get_logger().info(f"{self.id}")
+                    result = self.transform_point_base_to_map(tvec[0][0][2], tvec[0][0][0], math.atan2(tvec[0][0][0], tvec[0][0][2]))
+                    self.final_poses.append(result)
+                    self.dist_aruco_15 = np.hypot(tvec[0][0][2], tvec[0][0][0])
+                    self.theta = math.atan2(tvec[0][0][0], tvec[0][0][2])
+                    if self.final_mean_counter == 10:
+                        mean_x = np.mean(self.final_poses[0])
+                        mean_y = np.mean(self.final_poses[1])
+                        mean_yaw = np.mean(self.final_poses[2])
+                        self.pose_aruco_final = mean_x, mean_y, mean_yaw
+                    return result
+                    #calcular pos en globale
 
         return None
-
 
     def print_pose(self, marker_id, tvec, rvec):
         self.get_logger().info(
@@ -491,8 +594,6 @@ class FSM_final(Node):
 
         
         return Xabs, Yabs, AngleRobot
-
-
     
     #### ================= FUNCIONES GUIADO ================= ####     
     
@@ -609,8 +710,6 @@ class FSM_final(Node):
             self.nav2_ready = True
             self.get_logger().info("¡bt_navigator está activo y publicando estado!")
 
-
-
     #### ================= FUNCIONES CONTROL ================= ####
                
     # Actualiza el mensaje del lidar
@@ -619,7 +718,7 @@ class FSM_final(Node):
             if (not self.goal_active) and self.start_node:
                 self.lidar_msg = msg
                 self.get_logger().info("Generando siguiente goal...")
-                x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg)
+                x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg, 0)
                 if x_forward is None:
                     return
                 goal, error = self.create_and_send_goal(x_forward, y_lateral, yaw)
@@ -653,7 +752,7 @@ class FSM_final(Node):
             self.get_logger().warn(f"[TF Error] al verificar progreso: {e}")
             return -1
 
-    def generate_goal_from_lidar(self, msg):
+    def generate_goal_from_lidar(self, msg, giro = 0):
         # msg = self.rotate_laserscan(msg, np.radians(-90))     # raspi
         ranges = np.array(msg.ranges)
         angles = np.linspace(msg.angle_min, msg.angle_max, len(ranges))
@@ -707,11 +806,11 @@ class FSM_final(Node):
             max_right = max(right_distance)
             # front_distance -= 1
             angle = np.radians(0)
-            if max_left > max_right:
+            if max_left > max_right or giro == 2:
                 angle -= np.radians(30)
                 if front_distance < 1.0:
                     angle -= np.radians(30)
-            else:
+            elif max_left < max_right or giro == 1:
                 angle += np.radians(30)
                 if front_distance < 1.0:
                     angle += np.radians(30)
@@ -729,7 +828,7 @@ class FSM_final(Node):
                 error_y = goal_y - y_points[i]
                 error = math.sqrt(error_x**2 + error_y**2)
                 if error < 0.6:
-                    self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
+                    # self.get_logger().info(f"🚧 Punto cercano a la pared: ({x_points[i]:.2f}, {y_points[i]:.2f}), error: {error:.2f} m")
                     goal_x *= 0.5
                     goal_y *= 0.5
                     # goal_x += (goal_x - x_points[i]) * 0.5  # Ajuste proporcional
@@ -741,10 +840,10 @@ class FSM_final(Node):
 
         # Aseguramos que el ángulo esté en un rango razonable
         if abs(best_angle) > math.radians(90):  # Evitar giros excesivos
-            self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
+            # self.get_logger().warn(f"⚠️ Ángulo excesivo de giro ({math.degrees(best_angle):.1f}°). Ajustando...")
             best_angle = np.sign(best_angle) * math.radians(90)
 
-        self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
+        # self.get_logger().info(f"🎯 Nuevo goal: ({goal_x:.2f}, {goal_y:.2f}), yaw: {math.degrees(best_angle):.1f}°")
         return goal_x, goal_y, best_angle
 
     def rotate_laserscan(self, scan_msg: LaserScan, angle_shift_rad: float) -> LaserScan:
@@ -872,7 +971,6 @@ class FSM_final(Node):
             self.get_logger().warn(f"No se pudo transformar: {e}")
             return None, None, None
         
-
     #### ================= FUNCIONES FUSIONADAS ================= ####
 
     def odom_callback(self, msg):    
