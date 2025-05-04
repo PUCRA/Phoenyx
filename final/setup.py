@@ -27,7 +27,8 @@ setup(
     entry_points={
         'console_scripts': [
             'localizacion_final = final.localizacion_final:main',
-            'brain_final = final.brain_final:main'
+            'brain_final = final.brain_final:main',
+            'brain2 = final.intento2_brain:main', 
         ],
     },
 )

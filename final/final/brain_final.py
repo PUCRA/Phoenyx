@@ -194,12 +194,13 @@ class FSM_final(Node):
         #### ================= ESCANEO DE ARUCOS ================= ####
         self.arucos = []
         self.final_poses = []
+        self.final_theta = []
         self.id = None
         self.final_laps = None
         self.final_mean_counter = 0
         self.pose_aruco_final = None, None, None
         self.dist_aruco_15 = None
-        self.theta = None
+        # self.theta = None
         
     def FSM(self):     
         #### ================= PERCEPCION ================= ####
@@ -343,11 +344,11 @@ class FSM_final(Node):
                 
                 self.get_logger().info(f"{self.pose_aruco_final}")
 
-                r_forward = self.dist_aruco_15 - 5.0 # cambiar a 1.5m
-                x_forward = r_forward * np.sin(self.theta)
-                y_forward = r_forward * np.cos(self.theta)
-                self.get_logger().info(f"{x_forward, y_forward}")
-                self.create_and_send_goal(x_forward, y_forward, 0.0)
+                r_forward = self.dist_aruco_15 - 1.5 # cambiar a 1.5m
+                # x_forward = r_forward * np.cos(self.theta)
+                # y_forward = r_forward * np.sin(self.theta)
+                # self.get_logger().info(f"{x_forward, y_forward}")
+                self.create_and_send_goal(r_forward, 0.0, 0.0, True)
                 
                 # self.send_goal(self.pose_aruco_final[0],self.pose_aruco_final[1] + 5.0)
                 # self.get_logger().info("Waypoint final enviado.")
@@ -557,14 +558,19 @@ class FSM_final(Node):
                     self.final_mean_counter += 1 
                     # self.get_logger().info(f"{self.id}")
                     result = self.transform_point_base_to_map(tvec[0][0][2], tvec[0][0][0], math.atan2(tvec[0][0][0], tvec[0][0][2]))
-                    self.final_poses.append(result)
-                    self.dist_aruco_15 = np.hypot(tvec[0][0][2], tvec[0][0][0])
-                    self.theta = math.atan2(tvec[0][0][0], tvec[0][0][2])
+                    
                     if self.final_mean_counter == 10:
-                        mean_x = np.mean(self.final_poses[0])
-                        mean_y = np.mean(self.final_poses[1])
-                        mean_yaw = np.mean(self.final_poses[2])
-                        self.pose_aruco_final = mean_x, mean_y, mean_yaw
+                        # mean_x = np.mean(self.final_poses[0])
+                        # mean_y = np.mean(self.final_poses[1])
+                        # mean_yaw = np.mean(self.final_poses[2])
+                        # self.pose_aruco_final = mean_x, mean_y, mean_yaw
+                        # self.theta = np.mean(self.final_theta)
+                        self.dist_aruco_15 = np.mean(self.final_poses)
+                    else:
+                        dist_aruco_15 = np.hypot(tvec[0][0][2], tvec[0][0][0])
+                        self.final_poses.append(dist_aruco_15)
+                        # theta = math.atan2(tvec[0][0][0], tvec[0][0][2])
+                        # self.final_theta.append(theta)
                     return result
                     #calcular pos en globale
 
@@ -723,11 +729,14 @@ class FSM_final(Node):
             if (not self.goal_active) and self.start_node:
                 self.lidar_msg = msg
                 self.get_logger().info("Generando siguiente goal...")
-                self.indice_giro_aruco = 0
                 if self.id == 10 and not self.giro_forzado: #Aruco girar izquierda
                     self.indice_giro_aruco = 1 # izquierda
+                    self.giro_forzado = True
                 elif self.id == 11 and not self.giro_forzado: #Aruco girar derecha
                     self.indice_giro_aruco = 2 # derecha
+                    self.giro_forzado = True
+                elif not self.giro_forzado:
+                    self.indice_giro_aruco = 0
                 x_forward, y_lateral, yaw = self.generate_goal_from_lidar(self.lidar_msg, self.indice_giro_aruco)
                 if x_forward is None:
                     return
@@ -806,7 +815,7 @@ class FSM_final(Node):
         mask = (np.isfinite(ranges)) & (np.radians(-5) <= angles) & (angles <= np.radians(5))
         front_distance = ranges[mask]
         front_distance = max(front_distance)
-        if front_distance < 2.2:
+        if front_distance < 2.2 or self.giro_forzado:
             self.get_logger().warning(f"Pared detectada: {front_distance:.2f} m")
             angle = np.radians(0)
             sentido = 1
@@ -824,11 +833,11 @@ class FSM_final(Node):
                 self.giro_forzado = False
             elif giro == 1: # Izquierda si o si
                 sentido = -1
-                self.giro_forzado = True
+                self.giro_forzado = False
                 self.get_logger().info("=========================FORZANDO GIRO IZQUIERAD ================================")
             elif giro == 2: # Derecha si o si
                 sentido = 1
-                self.giro_forzado = True
+                self.giro_forzado = False
                 self.get_logger().info("=========================FORZANDO GIRO DERECHA ================================")
             angle = sentido*np.radians(45)
             if front_distance < 1.0:
@@ -858,6 +867,8 @@ class FSM_final(Node):
 
         # Orientamos el goal hacia el ángulo calculado
         best_angle = math.atan2(goal_y, goal_x)
+        if giro > 0:
+            self.timeout = 10.0
         if abs(best_angle) >= 15.0:
             self.prev_is_turning = True
             self.timemout = 4.0
@@ -918,9 +929,14 @@ class FSM_final(Node):
         return avg_ranges, avg_angles
 
     # Transforma el goal de odom a map y prepara el mensaje para nav2
-    def create_and_send_goal(self, x_forward, y_lateral, yaw):
+    def create_and_send_goal(self, x_forward, y_lateral, yaw, transform = True):
         try:
-            x, y, yaw = self.transform_point_base_to_map(x_forward, y_lateral, yaw)
+            if transform:
+                x, y, yaw = self.transform_point_base_to_map(x_forward, y_lateral, yaw)
+            else:
+                x = x_forward
+                y = y_lateral
+                yaw = yaw
             if x is None or y is None or yaw is None:
                 return None, 1
             else:
@@ -934,6 +950,7 @@ class FSM_final(Node):
                 self.get_logger().info(f"➡️ Nuevo goal dinámico: ({goal_map_stamped.pose.position.x:.2f}, {goal_map_stamped.pose.position.y:.2f})")
                 self.pub_goal.publish(goal_map_stamped)
                 return goal_map_stamped, 0
+                
 
         except Exception as e:
             self.get_logger().warn(f"Error al transformar goal: {e}")
@@ -987,7 +1004,7 @@ class FSM_final(Node):
                 target_frame,
                 timeout=rclpy.duration.Duration(seconds=1.0)
             )
-            self.get_logger().info("Tranformando")
+            # self.get_logger().info("Tranformando")
             yaw = self.get_yaw_from_quaternion(transformed_point.pose.orientation.x,
                                                transformed_point.pose.orientation.y,
                                                transformed_point.pose.orientation.z,
@@ -1021,7 +1038,31 @@ class FSM_final(Node):
         if (not self.start_node) and msg.buttons[0]:
             self.get_logger().info("Iniciando nodo")
             self.start_node = msg.buttons[0] # Boton A
+    ### PREPARACION DE FUNCIONES PARA EL ESTADO ULTIMO ##
+    def calculate_laps(self, arucos):
+        "Hace un clustering de la variable self.arucos(lista ya hecha) y actualiza self.final_laps con el numero de vueltas al final de la prueba"
+        arucos = [point for point in self.arucos if point[2] not in (10, 11)] #filtramos para sacar id 11 y 12 
+        df = pd.DataFrame(arucos, columns=["x", "y", "ID"])#DBSCAN(tecnica de clustering) funciona con df
+
+        eps_distance = 1.5  # Distancia maxima entre puntos para considerarse en el mismo grupo
+        min_samples = 1     # Consideramos hasta detecciones individuales como un grupo
         
+        id_especifico = self.number #de todo el array cogemos los elementos que contengan la id del numero detectado
+        puntos = df[df['ID'] == id_especifico][['x', 'y']].to_numpy()
+        
+        # Verifica que hay puntos
+        if len(puntos) == 0:
+            print(f"No hay puntos para ID {id_especifico}")
+        else:
+            clustering = DBSCAN(eps=eps_distance, min_samples=min_samples).fit(puntos)
+            etiquetas = clustering.labels_
+            final_laps = len(set(etiquetas)) - (1 if -1 in etiquetas else 0) 
+            # aqui no se si es mejor simplemente actualizar self.final_laps o hacer un return del numero de vueltas
+            # si asi se desea, descomentar:
+            return final_laps
+            # print(f"ID {id_especifico} tiene {self.final_laps} grupo(s)/vueltas") 
+        
+
 def main(args=None):
     rclpy.init(args=args)
     node = FSM_final()
