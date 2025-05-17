@@ -33,7 +33,7 @@ Built by students from **POLYTHECNIC UNIVERSITY OF CATALONIA**, this rover was d
 
 ---
 
-### 🔍 Challenge: Continuous Autonomous Navigation (LiDAR-only)
+### 🔍 Control Task (LiDAR-only)
 
 
 In this challenge, the robot had to **autonomously navigate narrow hallways using only 2D LiDAR**, with no predefined maps or waypoints. We addressed this with a custom ROS 2 node, `linea_media.py`, which combines **local perception** and **global goal planning** via Nav2.
