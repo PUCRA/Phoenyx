@@ -67,7 +67,8 @@ This test proved to be one of the most technically demanding—and rewarding—c
 - [📹 Control Task](https://youtu.be/W66J1JEbJms)
 - [📹 Guiado Task](https://youtu.be/kr9DZYW80oY)
 - [📷 Behind the Scenes](https://www.instagram.com/pucra.upc/)
-
+- [📈 Article in Spanish Newspaper](https://www.lavanguardia.com/launi/20250515/10686074/doble-victoria-equipo-upc-competicion-diseno-programacion-robots-superar-misiones-nasa.html)
+- [📈 Article in Sener's web ](https://www.lavanguardia.com/launi/20250515/10686074/doble-victoria-equipo-upc-competicion-diseno-programacion-robots-superar-misiones-nasa.html)
 ---
 
 ## ⚙️ Development Environment
@@ -83,7 +84,7 @@ This test proved to be one of the most technically demanding—and rewarding—c
   - Adafruit BNO055 IMU
   - 6-wheel rocker-bogie base from JPL OSR
   - LiPo battery 4S 5200mAh
-  - Arduhino for Neopixel Led control 
+  - Arduino for Neopixel Led control 
   - INA260n for battery state check
   - Emergency button 
 
@@ -206,7 +207,11 @@ ros2 launch guiado guiado.launch.py
 
 The autonomous navigation is triggered using the joystick's **A button** **`(/joy topic)`** (you dont need to run anything or code).
 
+⚠  **please, check the Orbbec Camera Package Readme to propperly use the Orbbec camera**
+
+
 ## 🧠 Technical Highlights
+
 
 - ✅ **Real-time LiDAR Navigation**: Uses 2D LiDAR to dynamically generate goals and follow the central path in corridors.  
 - 🎯 **Perception-Driven Behavior**: Recognizes color-coded signs and digits to inform decision-making.  
