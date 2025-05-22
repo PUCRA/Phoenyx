@@ -63,7 +63,7 @@ This test proved to be one of the most technically demanding—and rewarding—c
   <img src="resources/phoenyx.jpg" alt="Project Logo" width="250"/>
 </p>
 
-- [📹 Perception Task](https://youtu.be/W66J1JEbJms)
+- [📹 Perception Task](https://youtube.com/shorts/iHNUQLfxfGA?feature=share)
 - [📹 Control Task](https://youtu.be/W66J1JEbJms)
 - [📹 Guiado Task](https://youtu.be/kr9DZYW80oY)
 - [📷 Behind the Scenes](https://www.instagram.com/pucra.upc/)
