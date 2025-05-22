@@ -216,7 +216,7 @@ The autonomous navigation is triggered using the joystick's **A button** **`(/jo
 - 🧠 **Awarded for Best Robot Design**  
 - 🛡️ Achieved zero collisions in critical navigation tests  
 
-## 🧩 Contributors <b style="color:red">⚠⚠ Hay que revisar esto ⚠⚠</b>
+## 🧩 Contributors 
 
 Developed by the **PUCRA - PHOENYX I Team** from **POLYTHECNIC UNIVERSITY OF CATALONIA**  
 Mentored by engineers from **SENER** as part of the Bot Talent 2025 initiative.  
