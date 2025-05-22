@@ -40,4 +40,6 @@ This separation helps maintain clean, conflict-free development for both use cas
 Clone this branch for simulation work:
 
 ```bash
-git clone -b Humble-Sim https://github.com/your_user/your_repo.git
+git clone https://github.com/PUCRA/Phoenyx.git
+
+```
