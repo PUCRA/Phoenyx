@@ -207,7 +207,7 @@ ros2 launch guiado guiado.launch.py
 
 The autonomous navigation is triggered using the joystick's **A button** **`(/joy topic)`** (you dont need to run anything or code).
 
-⚠  **please, check the Orbbec Camera Package Readme to propperly use the Orbbec camera**
+⚠  **please, check the [Orbbec Camera Package](https://github.com/PUCRA/Phoenyx/tree/main/OrbbecSDK_ROS2) Readme to propperly use the Orbbec camera**
 
 
 ## 🧠 Technical Highlights
