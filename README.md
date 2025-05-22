@@ -58,8 +58,14 @@ This test proved to be one of the most technically demanding—and rewarding—c
 
 ## 🖼️ Media & Demonstrations
 
-- ![Rover in action](docs/images/rover_test.jpg)
-- [📹 Full Competition Run](https://youtu.be/your_video_link)
+## Phoenyx-I in the sunshine
+<p align="center">
+  <img src="resources/phoenyx.jpg" alt="Project Logo" width="250"/>
+</p>
+
+- [📹 Perception Task](https://youtu.be/W66J1JEbJms)
+- [📹 Control Task](https://youtu.be/W66J1JEbJms)
+- [📹 Guiado Task](https://youtu.be/kr9DZYW80oY)
 - [📷 Behind the Scenes](https://www.instagram.com/pucra.upc/)
 
 ---
