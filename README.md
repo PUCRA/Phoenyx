@@ -68,7 +68,7 @@ This test proved to be one of the most technically demanding—and rewarding—c
 - [📹 Guiado Task](https://youtu.be/kr9DZYW80oY)
 - [📷 Behind the Scenes](https://www.instagram.com/pucra.upc/)
 - [📈 Article in Spanish Newspaper](https://www.lavanguardia.com/launi/20250515/10686074/doble-victoria-equipo-upc-competicion-diseno-programacion-robots-superar-misiones-nasa.html)
-- [📈 Article in Sener's web ](https://www.lavanguardia.com/launi/20250515/10686074/doble-victoria-equipo-upc-competicion-diseno-programacion-robots-superar-misiones-nasa.html)
+- [📈 Article in Sener's web ](https://www.group.sener/noticias/la-universidad-politecnica-de-catalunya-gana-la-final-de-sener-ceas-bot-talent-el-concurso-de-robotica-de-la-fundacion-sener-y-el-comite-espanol-de-automatica/)
 ---
 
 ## ⚙️ Development Environment
