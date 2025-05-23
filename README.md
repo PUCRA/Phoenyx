@@ -33,6 +33,13 @@ Built by students from **POLYTHECNIC UNIVERSITY OF CATALONIA**, this rover was d
 
 ---
 
+### 🔍 Perception Task (kNN)
+
+As the rasberripy is only of 4GB of RAM, using heavy Deep Learning algorithms such as CNN was almost impossible. As a solution, it was decided to use a kNN, a clasical supervised ML algorithm in order to classify images. In this way, we achieved to reduce the computational load for de RPi.
+
+We also used clasical computer vision methods such as morphological treatments, a deep filter, and some adjustments in the image in order to only see the number ignoring the surroundings. Moreover, a stadistic study is used for detecting the colour.
+
+
 ### 🔍 Control Task (LiDAR-only)
 
 
@@ -42,6 +49,11 @@ The node continuously analyzes the LiDAR scan (-80º to 80º), detects the most 
 
 Optimized for a **Raspberry Pi 4B**, the implementation uses lightweight techniques like block averaging, polar gap detection, and adaptive filtering to ensure **real-time, robust, and safe navigation**, proven both in simulation and on the competition floor.
 
+### 🔍 Guiado Task (Aruco Localization-waypoint following)
+
+In this challenge we had to localize our robot with aruco markers given an uknown position in the map, this is done by `brain.py` (the code with **FSM structure** that coordinates all nodes)and `localizacion_aruco.py` (a node encharged of scanning the **arucomarker** and localizes by an odom reset by virtue of manual frame transformations )
+
+This code loads a `map` in the OSR in order to keep the robot out of the boundaries of the field.
 
 **Highlights of the implementation:**
 - 📡 Real-time goal generation using filtered 2D LiDAR data  
