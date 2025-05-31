@@ -48,19 +48,19 @@ Phoenyx I demonstrates how high-performance autonomy can be achieved using **acc
 
 ## 📦 Jump to:
 
-- [🎯 Competition Challenges Overview](#🎯-Competition-Challenge-Overview)
-- [🛠️ Development Environment](#🛠️-Development-Environment)
+- [🎯 Competition Challenges Overview](#🎯-competition-challenge-overview)
+- [🛠️ Development Environment](#🛠️-development-environment)
 - [📂 Repo Structure](#📁-repository-structure)
 - [🚦 How to Run](#🚦-how-to-run-the-system) 
-- [🏁 Competition Results](#🏁-Competition-Results)
-- [🤝 Want to Collaborate?](#🤝-Want-to-Collaborate?)
-- [🌐 Join & Follow Us](#🌐-Join-&-Follow-Us)
+- [🏁 Competition Results](#🏁-competition-results)
+- [🤝 Want to Collaborate?](#🤝-want-to-collaborate?)
+- [🌐 Join & Follow Us](#🌐-join-&-Follow-Us)
 
 ## 🎯 Competition Challenge Overview
 The **SENER-CEA's Bot Talent** competition features a serie of challenges focused on **AMRs (Autonomus Mobile Robots)**, in which universities from across Spain compete by completing some tasks using an open source Rover. Our team successfully tackled all the proposed challenges:
-- **[🔍 Perception Task](#🔍-Perception-Task)**: Visual marker classification.
-- **[🛣️ Control Task](#🛣️-Control-Task)**: Corridor navigation via LiDAR
-- **[📍Guidance Task](📍-Guidance-Task )**: Localization + waypoint following using ArUco.
+- **[🔍 Perception Task](#🔍-perception-task)**: Visual marker classification.
+- **[🛣️ Control Task](#🛣️-control-task)**: Corridor navigation via LiDAR
+- **[📍Guidance Task](#📍-guidance-task)**: Localization + waypoint following using ArUco.
 - **🧩Final Challenge**:  Full autonomous mission combining all above tasks.
   
 ### 🔍 Perception Task
