@@ -19,18 +19,6 @@ There are many ways to contribute, not just by writing code:
 * **Improving Documentation:** Found a typo or unclear section in the `README.md` or other documentation? Feel free to open a pull request.
 * **Community Support:** Help others by answering questions in issues or discussions.
 
-## Development Setup (INACABADO)
-
-If you plan to contribute code, here's how to set up your environment:
-
-1.  **Prerequisites:** (e.g., Python 3.9+, Git)
-2.  **Install dependencies:** (e.g., `pip install -r requirements.txt`)
-3.  **Run tests:** (e.g., `pytest`)
-
-## Code Style 
-
-Please try to follow the existing code style.
-
 ## Need Help?
 
 If you have questions or get stuck, please open an [issue](https://github.com/PUCRA/Phoenyx/issues) or reach out in [instagram](https://www.instagram.com/pucra.upc/) or in our [web](https://pucra.upc.edu/contact-es.html). 
