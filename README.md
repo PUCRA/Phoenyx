@@ -206,7 +206,7 @@ Parts of this project derived from the work of the **Jet Propulsion Laboratory (
 
 ## 🤝 Want to Collaborate?
 
-If you're interested in contributing code, improving documentation, or developing new features, feel free to fork the repository and open a pull request. Check the issues page to see where help is needed!
+If you're interested in contributing code, improving documentation, or developing new features, feel free to check our [CONTRIBUTING](PUCRA/Phoenyx/.github/CONTRIBUTING.md) page!
 
 ## 🌐 Join & Follow Us
 
