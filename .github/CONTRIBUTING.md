@@ -1,6 +1,6 @@
 # Contributing to PHOENYX I CODE
 
-We welcome contributions from everyone! By participating in this project, you agree to abide by our Code of Conduct.
+We welcome contributions from everyone!
 
 ## How Can I Contribute?
 
