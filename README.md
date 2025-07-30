@@ -198,6 +198,12 @@ ros2 launch guiado guiado.launch.py
 - 🥇 **First Place Overall – Bot Talent 2025**  
 - 🧠 **Awarded for Best Robot Design**   
 
+## License
+
+This main project, including all contributions by PUCRA and its collaborators, is licensed under the **[MIT License](LICENSE)**.
+
+Parts of this project derived from the work of the **Jet Propulsion Laboratory (JPL) of NASA** are covered by the **[Apache License, Version 2.0](JPL_NASA_License.txt)**. Please refer to the `JPL_NASA_License.txt` file for full terms and original attributions.
+
 ## 🤝 Want to Collaborate?
 
 If you're interested in contributing code, improving documentation, or developing new features, feel free to fork the repository and open a pull request. Check the issues page to see where help is needed!
