@@ -33,4 +33,4 @@ Please try to follow the existing code style.
 
 ## Need Help?
 
-If you have questions or get stuck, please open an [issue]https://github.com/PUCRA/Phoenyx/issues) or reach out in [instagram](https://www.instagram.com/pucra.upc/) or in our [web](https://pucra.upc.edu/contact-es.html). 
+If you have questions or get stuck, please open an [issue](https://github.com/PUCRA/Phoenyx/issues) or reach out in [instagram](https://www.instagram.com/pucra.upc/) or in our [web](https://pucra.upc.edu/contact-es.html). 
