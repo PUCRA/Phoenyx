@@ -132,7 +132,7 @@ class brain_percepcion(Node):
                 #     self.publish_recorte_bin.publish(self.bridge.cv2_to_imgmsg(img_bin, encoding='mono8'))
                 if recorte is not None:
                     
-                    # cv2.imshow("Recorte", recorte)
+                    # cv2.imshow("Recorte", recorte)oclaw_wrapper]: Motor 
                     # imagen_redimensionada = cv2.resize(recorte, (28, 28), interpolation=cv2.INTER_LINEAR)
                     # msg = self.bridge.cv2_to_imgmsg(recorte, encoding='bgr8')
                     progreso = len(self.numeros) / self.numero_muestras
@@ -175,7 +175,7 @@ class brain_percepcion(Node):
             if numero is not None:
                 self.numeros.append(numero)
                 if numero != self.numero_really:
-                    self.get_logger().info("Numero erroneo")
+                    # self.get_logger().info("Numero erroneo")
                     cv2.imwrite(f"percepcion/imagenes/{self.numero_really}_{numero}_{self.i}.png", img)
                     self.i += 1
                 self.get_logger().info("Numero: "+str(numero))

@@ -19,7 +19,7 @@ class ArucoDetector(Node):
         self.dist_coeffs = None
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
         self.parameters = cv2.aruco.DetectorParameters_create()
-        self.aruco_marker_length = 0.243  # No se modifica la longitud del marcador
+        self.aruco_marker_length = 0.285  # No se modifica la longitud del marcador
         self.get_logger().info("ArucoDetector inicializando...")
         if self.simulation:
             # Modo simulación
@@ -44,7 +44,8 @@ class ArucoDetector(Node):
             self.camera_matrix = np.load(cam_mat_file)
             self.dist_coeffs   = np.load(dist_file)
             # Inicializa VideoCapture
-            self.cap = cv2.VideoCapture("/dev/camara_color")
+            # self.cap = cv2.VideoCapture("/dev/camara_color")
+            self.cap = cv2.VideoCapture(0)
             self.get_logger().info("Cámara abierta correctamente.")
             w, h = (1280, 720) if res=="720p" else (640,480)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  w)
@@ -212,7 +213,7 @@ class ArucoDetector(Node):
         if result is not None:
             self.measurements.append(result)
             self.get_logger().info(f"Medición {len(self.measurements)}/10 obtenida.")
-            if len(self.measurements) >= 10:
+            if len(self.measurements) >= 5:
                 posX_list, posZ_list, angle_list = zip(*self.measurements)
                 posX_med = np.median(posX_list)
                 posZ_med = np.median(posZ_list)

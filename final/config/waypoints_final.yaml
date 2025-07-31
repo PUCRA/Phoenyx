@@ -1,0 +1,2 @@
+waypoints:
+  - {id: 1, 'x': 1.5, 'y': 5.0, 'yaw': 1.57}   # Pasillo

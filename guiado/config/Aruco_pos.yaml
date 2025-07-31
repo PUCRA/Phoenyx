@@ -1,54 +1,72 @@
 arucos:
-  - id: 9
+  - id: 60
     position:
       x: 1.5
       y: 0.0
     orientation: -1.5708
 
-  - id: 6
+  - id: 62
     position:
       x: 3.5
       y: 0.0
     orientation: -1.5708
 
-  - id: 11
+  - id: 67
     position:
       x: 5.5
       y: 0.0
     orientation: -1.5708
 
-  - id: 3
+  - id: 90
     position:
       x: 7.0
       y: 1.5
     orientation: 0.0
 
-  - id: 32
+  - id: 93
     position:
       x: 7.0
       y: 3.5
     orientation: 0.0
 
-  - id: 33
+  - id: 96
     position:
       x: 7.0
       y: 5.5
     orientation: 0.0
 
-  - id: 4
+  - id: 26
     position:
       x: 5.5
       y: 7.0
     orientation: 1.5708
 
-  - id: 10
+  - id: 25
     position:
       x: 3.5
       y: 7.0
     orientation: 1.5708
   
-  - id: 1
+  - id: 20
     position:
       x: 1.5
       y: 7.0
     orientation: 1.5708
+  
+  - id: 49
+    position:
+      x: 0.0
+      y: 5.5
+    orientation: -3.14158
+
+  - id: 44
+    position:
+      x: 0.0
+      y: 3.5
+    orientation: -3.14158
+  
+  - id: 40
+    position:
+      x: 0.0
+      y: 1.5
+    orientation: -3.14158

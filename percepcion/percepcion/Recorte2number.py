@@ -46,10 +46,10 @@ class Recorte2number():
         avg_r = np.mean(bgr_image[:, :, 2])  # Rojo
         max_value = max(avg_b, avg_g, avg_r)
         print(f"avg_b: {avg_b}, avg_g: {avg_g}, avg_r: {avg_r}")
-        if max_value == avg_b and avg_g < 80 and avg_r < 80:
+        if max_value == avg_b and avg_g < 130 and avg_r < 130:
             detected = "Azul"
         # elif avg_r > avg_b and (avg_r > avg_g and avg_b < 70 and avg_g < 70):
-        elif max_value == avg_r and avg_g < 80 and avg_b < 80:
+        elif max_value == avg_r and avg_g < 130 and avg_b < 130:
             detected = "Rojo"
         else:
             detected = "Indefinido"
@@ -60,8 +60,8 @@ class Recorte2number():
         white_pixels = np.count_nonzero(img_thresh > 100)
         print(f"white_pixels: {white_pixels}")
         # print(white_pixels)
-        if white_pixels < 20 or white_pixels > 1200:
-            return 0
+        # if white_pixels < 20 or white_pixels > 1200:
+        #     return 0
         prediccion = self.knn.predict(img_flat)[0]
         # if prediccion != 5:
         #     prediccion = self.obtener_num(img_thresh)
@@ -72,14 +72,18 @@ class Recorte2number():
         color = self.detectar_color_bgr(image)
 
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        ####################################################################
+        #               MODIFICAR UMBRAL EN CASO DE AJUSTE
+        #               
+        #######################################################################
         umbral = 150
         if color == "Rojo":
-            umbral = 100
+            umbral = 130#230
         elif color == "Azul":
-            umbral = 150
+            umbral = 140#230
         else:
             umbral = 120
-        _, img_thresh = cv2.threshold(gray, umbral, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        _, img_thresh = cv2.threshold(gray, umbral, 255, cv2.THRESH_BINARY) #+cv2.THRESH_OTSU
         frame_thickness = 10  # Ajusta este valor según el grosor del marco que quieras
         cv2.imwrite('imagen_umbralizada.png', img_thresh)
         # Poner en negro los píxeles del marco exterior (bordes)

@@ -131,21 +131,27 @@ class image2recorte():
             if log_level == 1:
                 cv2.imshow('Frame Image', frame)
             combined_mask = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            _, combined_mask = cv2.threshold(combined_mask, 120, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+            ####################################################################
+            #               MODIFICAR UMBRAL EN CASO DE AJUSTE
+            #               
+            #######################################################################
+            _, combined_mask = cv2.threshold(combined_mask, 120, 255, cv2.THRESH_BINARY)#+cv2.THRESH_OTSU)
             if log_level == 1:
                 cv2.imshow('Combined Mask', combined_mask)
-
+            cv2.imwrite("Bin.jpg", combined_mask)
             # # Tratamiento morfológico
             combined_mask = cv2.bitwise_not(combined_mask)
             combined_mask = cv2.bitwise_and(combined_mask, depth)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
             close_img = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
             cleaned_mask = cv2.morphologyEx(close_img, cv2.MORPH_OPEN, kernel)
             # cleaned_mask = close_imgk
             # cleaned_mask = cv2.bitwise_not(cleaned_mask)
             if log_level == 1:
                 cv2.imshow('Cleaned Mask', cleaned_mask)
+            cv2.imwrite("Cleaned_mask.jpg", cleaned_mask)
             vertices = self.detectar_contornos(cleaned_mask)
             # print(vertices)
             if len(vertices) == 0:
@@ -157,7 +163,7 @@ class image2recorte():
             mask_black = np.zeros_like(frame)
             cv2.fillPoly(mask_black, [vertices], (255, 255, 255))
             result = cv2.bitwise_and(frame, mask_black)
-
+            cv2.imwrite("Morf.jpg", result)
             if log_level == 1:
                 cv2.imshow('Masked Region', result)
 

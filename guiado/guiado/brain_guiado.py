@@ -16,7 +16,7 @@ import tf_transformations
 from geometry_msgs.msg import PoseWithCovarianceStamped
 import tf2_ros
 from bond.msg import Status 
-
+from sensor_msgs.msg import Joy
 class FSM(Node):
     def __init__(self):
         super().__init__('brain_guiado')
@@ -33,9 +33,15 @@ class FSM(Node):
             self.bond_callback,
             10
         )
+        self.joystick = self.create_subscription(
+            Joy,
+            '/joy',
+            self.callback_mando,
+            10
+        )
         self.waypoints = self.load_waypoints_yaml()
         
-        self.state = 0  # Estado inicial 
+        self.state = -1  # Estado inicial 
         self.timer = self.create_timer(0.1, self.FSM)  # 0.1 segundos
         self.odometry_recived = False 
         self.aruco_pos_state = False
@@ -56,11 +62,23 @@ class FSM(Node):
         self.first = True
         self.distance = None
         self.nav2_ready = False
+        self.start_node = False
 
-
+    def callback_mando(self, msg):
+        if (not self.start_node) and msg.buttons[0]:
+            self.get_logger().info("Iniciando nodo")
+            self.start_node = msg.buttons[0] # Boton A
 
     def FSM(self):
         #S0: cuando recibe odometria ejecuta callback que activa un flag indicando que puede empezar la FSM
+        if self.state == -1:
+            if self.first:
+                self.get_logger().info('Estado -1: Mando...')
+                self.first = False
+            if self.start_node:
+                self.state = 0
+                self.first = True
+
         if self.state == 0:
             if self.first:
                 self.get_logger().info('Estado 0: controlando...')

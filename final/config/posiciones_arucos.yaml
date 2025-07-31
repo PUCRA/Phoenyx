@@ -1,0 +1,48 @@
+arucos:
+  - id: 60  # (1)
+    position:
+      x: 1.5
+      y: 0.0
+    orientation: -1.5708
+
+  - id: 67  # (2)
+    position:
+      x: 3.5
+      y: 0.0
+    orientation: -1.5708
+
+  - id: 90  # (3)
+    position:
+      x: 5.0
+      y: 1.5
+    orientation: 0
+  
+  - id: 96  # (4)
+    position:
+      x: 5.0
+      y: 3.5
+    orientation: 0
+
+  - id: 28  # (5)
+    position:
+      x: 4.0
+      y: 5.0
+    orientation: 1.5708
+
+  - id: 20  # (6)
+    position:
+      x: 1.0
+      y: 5.0
+    orientation: 1.5708
+
+  - id: 49  # (7)
+    position:
+      x: 0.0
+      y: 3.5
+    orientation: -3.14159
+  
+  - id: 40  # (8)
+    position:
+      x: 0.0
+      y: 1.5
+    orientation: -3.14159
